@@ -524,7 +524,7 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
       <div class="section-head"><span class="eyebrow">Onde morar</span><h2>Acomodação &amp; prevenção contra golpes</h2><p></p></div>
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
-          <h3 style="margin-bottom:0;">Opções da planilha</h3>
+          <h3 style="margin-bottom:0;">Hospedagem inicial</h3>
           <span class="source-note">Marque uma opção para usá-la no resumo financeiro.</span>
         </div>
         <div id="stayCotacaoWrap"></div>
@@ -1350,7 +1350,7 @@ function renderStayFields(){
     '<input type="number" step="0.01" id="cotacaoInput" value="'+getCotacao()+'" style="width:90px;">'+
     '<a href="https://www.google.com/search?q=cota%C3%A7%C3%A3o+euro+hoje" target="_blank" rel="noopener" class="btn-ghost btn" style="width:auto;padding:6px 12px;font-size:12px;">Ver cotação de hoje ↗</a>'+
     '</div></div>'+
-    '<p class="source-note" style="margin-top:8px;">Um artifact do Claude não pode buscar dados de sites externos automaticamente (mesma restrição de segurança que bloqueia o mapa incorporado) — por isso a cotação é manual. Clique no link acima, confira o valor do dia e atualize aqui.</p>';
+    '<p class="source-note" style="margin-top:8px;">A cotação não é buscada automaticamente — clique no link acima, confira o valor do dia e atualize aqui.</p>';
   document.getElementById("cotacaoInput").addEventListener("input", function(e){
     ls("cotacao", parseFloat(e.target.value)||1);
     updateStayComputed();
