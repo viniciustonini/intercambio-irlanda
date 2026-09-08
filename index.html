@@ -172,6 +172,10 @@ input{font-family:var(--font-body);}
 .section-head p{color:var(--muted);font-size:14.5px;max-width:600px;margin:0;}
 
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow);}
+@media (hover:hover) and (prefers-reduced-motion: no-preference){
+  .card,.exp-card,.linkcard,.city-card,.tip-card,.seg-btn{transition:transform .2s ease,box-shadow .2s ease;}
+  .card:hover,.exp-card:hover,.linkcard:hover,.city-card:hover,.tip-card:hover,.seg-btn:hover{transform:translateY(-3px);box-shadow:0 10px 28px -12px rgba(16,28,43,.28);}
+}
 .card h3{font-size:16.5px;font-weight:600;margin-bottom:10px;}
 .grid{display:grid;gap:16px;}
 .grid.cols-2{grid-template-columns:repeat(2,1fr);}
@@ -680,6 +684,7 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
 var LAST_UPDATED = "03/09/2026";
 var LS = "ie_guide_";
@@ -721,13 +726,29 @@ function showSection(id){
 var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 var animEnabled = (typeof gsap !== "undefined") && !reduceMotion;
 if(animEnabled) document.documentElement.classList.add("js-anim");
+var hasScrollTrigger = typeof ScrollTrigger !== "undefined";
+if(hasScrollTrigger) gsap.registerPlugin(ScrollTrigger);
 function animateSectionEntrance(id){
   if(!animEnabled || isScrollMode()) return;
   var section = document.querySelector('.section[data-sec="'+id+'"]');
   if(!section) return;
   var items = section.querySelectorAll(".card, .tablewrap, .rules-card, .tourism-banner, .grid > *, .proscons, .seg, .subtabs");
   if(!items.length) return;
-  gsap.fromTo(items, {opacity:0, y:16}, {opacity:1, y:0, duration:.5, ease:"power2.out", stagger:0.05, overwrite:true});
+  if(hasScrollTrigger) ScrollTrigger.getAll().forEach(function(st){ st.kill(); });
+  var above = Array.prototype.slice.call(items, 0, 4);
+  var below = Array.prototype.slice.call(items, 4);
+  gsap.fromTo(above, {opacity:0, y:16}, {opacity:1, y:0, duration:.5, ease:"power2.out", stagger:0.05, overwrite:true});
+  if(hasScrollTrigger && below.length){
+    below.forEach(function(item){
+      gsap.fromTo(item, {opacity:0, y:26}, {
+        opacity:1, y:0, duration:.6, ease:"power2.out",
+        scrollTrigger:{trigger:item, start:"top 90%", toggleActions:"play none none none"}
+      });
+    });
+    requestAnimationFrame(function(){ ScrollTrigger.refresh(); });
+  } else {
+    gsap.set(below, {opacity:1, y:0});
+  }
 }
 function animateHeroEntrance(){
   if(!animEnabled) return;
