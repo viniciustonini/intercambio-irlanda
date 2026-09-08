@@ -1853,11 +1853,12 @@ function renderMoneyTips(){
 }
 
 /* ---------- orçamento ---------- */
-var BUDGET_DEFAULTS = {wage:14.15, hoursWeek:20, rent:900, phone:20, transport:80, groceries:200, englishCourse:0, insurance:0, gym:0, leisure:0, other:0};
+var BUDGET_DEFAULTS = {wage:14.15, hoursWeek:20, weeksMonth:4.33, rent:900, phone:20, transport:80, groceries:200, englishCourse:0, insurance:0, gym:0, leisure:0, other:0};
 function getBudget(){ return Object.assign({}, BUDGET_DEFAULTS, ls("budget")||{}); }
-function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderTaxBreakdown(); renderOverview(); }
+function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderTaxLine(); renderOverview(); }
 /* Estimativa de PAYE + USC + PRSI para 2026 (pessoa solteira, PAYE, sem filhos/outra renda,
-   créditos fiscais padrão) — aproximação para planejamento, não substitui o Revenue. */
+   créditos fiscais padrão) — aproximação para planejamento, não substitui o Revenue.
+   Baseado sempre em 52 semanas/ano (padrão fiscal), independente do campo "Semanas por mês". */
 function calcIrishTax(wage, hoursWeek){
   var grossWeek = wage*hoursWeek;
   var grossYear = grossWeek*52;
@@ -1876,21 +1877,31 @@ function calcIrishTax(wage, hoursWeek){
   var prsiYear = (grossWeek > 352 ? grossWeek*prsiRate : 0)*52;
   var totalYear = payeYear+uscYear+prsiYear;
   return {
-    grossWeek:grossWeek, grossMonth:grossYear/12, grossYear:grossYear,
+    grossWeek:grossWeek, grossYear:grossYear,
     payeMonth:payeYear/12, uscMonth:uscYear/12, prsiMonth:prsiYear/12,
-    totalMonth:totalYear/12, netMonth:(grossYear-totalYear)/12
+    totalMonth:totalYear/12
   };
 }
-function renderTaxBreakdown(){
+function renderTaxLine(){
   var b = getBudget();
   var t = calcIrishTax(b.wage, b.hoursWeek);
-  function row(lbl,val){ return '<div class="summary-row"><span class="lbl">'+lbl+'</span><span class="val">'+val+'</span></div>'; }
-  document.getElementById("taxBreakdownWrap").innerHTML =
-    row("PAYE (imposto de renda)","€"+t.payeMonth.toFixed(2))+
-    row("USC","€"+t.uscMonth.toFixed(2))+
-    row("PRSI","€"+t.prsiMonth.toFixed(2))+
-    row("Total de descontos","€"+t.totalMonth.toFixed(2))+
-    row("Salário líquido estimado","€"+t.netMonth.toFixed(2));
+  document.getElementById("taxEstValue").textContent = "€"+t.totalMonth.toFixed(2);
+  document.getElementById("taxDetailWrap").innerHTML =
+    '<div class="summary-row"><span class="lbl">PAYE (imposto de renda)</span><span class="val">€'+t.payeMonth.toFixed(2)+'</span></div>'+
+    '<div class="summary-row"><span class="lbl">USC</span><span class="val">€'+t.uscMonth.toFixed(2)+'</span></div>'+
+    '<div class="summary-row"><span class="lbl">PRSI</span><span class="val">€'+t.prsiMonth.toFixed(2)+'</span></div>'+
+    '<div class="summary-row big"><span class="lbl">Total de descontos</span><span class="val">€'+t.totalMonth.toFixed(2)+'</span></div>'+
+    '<button class="btn-ghost btn" id="taxInfoToggle" type="button" style="width:auto;padding:5px 10px;font-size:11.5px;margin-top:8px;">ⓘ Como calcula?</button>'+
+    '<div id="taxInfoWrap" hidden style="margin-top:8px;font-size:12.6px;color:var(--muted);">'+
+    '<p style="margin:0 0 8px;"><strong>PAYE:</strong> 20% até €44.000/ano, 40% acima — menos €4.000/ano de créditos fiscais padrão (com 20h/semana no mínimo, o crédito costuma zerar o PAYE).</p>'+
+    '<p style="margin:0 0 8px;"><strong>USC:</strong> isento até €13.000/ano; acima disso, 0,5% até €12.012, 2% até €28.700, 3% até €70.044, 8% acima.</p>'+
+    '<p style="margin:0;"><strong>PRSI (Classe A):</strong> isento até €352/semana; acima disso, 4,20% (até 30/09/2026) ou 4,35% (a partir de 01/10/2026).</p>'+
+    '</div>'+
+    '<p class="source-note" style="margin-top:10px;">Referência fiscal: <strong>2026</strong> (pessoa solteira, sem filhos/outra renda) — estimativa para planejamento, não substitui o Revenue. <a href="https://www.revenue.ie/en/jobs-and-pensions/calculating-your-income-tax/index.aspx" target="_blank" rel="noopener">Tabelas</a> · <a href="https://www.revenue.ie/en/jobs-and-pensions/usc/index.aspx" target="_blank" rel="noopener">USC</a> · <a href="https://www.gov.ie/en/department-of-social-protection/publications/prsi-class-a-rates/" target="_blank" rel="noopener">PRSI</a> · <a href="https://www.ros.ie/myaccount-web/sign_in.html" target="_blank" rel="noopener">Revenue myAccount ↗</a></p>';
+  document.getElementById("taxInfoToggle").addEventListener("click", function(){
+    var wrap = document.getElementById("taxInfoWrap");
+    wrap.hidden = !wrap.hidden;
+  });
 }
 function renderBudget(){
   var b = getBudget();
@@ -1898,46 +1909,42 @@ function renderBudget(){
     '<button class="subtab'+(b.hoursWeek===20?' active':'')+'" data-h="20">20h/semana (limite do Stamp 2)</button>'+
     '<button class="subtab'+(b.hoursWeek===40?' active':'')+'" data-h="40">40h/semana (exemplo tempo integral)</button>'+
     '</div>'+
-    '<p class="source-note" style="margin:-6px 0 12px;">Na Irlanda, tempo integral não é fixo em 44h como no Brasil — contratos de 39–40h são comuns (o teto legal médio é 48h/semana). Ajuste "Horas por semana" abaixo para o seu caso.</p>';
-  var incomeFields = [{k:"wage",l:"Salário por hora (€)",step:0.01},{k:"hoursWeek",l:"Horas por semana",step:1}];
+    '<p class="source-note" style="margin:-6px 0 12px;">Na Irlanda, tempo integral não é fixo em 44h como no Brasil — contratos de 39–40h são comuns. Ajuste "Horas por semana" abaixo para o seu caso.</p>';
+  var incomeFields = [{k:"wage",l:"Salário por hora (€)",step:0.01},{k:"hoursWeek",l:"Horas por semana",step:1},{k:"weeksMonth",l:"Semanas por mês",step:0.01}];
   document.getElementById("budgetIncomeFields").innerHTML = presetHtml + incomeFields.map(function(f){ return '<div class="numfield"><label>'+f.l+'</label><input type="number" step="'+f.step+'" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("")+
-    '<div class="card" style="background:var(--bg);box-shadow:none;margin:14px 0 0;padding:14px 16px;">'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;">'+
-    '<span class="eyebrow" style="margin:0;">Descontos estimados (PAYE + USC + PRSI)</span>'+
-    '<button class="btn-ghost btn" id="taxInfoToggle" type="button" style="width:auto;padding:5px 10px;font-size:11.5px;">ⓘ Como calcula?</button>'+
+    '<div class="numfield">'+
+    '<label>Impostos/descontos (estimado)</label>'+
+    '<span style="display:flex;align-items:center;gap:10px;">'+
+    '<span class="tabular" id="taxEstValue">€0.00</span>'+
+    '<button class="btn-ghost btn" id="taxEstToggle" type="button" style="width:auto;padding:6px 12px;font-size:15px;line-height:1;">▾</button>'+
+    '</span>'+
     '</div>'+
-    '<div id="taxBreakdownWrap" style="margin-top:8px;"></div>'+
-    '<div id="taxInfoWrap" hidden></div>'+
-    '<p class="source-note" style="margin-top:10px;">Referência fiscal: <strong>2026</strong> (pessoa solteira, PAYE, sem filhos/outra renda) — atualize quando as regras de 2027 saírem. Estimativa para planejamento; <a href="https://www.revenue.ie/en/jobs-and-pensions/calculating-your-income-tax/index.aspx" target="_blank" rel="noopener">tabelas do Revenue</a> · <a href="https://www.revenue.ie/en/jobs-and-pensions/usc/index.aspx" target="_blank" rel="noopener">USC</a> · <a href="https://www.gov.ie/en/department-of-social-protection/publications/prsi-class-a-rates/" target="_blank" rel="noopener">PRSI Classe A</a> · <a href="https://www.ros.ie/myaccount-web/sign_in.html" target="_blank" rel="noopener">Revenue myAccount ↗</a></p>'+
-    '</div>';
+    '<div id="taxDetailWrap" style="display:none;padding-top:10px;"></div>';
   var expenseFields = [{k:"rent",l:"Aluguel / quarto"},{k:"phone",l:"Celular / contas extras"},{k:"transport",l:"Transporte"},{k:"groceries",l:"Mercado"},{k:"englishCourse",l:"Escola de inglês"},{k:"insurance",l:"Seguro-saúde"},{k:"gym",l:"Academia"},{k:"leisure",l:"Lazer / saídas"},{k:"other",l:"Outros gastos"}];
   document.getElementById("budgetExpenseFields").innerHTML = expenseFields.map(function(f){ return '<div class="numfield"><label>'+f.l+'</label><input type="number" step="1" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("");
   document.querySelectorAll("#budgetIncomeFields input, #budgetExpenseFields input").forEach(function(inp){ inp.addEventListener("input", function(){ setBudgetField(inp.dataset.k, parseFloat(inp.value)||0); }); });
   document.querySelectorAll("#hoursPreset .subtab").forEach(function(btn){
     btn.addEventListener("click", function(){ setBudgetField("hoursWeek", parseFloat(btn.dataset.h)); renderBudget(); });
   });
-  document.getElementById("taxInfoToggle").addEventListener("click", function(){
-    var wrap = document.getElementById("taxInfoWrap");
-    if(wrap.hidden){
-      wrap.hidden = false;
-      wrap.innerHTML = '<div class="callout" style="margin-top:10px;font-size:12.6px;">'+
-        '<p style="margin:0 0 8px;"><strong>PAYE:</strong> 20% até €44.000/ano, 40% acima disso — menos €4.000/ano de créditos fiscais padrão (Personal + Employee Tax Credit). Com 20h/semana no salário mínimo, o crédito costuma zerar o PAYE.</p>'+
-        '<p style="margin:0 0 8px;"><strong>USC:</strong> isento até €13.000/ano; acima disso, 0,5% nos primeiros €12.012, 2% até €28.700, 3% até €70.044, 8% acima.</p>'+
-        '<p style="margin:0;"><strong>PRSI (Classe A):</strong> isento até €352/semana; acima disso, 4,20% (até 30/09/2026) ou 4,35% (a partir de 01/10/2026) sobre o bruto semanal.</p>'+
-        '</div>';
-    } else { wrap.hidden = true; }
+  document.getElementById("taxEstToggle").addEventListener("click", function(){
+    var detail = document.getElementById("taxDetailWrap");
+    var opening = detail.style.display === "none";
+    detail.style.display = opening ? "block" : "none";
+    document.getElementById("taxEstToggle").style.transform = opening ? "rotate(180deg)" : "none";
   });
-  renderTaxBreakdown();
+  renderTaxLine();
   updateBudgetSummary();
 }
 function updateBudgetSummary(){
   var b = getBudget();
   var t = calcIrishTax(b.wage, b.hoursWeek);
+  var grossMonth = b.wage*b.hoursWeek*b.weeksMonth;
+  var netMonth = grossMonth - t.totalMonth;
   var totalExpenses = b.rent+b.phone+b.transport+b.groceries+b.englishCourse+b.insurance+b.gym+b.leisure+b.other;
-  var freeBalance = t.netMonth-totalExpenses, pctCommitted = t.netMonth>0 ? (totalExpenses/t.netMonth*100):0, yearlyReserve = freeBalance*12;
+  var freeBalance = netMonth-totalExpenses, pctCommitted = netMonth>0 ? (totalExpenses/netMonth*100):0, yearlyReserve = freeBalance*12;
   function row(lbl,val,cls){ return '<div class="summary-row '+(cls||"")+'"><span class="lbl">'+lbl+'</span><span class="val">'+val+'</span></div>'; }
   document.getElementById("budgetSummary").innerHTML =
-    row("Salário bruto semanal","€"+t.grossWeek.toFixed(2))+row("Salário bruto mensal","€"+t.grossMonth.toFixed(2))+row("Salário líquido estimado","€"+t.netMonth.toFixed(2))+
+    row("Salário bruto semanal","€"+t.grossWeek.toFixed(2))+row("Salário bruto mensal","€"+grossMonth.toFixed(2))+row("Salário líquido estimado","€"+netMonth.toFixed(2))+
     row("Total de gastos mensais","€"+totalExpenses.toFixed(2))+row("Saldo livre no mês","€"+freeBalance.toFixed(2), freeBalance<0?"warn big":"big")+
     row("% da renda comprometida", pctCommitted.toFixed(1)+"%", pctCommitted>85?"warn":"")+row("Reserva possível em 12 meses","€"+yearlyReserve.toFixed(2));
 }
