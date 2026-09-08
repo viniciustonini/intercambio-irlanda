@@ -43,19 +43,6 @@ input{font-family:var(--font-body);}
 ::selection{background:var(--accent-soft);}
 [hidden]{display:none!important;}
 
-/* ---------- Gate ---------- */
-#gate{
-  position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;
-  background:radial-gradient(1000px 640px at 12% -10%, rgba(27,156,107,.10), transparent 60%), var(--navy);
-}
-.gate-card{width:100%;max-width:400px;background:var(--surface);border-radius:20px;padding:36px 32px;box-shadow:var(--shadow);}
-.gate-mark{width:38px;height:38px;margin-bottom:16px;}
-.gate-card h1{font-size:25px;font-weight:600;margin-bottom:6px;}
-.gate-card .sub{color:var(--muted);font-size:13.5px;margin-bottom:24px;}
-.field{margin-bottom:15px;}
-.field label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;}
-.field input{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14.5px;}
-.field input:focus{outline:2px solid var(--accent);outline-offset:1px;}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:10px;padding:12px 18px;font-size:14.5px;font-weight:600;background:var(--navy);color:#fff;width:100%;transition:background .15s ease;}
 .btn:hover{background:var(--navy-2);}
 .btn-accent{background:var(--accent);}
@@ -69,12 +56,9 @@ input{font-family:var(--font-body);}
 .modal-card p{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
 .btn-ghost:hover{background:var(--surface-2);}
-.gate-error{color:var(--warn-strong);font-size:13px;margin-top:10px;min-height:1.2em;}
-.gate-foot{margin-top:20px;font-size:12px;color:var(--muted);text-align:center;}
 
 /* ---------- App ---------- */
-#app{display:none;}
-#app.on{display:block;}
+#app{display:block;}
 
 .hero{
   position:relative;overflow:hidden;background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);
@@ -337,21 +321,6 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
 }
 </style>
 
-<!-- ============ GATE ============ -->
-<div id="gate">
-  <div class="gate-card">
-    <svg class="gate-mark" viewBox="0 0 40 40" fill="none"><path d="M20 6C13 6 8 11 8 17c0 5 4 8 8 8h8c4 0 8-3 8-8 0-6-5-11-12-11Z" stroke="#1B9C6B" stroke-width="2.2"/><path d="M20 25v9M14 34h12" stroke="#1B9C6B" stroke-width="2.2" stroke-linecap="round"/></svg>
-    <h1>Intercâmbio Irlanda</h1>
-    <div class="sub">Guia completo de planejamento — acesso reservado a quem recebeu o convite.</div>
-    <form id="gate-form">
-      <div class="field"><label for="gname">Seu nome</label><input id="gname" type="text" autocomplete="name" required></div>
-      <div class="field"><label for="gcode">Código de acesso</label><input id="gcode" type="text" autocomplete="off" required></div>
-      <button class="btn btn-accent" type="submit">Entrar</button>
-      <div class="gate-error" id="gate-error"></div>
-    </form>
-    <div class="gate-foot">Não tem o código? Peça a quem te enviou este link.</div>
-  </div>
-</div>
 
 <!-- ============ APP ============ -->
 <div id="app">
@@ -688,31 +657,12 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
-var ACCESS_CODE = "IRLANDA2027";
 var LAST_UPDATED = "03/09/2026";
 var LS = "ie_guide_";
 function ls(key, val){
   if(val===undefined){ try{ var v = localStorage.getItem(LS+key); return v===null?null:JSON.parse(v); }catch(e){ return null; } }
   try{ localStorage.setItem(LS+key, JSON.stringify(val)); }catch(e){}
 }
-
-/* ---------- gate ---------- */
-(function(){
-  if(ls("unlocked")){ document.getElementById("gate").style.display="none"; document.getElementById("app").classList.add("on"); }
-  document.getElementById("gate-form").addEventListener("submit", function(e){
-    e.preventDefault();
-    var name = document.getElementById("gname").value.trim();
-    var code = document.getElementById("gcode").value.trim();
-    if(code.toUpperCase() === ACCESS_CODE){
-      ls("unlocked", true); ls("name", name);
-      document.getElementById("gate").style.display="none";
-      document.getElementById("app").classList.add("on");
-      init();
-    } else {
-      document.getElementById("gate-error").textContent = "Código incorreto. Confirme com quem te enviou o convite.";
-    }
-  });
-})();
 
 /* ---------- nav ---------- */
 var SCROLL_MODE_MQ = window.matchMedia("(max-width:900px)");
@@ -2159,5 +2109,5 @@ function init(){
   syncTabbarHeight();
   if(!isScrollMode()) animateHeroEntrance();
 }
-if(ls("unlocked")){ init(); }
+init();
 </script>
