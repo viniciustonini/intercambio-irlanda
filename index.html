@@ -56,6 +56,10 @@ input{font-family:var(--font-body);}
 .modal-card p{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
 .btn-ghost:hover{background:var(--surface-2);}
+.cookie-bar{position:fixed;left:0;right:0;bottom:0;z-index:150;background:var(--navy);color:#fff;padding:14px 20px;display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:13px;box-shadow:0 -4px 16px rgba(0,0,0,.15);}
+.cookie-bar a{color:#fff;text-decoration:underline;}
+.cookie-bar button{width:auto;padding:9px 18px;flex:none;}
+.cookie-bar[hidden]{display:none;}
 
 /* ---------- App ---------- */
 #app{display:block;}
@@ -641,7 +645,24 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
     </section>
 
   </main>
-  <footer class="site">Guia mantido por Vinicius para ajudar outros intercambistas. · Última atualização: <span id="lastUpdated"></span></footer>
+  <footer class="site">Guia mantido por Vinicius para ajudar outros intercambistas. · Última atualização: <span id="lastUpdated"></span> · <a href="#" id="privacyLink">Política de privacidade</a></footer>
+</div>
+
+<div class="modal-overlay" id="privacyModal" hidden>
+  <div class="modal-card" style="max-width:560px;max-height:80vh;overflow-y:auto;text-align:left;">
+    <h3>Política de privacidade</h3>
+    <p><strong>O que este site guarda:</strong> checklist, orçamento, favoritos e outras respostas que você preenche ficam salvos só no seu navegador (localStorage) — não existe servidor ou banco de dados nosso recebendo esses dados. Se você limpar os dados do navegador ou trocar de aparelho, essas informações se perdem.</p>
+    <p><strong>Cookies e publicidade:</strong> este site pode exibir anúncios do Google AdSense. O Google e seus parceiros usam cookies para veicular anúncios com base em visitas anteriores suas a este e a outros sites — isso pode incluir anúncios personalizados. Você pode desativar a publicidade personalizada nas <a href="https://adssettings.google.com" target="_blank" rel="noopener">configurações de anúncios do Google</a>.</p>
+    <p><strong>Fontes e bibliotecas externas:</strong> carregamos fontes do Google Fonts e a biblioteca GSAP via CDN — esses serviços podem registrar sua requisição (como IP e navegador) para entregar o arquivo, seguindo as políticas de privacidade deles.</p>
+    <p><strong>Links externos:</strong> os links para sites oficiais (imigração, transporte, bancos etc.) levam a páginas de terceiros, cada uma com sua própria política de privacidade — este site não tem controle sobre elas.</p>
+    <p><strong>Contato:</strong> dúvidas sobre esta política podem ser enviadas a quem administra o site.</p>
+    <div class="modal-actions"><button class="btn btn-ghost" id="privacyModalClose" type="button">Fechar</button></div>
+  </div>
+</div>
+
+<div class="cookie-bar" id="cookieBar" hidden>
+  <span>Este site usa cookies para exibir anúncios personalizados do Google. <a href="#" id="cookieBarLink">Saiba mais</a>.</span>
+  <button class="btn btn-accent" id="cookieBarAccept" type="button">Entendi</button>
 </div>
 
 <div class="modal-overlay" id="resetModal" hidden>
@@ -829,6 +850,19 @@ document.getElementById("resetModalConfirm").addEventListener("click", function(
   Object.keys(localStorage).filter(function(k){return k.indexOf(LS)===0 && k!==LS+"unlocked" && k!==LS+"name";}).forEach(function(k){ localStorage.removeItem(k); });
   location.reload();
 });
+
+/* ---------- privacidade & cookies ---------- */
+function openPrivacyModal(){ document.getElementById("privacyModal").hidden = false; }
+function closePrivacyModal(){ document.getElementById("privacyModal").hidden = true; }
+document.getElementById("privacyLink").addEventListener("click", function(e){ e.preventDefault(); openPrivacyModal(); });
+document.getElementById("privacyModalClose").addEventListener("click", closePrivacyModal);
+document.getElementById("privacyModal").addEventListener("click", function(e){ if(e.target.id==="privacyModal") closePrivacyModal(); });
+document.getElementById("cookieBarLink").addEventListener("click", function(e){ e.preventDefault(); openPrivacyModal(); });
+document.getElementById("cookieBarAccept").addEventListener("click", function(){
+  ls("cookieConsent", true);
+  document.getElementById("cookieBar").hidden = true;
+});
+if(!ls("cookieConsent")) document.getElementById("cookieBar").hidden = false;
 
 /* ---------- profile & city ---------- */
 function getProfile(){ return ls("profile"); }
