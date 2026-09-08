@@ -59,6 +59,14 @@ input{font-family:var(--font-body);}
 .modal-card p{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
 .btn-ghost:hover{background:var(--surface-2);}
+.faq-item{border-bottom:1px solid var(--border);padding:14px 0;}
+.faq-item:last-child{border-bottom:none;}
+.faq-q{display:flex;align-items:baseline;gap:9px;background:none;border:none;padding:0;text-align:left;width:100%;font-family:var(--font-body);font-weight:700;font-size:14.3px;color:var(--text);cursor:pointer;}
+.faq-caret{flex:none;color:var(--accent);font-size:11px;transition:transform .2s ease;}
+.faq-item.collapsed .faq-caret{transform:rotate(-90deg);}
+.faq-a{margin-top:8px;padding-left:20px;font-size:13.3px;color:var(--muted);}
+.faq-a p{margin:0 0 8px;}
+.faq-item.collapsed .faq-a{display:none;}
 .cookie-bar{position:fixed;left:0;right:0;bottom:0;z-index:150;background:var(--navy);color:#fff;padding:14px 20px;display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:13px;box-shadow:0 -4px 16px rgba(0,0,0,.15);}
 .cookie-bar a{color:#fff;text-decoration:underline;}
 .cookie-bar button{width:auto;padding:9px 18px;flex:none;}
@@ -172,6 +180,10 @@ input{font-family:var(--font-body);}
 .section-head p{color:var(--muted);font-size:14.5px;max-width:600px;margin:0;}
 
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow);}
+@media (hover:hover) and (prefers-reduced-motion: no-preference){
+  .card,.exp-card,.linkcard,.city-card,.tip-card,.seg-btn{transition:transform .2s ease,box-shadow .2s ease;}
+  .card:hover,.exp-card:hover,.linkcard:hover,.city-card:hover,.tip-card:hover,.seg-btn:hover{transform:translateY(-3px);box-shadow:0 10px 28px -12px rgba(16,28,43,.28);}
+}
 .card h3{font-size:16.5px;font-weight:600;margin-bottom:10px;}
 .grid{display:grid;gap:16px;}
 .grid.cols-2{grid-template-columns:repeat(2,1fr);}
@@ -467,6 +479,12 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
         <h3>O que não muda entre as cidades</h3>
         <ul id="nationalRulesList"></ul>
       </div>
+      <div class="card" style="margin-top:16px;">
+        <span class="eyebrow">Comece por aqui</span>
+        <h3 style="margin:8px 0 6px;">As decisões que organizam seu intercâmbio</h3>
+        <p class="source-note" style="margin-bottom:16px;">Use este guia como ponto de partida. Seus valores e progresso ficam neste navegador; eles não são sincronizados entre aparelhos.</p>
+        <div id="faqStartWrap"></div>
+      </div>
     </section>
 
     <!-- IMIGRAÇÃO -->
@@ -680,6 +698,7 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
 var LAST_UPDATED = "03/09/2026";
 var LS = "ie_guide_";
@@ -721,13 +740,29 @@ function showSection(id){
 var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 var animEnabled = (typeof gsap !== "undefined") && !reduceMotion;
 if(animEnabled) document.documentElement.classList.add("js-anim");
+var hasScrollTrigger = typeof ScrollTrigger !== "undefined";
+if(hasScrollTrigger) gsap.registerPlugin(ScrollTrigger);
 function animateSectionEntrance(id){
   if(!animEnabled || isScrollMode()) return;
   var section = document.querySelector('.section[data-sec="'+id+'"]');
   if(!section) return;
   var items = section.querySelectorAll(".card, .tablewrap, .rules-card, .tourism-banner, .grid > *, .proscons, .seg, .subtabs");
   if(!items.length) return;
-  gsap.fromTo(items, {opacity:0, y:16}, {opacity:1, y:0, duration:.5, ease:"power2.out", stagger:0.05, overwrite:true});
+  if(hasScrollTrigger) ScrollTrigger.getAll().forEach(function(st){ st.kill(); });
+  var above = Array.prototype.slice.call(items, 0, 4);
+  var below = Array.prototype.slice.call(items, 4);
+  gsap.fromTo(above, {opacity:0, y:16}, {opacity:1, y:0, duration:.5, ease:"power2.out", stagger:0.05, overwrite:true});
+  if(hasScrollTrigger && below.length){
+    below.forEach(function(item){
+      gsap.fromTo(item, {opacity:0, y:26}, {
+        opacity:1, y:0, duration:.6, ease:"power2.out",
+        scrollTrigger:{trigger:item, start:"top 90%", toggleActions:"play none none none"}
+      });
+    });
+    requestAnimationFrame(function(){ ScrollTrigger.refresh(); });
+  } else {
+    gsap.set(below, {opacity:1, y:0});
+  }
 }
 function animateHeroEntrance(){
   if(!animEnabled) return;
@@ -926,6 +961,22 @@ function renderCitySeg(){
 }
 document.getElementById("pickEU").addEventListener("click", function(){ setProfile("eu"); });
 document.getElementById("pickNONEU").addEventListener("click", function(){ setProfile("non-eu"); });
+var FAQ_START = [
+  {q:"Como comparar escolas sem olhar só o preço?", a:"Peça uma proposta com curso, matrícula, material, exame, seguro e proteção do aluno discriminados. Confira horário, localização, política de cancelamento, reembolso e elegibilidade migratória do curso. Guarde a proposta e os comprovantes.", src:{label:"Regras e perguntas sobre estudos · ISD", url:"https://www.irishimmigration.ie/coming-to-study-in-ireland/frequently-asked-questions-for-students/"}},
+  {q:"Quanto preciso reservar antes de viajar?", a:"Some curso, passagem, seguro, documentos, hospedagem inicial, depósito de moradia e instalação. Acrescente os gastos mensais de um período sem emprego e uma margem para imprevistos. O valor de comprovação migratória não é uma previsão de quanto a viagem inteira custará."},
+  {q:"O que perguntar durante uma visita ao quarto?", a:"Confirme quem pode alugar o imóvel, quem mora nele, contas incluídas, depósito, duração do acordo, regras da casa e condições de saída. Teste o trajeto até a escola. Peça tudo por escrito e verifique se é tenancy ou licence antes de presumir quais proteções se aplicam.", src:{label:"Orientação sobre moradia · Threshold", url:"https://www.threshold.ie"}},
+  {q:"Como me organizar para buscar emprego?", a:"Prepare currículo em inglês, disponibilidade compatível com o curso e a permissão, referências e mensagens de candidatura. Acompanhe onde enviou o currículo e guarde contrato e recibos. Inclua no orçamento um período de procura sem renda.", src:{label:"Vagas · Jobs Ireland", url:"https://jobsireland.ie/"}},
+  {q:"Como preparar saúde e adaptação?", a:"Entenda como acionar seu seguro, quais serviços cobre e onde buscar atendimento. Organize receitas e documentação de medicamentos antes do embarque. Planeje uma rotina de sono, alimentação, convivência e contato com sua rede de apoio.", src:{label:"Serviços de saúde · HSE", url:"https://www.hse.ie"}}
+];
+function renderFaqStart(){
+  document.getElementById("faqStartWrap").innerHTML = FAQ_START.map(function(f){
+    return '<div class="faq-item"><button class="faq-q"><span class="faq-caret">▾</span>'+f.q+'</button>'+
+      '<div class="faq-a"><p>'+f.a+'</p>'+(f.src?'<a href="'+f.src.url+'" target="_blank" rel="noopener" class="source-note">'+f.src.label+' ↗</a>':'')+'</div></div>';
+  }).join("");
+  document.querySelectorAll("#faqStartWrap .faq-q").forEach(function(btn){
+    btn.addEventListener("click", function(){ btn.parentElement.classList.toggle("collapsed"); });
+  });
+}
 function renderProfileSeg(){
   var p = getProfile();
   document.getElementById("pickEU").classList.toggle("selected", p==="eu");
@@ -1109,12 +1160,11 @@ var F_BRVISA = "https://www.ireland.ie/en/brazil/saopaulo/services/visas/visas-f
 var F_IRP = "https://www.irishimmigration.ie/registering-your-immigration-permission/how-to-register-your-immigration-permission-for-the-first-time/information-on-registering-your-immigration-permission-for-the-first-time/";
 var F_FIN = "https://www.irishimmigration.ie/coming-to-study-in-ireland/what-are-my-study-options/a-fee-paying-private-primary-or-secondary-school/information-on-student-finances/";
 var VISTOS = [
-  {title:"Visto D de estudante — antes de embarcar", eu:false, body:"Se o curso durar mais de 90 dias (a maioria dos cursos de inglês de 6–8 meses), brasileiros precisam solicitar o visto de longa duração <strong>tipo D</strong> ANTES de viajar — não dá para entrar como turista e regularizar depois. O pedido é feito online no <strong>AVATS</strong> (sistema oficial de vistos irlandês); depois você agenda um horário num centro <strong>VFS Global</strong> (parceiro oficial no Brasil) para entregar biometria, documentos e pagar a taxa. O processamento leva de <strong>4 a 8 semanas</strong> (pode demorar mais entre maio e agosto). Comece o pedido com bastante antecedência e só compre passagens não-reembolsáveis depois do visto aprovado."+fonte(F_BRVISA)},
-  {title:"Entrada para estudar: brasileiros e outras nacionalidades", eu:false, body:"Brasileiros com passaporte brasileiro são dispensados do visto de entrada para estadias curtas. Ao chegar, apresente o propósito de estudo e os documentos exigidos; a entrada depende da avaliação da imigração. Para ficar mais de 90 dias, registre a permissão de residência. Outras nacionalidades podem precisar de visto antes da viagem — consulte os requisitos do seu passaporte antes de comprar a passagem."+fonte(F_BRVISA)},
+  {title:"Entrada e visto de estudante — antes de embarcar", eu:false, body:"Brasileiros com passaporte brasileiro são dispensados de visto para estadias curtas (turismo/visita) — mas isso <strong>não vale</strong> para a maioria dos cursos de inglês (6–8 meses, acima de 90 dias). Nesse caso, é preciso solicitar o visto de longa duração <strong>tipo D</strong> ANTES de viajar: não dá para entrar como turista e regularizar depois. O pedido é feito online no <strong>AVATS</strong> (sistema oficial de vistos irlandês); depois você agenda horário num centro <strong>VFS Global</strong> (parceiro oficial no Brasil) para entregar biometria, documentos e pagar a taxa. Processamento de <strong>4 a 8 semanas</strong> (pode demorar mais entre maio e agosto) — comece com antecedência e só compre passagens não-reembolsáveis depois do visto aprovado. Ao chegar, apresente o propósito de estudo e os documentos exigidos; a entrada final depende da avaliação da imigração. Outras nacionalidades podem ter regras diferentes — confira os requisitos do seu passaporte antes de comprar a passagem."+fonte(F_BRVISA)},
   {title:"Stamp 2", eu:false, body:"Permissão de estudante para cursos elegíveis, incluindo inglês (em escola credenciada no ILEP) e ensino superior. A elegibilidade do curso e as condições da permissão precisam ser verificadas antes da matrícula. Não se aplica a cidadãos europeus, que têm liberdade de movimento."+fonte(F_FAQ)},
   {title:"IRP: primeiro registro depois da chegada", eu:false, body:"Desde <strong>13/01/2025</strong>, o primeiro registro de residência de toda a República da Irlanda (não só Dublin) é feito pelo ISD em <strong>Burgh Quay, Dublin</strong>. Agende pelo canal oficial (conta no Digital Contact Centre) assim que chegar — não há prazo garantido para vaga. Agendar é gratuito; a taxa de registro do cartão pode ser de <strong>€300</strong>, paga só com cartão. Leve passaporte, formulário de endereço, carta da escola com matrícula e mensalidade paga, comprovação financeira e seguro-saúde."+fonte(F_IRP)},
   {title:"Seguro-saúde exigido", eu:false, body:"Estudantes não europeus devem apresentar seguro médico privado adequado às condições da permissão — normalmente cobertura mínima de <strong>€25.000 para acidente e €25.000 para doença</strong>, válida por todo o período. Confira cobertura, exclusões e documentos aceitos com o ISD antes de contratar; seguro de viagem e seguro médico não são automaticamente equivalentes."+fonte(F_FAQ)},
-  {title:"Comprovação financeira", eu:false, body:"Para estudantes dispensados de visto de entrada, o ISD informa acesso a <strong>€833 por mês ou €6.665 no total</strong> para permanências de até oito meses; acima de oito meses, <strong>€10.000 por ano acadêmico</strong>. Para quem precisa de visto, a comprovação ocorre no próprio pedido do visto, conforme as regras da categoria. O extrato não deve ter mais de 90 dias, e depósitos grandes recentes sem explicação podem levantar suspeita. O mínimo migratório não substitui um orçamento pessoal e não deve depender de conseguir emprego."+fonte(F_FIN)},
+  {title:"Comprovação financeira", eu:false, body:"Para estudantes dispensados de visto de entrada, o valor oficial exigido pelo ISD é de <strong>€6.665</strong> para permanências de até oito meses — esse é o total que precisa estar disponível na conta que você vai apresentar à imigração (o cálculo é €833/mês × 8, mas o que importa é ter esse saldo completo na conta, não um fluxo mensal). Acima de oito meses, o valor sobe para <strong>€10.000 por ano acadêmico</strong>. Para quem precisa de visto, a comprovação ocorre no próprio pedido do visto, conforme as regras da categoria. O extrato não deve ter mais de 90 dias, e depósitos grandes recentes sem explicação podem levantar suspeita. O mínimo migratório não substitui um orçamento pessoal e não deve depender de conseguir emprego."+fonte(F_FIN)},
   {title:"Limite de horas de trabalho", eu:false, body:"Com Stamp 2: até <strong>20 horas semanais</strong> no período regular, e até <strong>40 horas semanais</strong> durante os períodos de férias padronizados — <strong>junho a setembro (inclusive)</strong> e de <strong>15 de dezembro a 15 de janeiro</strong>. Férias individuais da escola fora dessas datas não liberam automaticamente as 40 horas."+fonte(F_FAQ)},
   {title:"Na prática: sobreviver com 20h", eu:false, body:"20h/semana no salário mínimo dá pouco mais de €1.100–1.200/mês líquidos — apertado nas cidades mais caras, ainda mais em Dublin. É comum ver intercambista trabalhando além do limite oficial pra fechar a conta, mas isso é uma violação da permissão de estudo: o risco real é perder o Stamp 2/IRP e complicar pedidos migratórios futuros (inclusive em outros países). Se for pra fechar as contas, priorize aumentar horas nos períodos de férias liberadas (40h) e ajustar o orçamento antes de contar com horas extras informais."},
   {title:"Renovação e continuidade dos estudos", eu:false, body:"Cursos de inglês têm teto de <strong>2 anos cumulativos</strong> (até 3 matrículas de 8 meses). Para renovar: matricule-se num curso de nível superior de pelo menos 25 semanas, comprove frequência mínima de 15h/semana no curso anterior, tenha frequentado pelo menos 85% das aulas, e apresente resultado do exame de fim de curso. Planeje a renovação antes do vencimento — não presuma que um curso noturno ou parcial mantém a mesma permissão."+fonte(F_FAQ)},
@@ -1802,34 +1852,98 @@ function renderMoneyTips(){
 }
 
 /* ---------- orçamento ---------- */
-var BUDGET_DEFAULTS = {wage:14.15, hoursWeek:44, weeksMonth:4.33, taxes:400, rent:900, phone:20, transport:80, groceries:200, englishCourse:0, insurance:0, gym:0, leisure:0, other:0};
+var BUDGET_DEFAULTS = {wage:14.15, hoursWeek:20, weeksMonth:4.33, rent:900, phone:20, transport:80, groceries:200, englishCourse:0, insurance:0, gym:0, leisure:0, other:0};
 function getBudget(){ return Object.assign({}, BUDGET_DEFAULTS, ls("budget")||{}); }
-function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderOverview(); }
+function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderTaxLine(); renderOverview(); }
+/* Estimativa de PAYE + USC + PRSI para 2026 (pessoa solteira, PAYE, sem filhos/outra renda,
+   créditos fiscais padrão) — aproximação para planejamento, não substitui o Revenue.
+   Baseado sempre em 52 semanas/ano (padrão fiscal), independente do campo "Semanas por mês". */
+function calcIrishTax(wage, hoursWeek){
+  var grossWeek = wage*hoursWeek;
+  var grossYear = grossWeek*52;
+  var cutoff = 44000, creditYear = 4000;
+  var payeBeforeCredit = grossYear<=cutoff ? grossYear*0.20 : cutoff*0.20 + (grossYear-cutoff)*0.40;
+  var payeYear = Math.max(0, payeBeforeCredit - creditYear);
+  var uscYear = 0;
+  if(grossYear > 13000){
+    var b1 = Math.min(grossYear, 12012)*0.005;
+    var b2 = Math.max(0, Math.min(grossYear,28700)-12012)*0.02;
+    var b3 = Math.max(0, Math.min(grossYear,70044)-28700)*0.03;
+    var b4 = Math.max(0, grossYear-70044)*0.08;
+    uscYear = b1+b2+b3+b4;
+  }
+  var prsiRate = new Date() >= new Date("2026-10-01T00:00:00") ? 0.0435 : 0.042;
+  var prsiYear = (grossWeek > 352 ? grossWeek*prsiRate : 0)*52;
+  var totalYear = payeYear+uscYear+prsiYear;
+  return {
+    grossWeek:grossWeek, grossYear:grossYear,
+    payeMonth:payeYear/12, uscMonth:uscYear/12, prsiMonth:prsiYear/12,
+    totalMonth:totalYear/12
+  };
+}
+function renderTaxLine(){
+  var b = getBudget();
+  var t = calcIrishTax(b.wage, b.hoursWeek);
+  document.getElementById("taxEstValue").textContent = "€"+t.totalMonth.toFixed(2);
+  document.getElementById("taxDetailWrap").innerHTML =
+    '<div class="summary-row"><span class="lbl">PAYE (imposto de renda)</span><span class="val">€'+t.payeMonth.toFixed(2)+'</span></div>'+
+    '<div class="summary-row"><span class="lbl">USC</span><span class="val">€'+t.uscMonth.toFixed(2)+'</span></div>'+
+    '<div class="summary-row"><span class="lbl">PRSI</span><span class="val">€'+t.prsiMonth.toFixed(2)+'</span></div>'+
+    '<div class="summary-row big"><span class="lbl">Total de descontos</span><span class="val">€'+t.totalMonth.toFixed(2)+'</span></div>'+
+    '<button class="btn-ghost btn" id="taxInfoToggle" type="button" style="width:auto;padding:5px 10px;font-size:11.5px;margin-top:8px;">ⓘ Como calcula?</button>'+
+    '<div id="taxInfoWrap" hidden style="margin-top:8px;font-size:12.6px;color:var(--muted);">'+
+    '<p style="margin:0 0 8px;"><strong>PAYE:</strong> 20% até €44.000/ano, 40% acima — menos €4.000/ano de créditos fiscais padrão (com 20h/semana no mínimo, o crédito costuma zerar o PAYE).</p>'+
+    '<p style="margin:0 0 8px;"><strong>USC:</strong> isento até €13.000/ano; acima disso, 0,5% até €12.012, 2% até €28.700, 3% até €70.044, 8% acima.</p>'+
+    '<p style="margin:0;"><strong>PRSI (Classe A):</strong> isento até €352/semana; acima disso, 4,20% (até 30/09/2026) ou 4,35% (a partir de 01/10/2026).</p>'+
+    '</div>'+
+    '<p class="source-note" style="margin-top:10px;">Referência fiscal: <strong>2026</strong> (pessoa solteira, sem filhos/outra renda) — estimativa para planejamento, não substitui o Revenue. <a href="https://www.revenue.ie/en/jobs-and-pensions/calculating-your-income-tax/index.aspx" target="_blank" rel="noopener">Tabelas</a> · <a href="https://www.revenue.ie/en/jobs-and-pensions/usc/index.aspx" target="_blank" rel="noopener">USC</a> · <a href="https://www.gov.ie/en/department-of-social-protection/publications/prsi-class-a-rates/" target="_blank" rel="noopener">PRSI</a> · <a href="https://www.ros.ie/myaccount-web/sign_in.html" target="_blank" rel="noopener">Revenue myAccount ↗</a></p>';
+  document.getElementById("taxInfoToggle").addEventListener("click", function(){
+    var wrap = document.getElementById("taxInfoWrap");
+    wrap.hidden = !wrap.hidden;
+  });
+}
 function renderBudget(){
   var b = getBudget();
   var presetHtml = '<div class="subtabs" id="hoursPreset" style="margin-bottom:12px;">'+
     '<button class="subtab'+(b.hoursWeek===20?' active':'')+'" data-h="20">20h/semana (limite do Stamp 2)</button>'+
-    '<button class="subtab'+(b.hoursWeek===44?' active':'')+'" data-h="44">44h/semana (tempo integral)</button>'+
+    '<button class="subtab'+(b.hoursWeek===40?' active':'')+'" data-h="40">40h/semana (exemplo tempo integral)</button>'+
     '</div>'+
-    '<p class="source-note" style="margin:-6px 0 12px;">Com 20h/semana no salário mínimo, a renda anual costuma ficar numa faixa em que se paga pouco ou nenhum imposto de renda (créditos fiscais pessoais); em 44h o imposto e o USC pesam mais. Ajuste o campo "Impostos/descontos" abaixo para refletir sua situação — confirme sempre em <a href="https://www.revenue.ie/en/jobs-and-pensions/calculating-your-income-tax/index.aspx" target="_blank" rel="noopener">revenue.ie</a>.</p>';
-  var incomeFields = [{k:"wage",l:"Salário por hora (€)",step:0.01},{k:"hoursWeek",l:"Horas por semana",step:1},{k:"weeksMonth",l:"Semanas por mês",step:0.01},{k:"taxes",l:"Impostos/descontos (€/mês)",step:1}];
-  document.getElementById("budgetIncomeFields").innerHTML = presetHtml + incomeFields.map(function(f){ return '<div class="numfield"><label>'+f.l+'</label><input type="number" step="'+f.step+'" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("");
+    '<p class="source-note" style="margin:-6px 0 12px;">Na Irlanda, tempo integral não é fixo em 44h como no Brasil — contratos de 39–40h são comuns. Ajuste "Horas por semana" abaixo para o seu caso.</p>';
+  var incomeFields = [{k:"wage",l:"Salário por hora (€)",step:0.01},{k:"hoursWeek",l:"Horas por semana",step:1},{k:"weeksMonth",l:"Semanas por mês",step:0.01}];
+  document.getElementById("budgetIncomeFields").innerHTML = presetHtml + incomeFields.map(function(f){ return '<div class="numfield"><label>'+f.l+'</label><input type="number" step="'+f.step+'" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("")+
+    '<div class="numfield">'+
+    '<label>Impostos/descontos (estimado)</label>'+
+    '<span style="display:flex;align-items:center;gap:10px;">'+
+    '<span class="tabular" id="taxEstValue">€0.00</span>'+
+    '<button class="btn-ghost btn" id="taxEstToggle" type="button" style="width:auto;padding:6px 12px;font-size:15px;line-height:1;">▾</button>'+
+    '</span>'+
+    '</div>'+
+    '<div id="taxDetailWrap" style="display:none;padding-top:10px;"></div>';
   var expenseFields = [{k:"rent",l:"Aluguel / quarto"},{k:"phone",l:"Celular / contas extras"},{k:"transport",l:"Transporte"},{k:"groceries",l:"Mercado"},{k:"englishCourse",l:"Escola de inglês"},{k:"insurance",l:"Seguro-saúde"},{k:"gym",l:"Academia"},{k:"leisure",l:"Lazer / saídas"},{k:"other",l:"Outros gastos"}];
   document.getElementById("budgetExpenseFields").innerHTML = expenseFields.map(function(f){ return '<div class="numfield"><label>'+f.l+'</label><input type="number" step="1" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("");
   document.querySelectorAll("#budgetIncomeFields input, #budgetExpenseFields input").forEach(function(inp){ inp.addEventListener("input", function(){ setBudgetField(inp.dataset.k, parseFloat(inp.value)||0); }); });
   document.querySelectorAll("#hoursPreset .subtab").forEach(function(btn){
     btn.addEventListener("click", function(){ setBudgetField("hoursWeek", parseFloat(btn.dataset.h)); renderBudget(); });
   });
+  document.getElementById("taxEstToggle").addEventListener("click", function(){
+    var detail = document.getElementById("taxDetailWrap");
+    var opening = detail.style.display === "none";
+    detail.style.display = opening ? "block" : "none";
+    document.getElementById("taxEstToggle").style.transform = opening ? "rotate(180deg)" : "none";
+  });
+  renderTaxLine();
   updateBudgetSummary();
 }
 function updateBudgetSummary(){
   var b = getBudget();
-  var grossWeek = b.wage*b.hoursWeek, grossMonth = grossWeek*b.weeksMonth, netMonth = grossMonth-b.taxes;
+  var t = calcIrishTax(b.wage, b.hoursWeek);
+  var grossMonth = b.wage*b.hoursWeek*b.weeksMonth;
+  var netMonth = grossMonth - t.totalMonth;
   var totalExpenses = b.rent+b.phone+b.transport+b.groceries+b.englishCourse+b.insurance+b.gym+b.leisure+b.other;
   var freeBalance = netMonth-totalExpenses, pctCommitted = netMonth>0 ? (totalExpenses/netMonth*100):0, yearlyReserve = freeBalance*12;
   function row(lbl,val,cls){ return '<div class="summary-row '+(cls||"")+'"><span class="lbl">'+lbl+'</span><span class="val">'+val+'</span></div>'; }
   document.getElementById("budgetSummary").innerHTML =
-    row("Salário bruto semanal","€"+grossWeek.toFixed(2))+row("Salário bruto mensal","€"+grossMonth.toFixed(2))+row("Salário líquido estimado","€"+netMonth.toFixed(2))+
+    row("Salário bruto semanal","€"+t.grossWeek.toFixed(2))+row("Salário bruto mensal","€"+grossMonth.toFixed(2))+row("Salário líquido estimado","€"+netMonth.toFixed(2))+
     row("Total de gastos mensais","€"+totalExpenses.toFixed(2))+row("Saldo livre no mês","€"+freeBalance.toFixed(2), freeBalance<0?"warn big":"big")+
     row("% da renda comprometida", pctCommitted.toFixed(1)+"%", pctCommitted>85?"warn":"")+row("Reserva possível em 12 meses","€"+yearlyReserve.toFixed(2));
 }
@@ -2162,7 +2276,7 @@ function renderMistakes(){
 
 /* ---------- init ---------- */
 function renderAll(){
-  renderProfileSeg(); renderCitySeg(); renderChecklist(); renderVistos(); renderTrabalho(); renderCursoRegras();
+  renderFaqStart(); renderProfileSeg(); renderCitySeg(); renderChecklist(); renderVistos(); renderTrabalho(); renderCursoRegras();
   renderCheckableList("cronogramaWrap", CRONOGRAMA, "cronogramaDone");
   renderCheckableList("dias30Wrap", DIAS30, "dias30Done");
   renderOverview();
