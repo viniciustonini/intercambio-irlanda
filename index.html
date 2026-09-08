@@ -59,6 +59,14 @@ input{font-family:var(--font-body);}
 .modal-card p{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
 .btn-ghost:hover{background:var(--surface-2);}
+.faq-item{border-bottom:1px solid var(--border);padding:14px 0;}
+.faq-item:last-child{border-bottom:none;}
+.faq-q{display:flex;align-items:baseline;gap:9px;background:none;border:none;padding:0;text-align:left;width:100%;font-family:var(--font-body);font-weight:700;font-size:14.3px;color:var(--text);cursor:pointer;}
+.faq-caret{flex:none;color:var(--accent);font-size:11px;transition:transform .2s ease;}
+.faq-item.collapsed .faq-caret{transform:rotate(-90deg);}
+.faq-a{margin-top:8px;padding-left:20px;font-size:13.3px;color:var(--muted);}
+.faq-a p{margin:0 0 8px;}
+.faq-item.collapsed .faq-a{display:none;}
 .cookie-bar{position:fixed;left:0;right:0;bottom:0;z-index:150;background:var(--navy);color:#fff;padding:14px 20px;display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:13px;box-shadow:0 -4px 16px rgba(0,0,0,.15);}
 .cookie-bar a{color:#fff;text-decoration:underline;}
 .cookie-bar button{width:auto;padding:9px 18px;flex:none;}
@@ -438,6 +446,12 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
     <!-- PERFIL & CIDADE -->
     <section class="section" id="sec-perfil" data-sec="perfil">
       <div class="section-head"><span class="eyebrow">Personalize o guia</span><h2>Seu perfil e sua cidade</h2><p>Isso ajusta o que aparece em Checklist, Imigração e Trabalho.</p></div>
+      <div class="card">
+        <span class="eyebrow">Comece por aqui</span>
+        <h3 style="margin:8px 0 6px;">As decisões que organizam seu intercâmbio</h3>
+        <p class="source-note" style="margin-bottom:16px;">Use este guia como ponto de partida. Seus valores e progresso ficam neste navegador; eles não são sincronizados entre aparelhos.</p>
+        <div id="faqStartWrap"></div>
+      </div>
       <div class="card">
         <h3>Cidadania</h3>
         <div class="seg">
@@ -947,6 +961,22 @@ function renderCitySeg(){
 }
 document.getElementById("pickEU").addEventListener("click", function(){ setProfile("eu"); });
 document.getElementById("pickNONEU").addEventListener("click", function(){ setProfile("non-eu"); });
+var FAQ_START = [
+  {q:"Como comparar escolas sem olhar só o preço?", a:"Peça uma proposta com curso, matrícula, material, exame, seguro e proteção do aluno discriminados. Confira horário, localização, política de cancelamento, reembolso e elegibilidade migratória do curso. Guarde a proposta e os comprovantes.", src:{label:"Regras e perguntas sobre estudos · ISD", url:"https://www.irishimmigration.ie/coming-to-study-in-ireland/frequently-asked-questions-for-students/"}},
+  {q:"Quanto preciso reservar antes de viajar?", a:"Some curso, passagem, seguro, documentos, hospedagem inicial, depósito de moradia e instalação. Acrescente os gastos mensais de um período sem emprego e uma margem para imprevistos. O valor de comprovação migratória não é uma previsão de quanto a viagem inteira custará."},
+  {q:"O que perguntar durante uma visita ao quarto?", a:"Confirme quem pode alugar o imóvel, quem mora nele, contas incluídas, depósito, duração do acordo, regras da casa e condições de saída. Teste o trajeto até a escola. Peça tudo por escrito e verifique se é tenancy ou licence antes de presumir quais proteções se aplicam.", src:{label:"Orientação sobre moradia · Threshold", url:"https://www.threshold.ie"}},
+  {q:"Como me organizar para buscar emprego?", a:"Prepare currículo em inglês, disponibilidade compatível com o curso e a permissão, referências e mensagens de candidatura. Acompanhe onde enviou o currículo e guarde contrato e recibos. Inclua no orçamento um período de procura sem renda.", src:{label:"Vagas · Jobs Ireland", url:"https://jobsireland.ie/"}},
+  {q:"Como preparar saúde e adaptação?", a:"Entenda como acionar seu seguro, quais serviços cobre e onde buscar atendimento. Organize receitas e documentação de medicamentos antes do embarque. Planeje uma rotina de sono, alimentação, convivência e contato com sua rede de apoio.", src:{label:"Serviços de saúde · HSE", url:"https://www.hse.ie"}}
+];
+function renderFaqStart(){
+  document.getElementById("faqStartWrap").innerHTML = FAQ_START.map(function(f){
+    return '<div class="faq-item"><button class="faq-q"><span class="faq-caret">▾</span>'+f.q+'</button>'+
+      '<div class="faq-a"><p>'+f.a+'</p>'+(f.src?'<a href="'+f.src.url+'" target="_blank" rel="noopener" class="source-note">'+f.src.label+' ↗</a>':'')+'</div></div>';
+  }).join("");
+  document.querySelectorAll("#faqStartWrap .faq-q").forEach(function(btn){
+    btn.addEventListener("click", function(){ btn.parentElement.classList.toggle("collapsed"); });
+  });
+}
 function renderProfileSeg(){
   var p = getProfile();
   document.getElementById("pickEU").classList.toggle("selected", p==="eu");
@@ -2183,7 +2213,7 @@ function renderMistakes(){
 
 /* ---------- init ---------- */
 function renderAll(){
-  renderProfileSeg(); renderCitySeg(); renderChecklist(); renderVistos(); renderTrabalho(); renderCursoRegras();
+  renderFaqStart(); renderProfileSeg(); renderCitySeg(); renderChecklist(); renderVistos(); renderTrabalho(); renderCursoRegras();
   renderCheckableList("cronogramaWrap", CRONOGRAMA, "cronogramaDone");
   renderCheckableList("dias30Wrap", DIAS30, "dias30Done");
   renderOverview();
