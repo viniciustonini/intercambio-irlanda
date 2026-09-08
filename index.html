@@ -1343,14 +1343,36 @@ function getStayOptions(){
 }
 function saveStayOptions(o){ ls("stayOptions", o); }
 function getCotacao(){ return ls("cotacao") || 6.02; }
+function fetchLiveCotacao(){
+  var today = new Date().toISOString().slice(0,10);
+  if(ls("cotacaoUpdatedAt") === today) return;
+  fetch("https://api.frankfurter.dev/v1/latest?base=EUR&symbols=BRL")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var rate = d && d.rates && d.rates.BRL;
+      if(!rate) return;
+      ls("cotacao", rate);
+      ls("cotacaoUpdatedAt", today);
+      var val = document.getElementById("heroCotacaoVal");
+      if(val) val.textContent = "R$ " + rate.toFixed(2).replace(".", ",");
+      var inp = document.getElementById("cotacaoInput");
+      if(inp) inp.value = rate;
+      var note = document.getElementById("cotacaoAutoNote");
+      if(note) note.textContent = "Atualizada automaticamente hoje ("+today.split("-").reverse().join("/")+"), a partir do Banco Central Europeu.";
+      if(typeof updateStayComputed === "function") updateStayComputed();
+    })
+    .catch(function(){ /* sem internet ou API fora do ar — mantém o último valor salvo */ });
+}
 function renderStayFields(){
+  var updated = ls("cotacaoUpdatedAt");
+  var noteText = updated ? "Atualizada automaticamente em "+updated.split("-").reverse().join("/")+", a partir do Banco Central Europeu. Você pode ajustar manualmente se precisar." : "Buscando cotação automática... você também pode ajustar manualmente.";
   document.getElementById("stayCotacaoWrap").innerHTML =
     '<div class="numfield"><label>Cotação R$/€ (usada em todas as opções)</label>'+
     '<div style="display:flex;align-items:center;gap:10px;">'+
     '<input type="number" step="0.01" id="cotacaoInput" value="'+getCotacao()+'" style="width:90px;">'+
-    '<a href="https://www.google.com/search?q=cota%C3%A7%C3%A3o+euro+hoje" target="_blank" rel="noopener" class="btn-ghost btn" style="width:auto;padding:6px 12px;font-size:12px;">Ver cotação de hoje ↗</a>'+
+    '<a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-brl.en.html" target="_blank" rel="noopener" class="btn-ghost btn" style="width:auto;padding:6px 12px;font-size:12px;">Fonte oficial (BCE) ↗</a>'+
     '</div></div>'+
-    '<p class="source-note" style="margin-top:8px;">A cotação não é buscada automaticamente — clique no link acima, confira o valor do dia e atualize aqui.</p>';
+    '<p class="source-note" style="margin-top:8px;" id="cotacaoAutoNote">'+noteText+'</p>';
   document.getElementById("cotacaoInput").addEventListener("input", function(e){
     ls("cotacao", parseFloat(e.target.value)||1);
     updateStayComputed();
@@ -2150,6 +2172,7 @@ function init(){
   document.getElementById("lastUpdated").textContent = LAST_UPDATED;
   applyScrollMode();
   syncTabbarHeight();
+  fetchLiveCotacao();
   if(!isScrollMode()) animateHeroEntrance();
 }
 init();
