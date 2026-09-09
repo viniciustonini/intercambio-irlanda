@@ -152,7 +152,10 @@ input{font-family:var(--font-body);}
 .eyebrow-alt{color:var(--gold-text)!important;}
 .tourism-banner{background:linear-gradient(100deg,#231a06,#3a2a0c);color:#F4E3C1;border-radius:var(--radius);padding:16px 20px;margin-bottom:24px;font-size:13px;}
 .tourism-banner b{color:var(--gold-on-dark);}
-.city-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin-bottom:16px;}
+.city-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin-bottom:16px;overflow:hidden;}
+.city-card-photo{width:calc(100% + 48px);height:170px;object-fit:cover;display:block;margin:-22px -24px 16px;}
+.city-card-credit{display:block;font-size:11px;color:var(--muted);text-decoration:none;margin-top:10px;}
+.city-card-credit:hover{text-decoration:underline;}
 .city-card h3{font-size:18px;margin-bottom:4px;}
 .city-card .dist{font-size:12px;color:var(--gold-text);font-weight:700;margin-bottom:12px;}
 .city-card .attractions{font-size:13.3px;margin-bottom:12px;}
@@ -2010,8 +2013,9 @@ function renderGroups(){
     var list = GROUPS[c.id] || [];
     var body = list.length
       ? '<div class="grid cols-3">'+list.map(function(g){
+          var fav = faviconUrl(g.url);
           return '<a class="linkcard" href="'+g.url+'" target="_blank" rel="noopener">'+
-            '<div class="linkcard-icon">'+LINK_ICONS.users+'</div>'+
+            '<div class="linkcard-icon">'+LINK_ICONS.users+(fav?'<img class="linkcard-favicon" src="'+fav+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div>'+
             '<h4>'+g.name+'</h4><p>'+g.desc+'</p>'+
             '<span class="linkcard-arrow">↗</span></a>';
         }).join("")+'</div>'
@@ -2107,21 +2111,41 @@ var TOUR_ICONS = {
   island:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 17c3-1 5-1 8 0s5 1 8 0M2 20c3-1 5-1 8 0s5 1 8 0"/><path d="M12 14V6M9 9l3-3 3 3"/></svg>'
 };
 var TOURIST_CITIES = [
-  {name:"Dublin", icon:"castle", dist:"Ponto de chegada", attractions:"Trinity College, Grafton Street, Catedral de St. Patrick, Dublin Castle, Guinness Storehouse, Temple Bar.", hotel:"Ruby Molly Hotel — bem avaliado e no centro da cidade."},
-  {name:"Wicklow &amp; Glendalough", icon:"mountain", dist:"~50 km de Dublin (1h de carro)", attractions:"Powerscourt Estate (jardins) e Glendalough, vale glacial com lagos e ruínas monásticas — clássico bate-volta de Dublin.", hotel:"Geralmente feito em excursão de um dia, sem pernoite."},
-  {name:"Kilkenny", icon:"castle", dist:"~139 km de Dublin (1h40 de carro)", attractions:"Cidade medieval com ruas estreitas, catedral histórica e o Castelo de Kilkenny visitável.", hotel:"Também comum como bate-volta de Dublin."},
-  {name:"Galway", icon:"music", dist:"~208 km de Dublin (2h45 de carro)", attractions:"Centro histórico boêmio com pubs de música ao vivo, ponto de partida para as Ilhas Aran e os Cliffs of Moher.", hotel:"The Dean Galway — design moderno, rooftop e localização central."},
-  {name:"Ilhas Aran", icon:"island", dist:"Balsa a partir de Galway (~40min–1h)", attractions:"Três ilhas com o forte pré-histórico de Dún Aonghasa e tradições irlandesas bem preservadas.", hotel:"Geralmente visitado em bate-volta a partir de Galway."},
-  {name:"Cliffs of Moher", icon:"mountain", dist:"~1h de Galway", attractions:"Falésias de 214m de altura ao longo de 8km de costa — um dos points mais fotografados da Irlanda.", hotel:"Normalmente visitado em bate-volta a partir de Galway."},
-  {name:"Killarney / Ring of Kerry", icon:"mountain", dist:"~307 km de Dublin (4h de carro)", attractions:"Parque Nacional de Killarney, Bunratty Castle nas proximidades, e o Ring of Kerry — percurso circular de 179km com paisagens litorâneas.", hotel:"The Lake Hotel Killarney — à beira do lago, dentro do parque nacional."},
-  {name:"Cork", icon:"ship", dist:"~259 km de Dublin (2h45 de carro)", attractions:"Segunda maior cidade do país, English Market, e a Pedra de Blarney nas proximidades.", hotel:"The Imperial Hotel — clássico, no centro da cidade."},
-  {name:"Belfast &amp; Giant's Causeway", icon:"ship", dist:"~166 km de Dublin (1h30 de carro) — já na Irlanda do Norte", attractions:"Museu Titanic Belfast, Dark Hedges (cenário de Game of Thrones) e o Giant's Causeway — patrimônio da UNESCO com 40 mil colunas de basalto.", hotel:"Consulte Booking/Tripadvisor — boa oferta de hotéis no centro de Belfast."}
+  {name:"Dublin", icon:"castle", dist:"Ponto de chegada", attractions:"Trinity College, Grafton Street, Catedral de St. Patrick, Dublin Castle, Guinness Storehouse, Temple Bar.", hotel:"Ruby Molly Hotel — bem avaliado e no centro da cidade.",
+    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Dublin_-_aerial_-_2025-07-07_01.jpg/330px-Dublin_-_aerial_-_2025-07-07_01.jpg",
+    photoCredit:{name:"瑞丽江的河水", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:Dublin_-_aerial_-_2025-07-07_01.jpg"}},
+  {name:"Wicklow &amp; Glendalough", icon:"mountain", dist:"~50 km de Dublin (1h de carro)", attractions:"Powerscourt Estate (jardins) e Glendalough, vale glacial com lagos e ruínas monásticas — clássico bate-volta de Dublin.", hotel:"Geralmente feito em excursão de um dia, sem pernoite.",
+    photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/St._Kevin%27s_Kitchen%2C_Glendalough%2C_Co._Wicklow_%282023%29.jpg/330px-St._Kevin%27s_Kitchen%2C_Glendalough%2C_Co._Wicklow_%282023%29.jpg",
+    photoCredit:{name:"Denzillacey", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:St._Kevin%27s_Kitchen,_Glendalough,_Co._Wicklow_(2023).jpg"}},
+  {name:"Kilkenny", icon:"castle", dist:"~139 km de Dublin (1h40 de carro)", attractions:"Cidade medieval com ruas estreitas, catedral histórica e o Castelo de Kilkenny visitável.", hotel:"Também comum como bate-volta de Dublin.",
+    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Kilkenny_castle_2.jpg/330px-Kilkenny_castle_2.jpg",
+    photoCredit:{name:"Jimmy joe jazz", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:Kilkenny_castle_2.jpg"}},
+  {name:"Galway", icon:"music", dist:"~208 km de Dublin (2h45 de carro)", attractions:"Centro histórico boêmio com pubs de música ao vivo, ponto de partida para as Ilhas Aran e os Cliffs of Moher.", hotel:"The Dean Galway — design moderno, rooftop e localização central.",
+    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Galway_cathedral.jpg/330px-Galway_cathedral.jpg",
+    photoCredit:{name:"Wikimedia Commons", license:"CC BY-SA 3.0", url:"https://commons.wikimedia.org/wiki/File:Galway_cathedral.jpg"}},
+  {name:"Ilhas Aran", icon:"island", dist:"Balsa a partir de Galway (~40min–1h)", attractions:"Três ilhas com o forte pré-histórico de Dún Aonghasa e tradições irlandesas bem preservadas.", hotel:"Geralmente visitado em bate-volta a partir de Galway.",
+    photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Dun_Aonghasa_%28cropped%29.JPG/330px-Dun_Aonghasa_%28cropped%29.JPG",
+    photoCredit:{name:"Ronan Mac Giollapharaic", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:Dun_Aonghasa_(cropped).JPG"}},
+  {name:"Cliffs of Moher", icon:"mountain", dist:"~1h de Galway", attractions:"Falésias de 214m de altura ao longo de 8km de costa — um dos points mais fotografados da Irlanda.", hotel:"Normalmente visitado em bate-volta a partir de Galway.",
+    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Cliffs-Of-Moher-OBriens-From-South.JPG/330px-Cliffs-Of-Moher-OBriens-From-South.JPG",
+    photoCredit:{name:"Bjørn Christian Tørrissen", license:"CC BY-SA 3.0", url:"https://commons.wikimedia.org/wiki/File:Cliffs-Of-Moher-OBriens-From-South.JPG"}},
+  {name:"Killarney / Ring of Kerry", icon:"mountain", dist:"~307 km de Dublin (4h de carro)", attractions:"Parque Nacional de Killarney, Bunratty Castle nas proximidades, e o Ring of Kerry — percurso circular de 179km com paisagens litorâneas.", hotel:"The Lake Hotel Killarney — à beira do lago, dentro do parque nacional.",
+    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Atlantic_Ocean%2C_Ring_of_Kerry_%28506559%29_%2827964189752%29.jpg/330px-Atlantic_Ocean%2C_Ring_of_Kerry_%28506559%29_%2827964189752%29.jpg",
+    photoCredit:{name:"Robert Linsdell", license:"CC BY 2.0", url:"https://commons.wikimedia.org/wiki/File:Atlantic_Ocean,_Ring_of_Kerry_(506559)_(27964189752).jpg"}},
+  {name:"Cork", icon:"ship", dist:"~259 km de Dublin (2h45 de carro)", attractions:"Segunda maior cidade do país, English Market, e a Pedra de Blarney nas proximidades.", hotel:"The Imperial Hotel — clássico, no centro da cidade.",
+    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d4/University_College_Cork_-_Quad_during_Eclipse_2015_%2816684104050%29.jpg/330px-University_College_Cork_-_Quad_during_Eclipse_2015_%2816684104050%29.jpg",
+    photoCredit:{name:"Darius Whelan", license:"CC BY 2.0", url:"https://commons.wikimedia.org/wiki/File:University_College_Cork_-_Quad_during_Eclipse_2015_(16684104050).jpg"}},
+  {name:"Belfast &amp; Giant's Causeway", icon:"ship", dist:"~166 km de Dublin (1h30 de carro) — já na Irlanda do Norte", attractions:"Museu Titanic Belfast, Dark Hedges (cenário de Game of Thrones) e o Giant's Causeway — patrimônio da UNESCO com 40 mil colunas de basalto.", hotel:"Consulte Booking/Tripadvisor — boa oferta de hotéis no centro de Belfast.",
+    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Causeway-code_poet-4.jpg/330px-Causeway-code_poet-4.jpg",
+    photoCredit:{name:"code poet (Flickr)", license:"CC BY-SA 2.0", url:"https://commons.wikimedia.org/wiki/File:Causeway-code_poet-4.jpg"}}
 ];
 function renderTouristCities(){
   document.getElementById("touristCitiesWrap").innerHTML = TOURIST_CITIES.map(function(c){
-    return '<div class="city-card"><div class="city-icon">'+TOUR_ICONS[c.icon]+'</div><h3>'+c.name+'</h3><div class="dist">'+c.dist+'</div>'+
+    var photo = c.photo ? '<img class="city-card-photo" src="'+c.photo+'" alt="'+c.name.replace(/<[^>]+>/g,"")+'" loading="lazy" onerror="this.remove()">' : "";
+    var credit = c.photo ? '<a class="city-card-credit" href="'+c.photoCredit.url+'" target="_blank" rel="noopener">Foto: '+c.photoCredit.name+' / Wikimedia Commons ('+c.photoCredit.license+')</a>' : "";
+    return '<div class="city-card">'+photo+'<div class="city-icon">'+TOUR_ICONS[c.icon]+'</div><h3>'+c.name+'</h3><div class="dist">'+c.dist+'</div>'+
       '<div class="attractions">'+c.attractions+'</div>'+
-      '<div class="hotel-pick"><b>Hotel sugerido:</b> '+c.hotel+'</div></div>';
+      '<div class="hotel-pick"><b>Hotel sugerido:</b> '+c.hotel+'</div>'+credit+'</div>';
   }).join("");
 }
 var TOURIST_BUDGET = [
