@@ -58,6 +58,15 @@ input{font-family:var(--font-body);}
 .btn-danger{background:var(--warn);width:auto;}
 .modal-overlay{position:fixed;inset:0;background:rgba(15,28,43,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay[hidden]{display:none;}
+.lightbox-overlay{position:fixed;inset:0;background:rgba(9,14,20,.92);z-index:300;display:flex;align-items:center;justify-content:center;padding:40px 20px;cursor:zoom-out;}
+.lightbox-overlay[hidden]{display:none;}
+.lightbox-figure{margin:0;max-width:min(1100px,92vw);max-height:88vh;display:flex;flex-direction:column;align-items:center;gap:12px;cursor:default;}
+.lightbox-figure img{max-width:100%;max-height:78vh;border-radius:10px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6);object-fit:contain;}
+.lightbox-figure figcaption{color:rgba(255,255,255,.75);font-size:12.5px;text-align:center;}
+.lightbox-figure figcaption a{color:#fff;}
+.lightbox-close{position:absolute;top:18px;right:22px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s ease;}
+.lightbox-close:hover{background:rgba(255,255,255,.2);}
+.city-card-photo{cursor:zoom-in;}
 .modal-card{background:var(--surface);border-radius:var(--radius);padding:24px;max-width:380px;width:100%;box-shadow:var(--shadow);}
 .modal-card h3{font-size:17px;margin-bottom:10px;}
 .modal-card p{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
@@ -286,6 +295,16 @@ td.num,th.num{text-align:right;font-family:var(--font-mono);}
 .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11.3px;font-weight:700;}
 .pill.eu{background:var(--accent-soft);color:var(--accent-strong);}
 .pill.noneu{background:var(--warn-soft);color:var(--warn-strong);}
+.pill.step{background:var(--surface-2);color:var(--muted);}
+.checkitem.checked .pill.step{background:var(--accent-soft);color:var(--accent-strong);}
+.ci-link{display:inline-block;margin-top:6px;font-size:12.3px;font-weight:600;color:var(--accent-strong);text-decoration:none;}
+.ci-link:hover{text-decoration:underline;}
+.timeline{position:relative;}
+.timeline .checkitem{border-color:transparent;background:transparent;box-shadow:none;border-radius:10px;transition:background .15s ease;}
+.timeline .checkitem:hover{border-color:transparent;background:var(--surface-2);}
+.timeline .checkitem:not(:last-child){position:relative;}
+.timeline .checkitem:not(:last-child)::after{content:"";position:absolute;left:23px;top:32px;bottom:-8px;width:2px;background:var(--border);}
+.timeline .checkitem .box{position:relative;z-index:1;}
 
 /* budget */
 .budget-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;}
@@ -413,7 +432,7 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
       <button class="tab-btn" id="tab-links" data-sec="links" role="tab" aria-selected="false" aria-controls="sec-links">Links oficiais</button>
       <button class="tab-btn" id="tab-roteiro" data-sec="roteiro" role="tab" aria-selected="false" aria-controls="sec-roteiro">Roteiro completo</button>
       <button class="tab-btn" id="tab-grupos" data-sec="grupos" role="tab" aria-selected="false" aria-controls="sec-grupos">Grupos</button>
-      <button class="tab-btn tab-btn-alt" id="tab-turismo" data-sec="turismo" role="tab" aria-selected="false" aria-controls="sec-turismo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:2px;"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3.5 20.5 3 18.5 3.5 17 5l-3.5 3.5L5.3 6.7c-.4-.1-.8 0-1 .3l-.6.6c-.3.3-.2.7.1 1L8 12l-3 3H2.9l-.7.7c-.3.3-.3.7 0 1L4 18.5l1.8 1.8c.3.3.7.3 1 0l.7-.7v-2.1l3-3 4.2 4.2c.3.3.7.4 1 .1l.6-.6c.3-.2.4-.6.3-1z"/></svg>Turismo (poucos dias)</button>
+      <button class="tab-btn tab-btn-alt" id="tab-turismo" data-sec="turismo" role="tab" aria-selected="false" aria-controls="sec-turismo">✈ Turismo (poucos dias)</button>
     </nav>
     <div class="tabbar-fade right" id="tabFadeRight"></div>
     <button class="tabbar-arrow right" id="tabArrowRight" type="button" aria-label="Rolar para a direita"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -611,9 +630,9 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
       <h3 style="font-size:17px;margin-bottom:12px;">Checklist final</h3>
       <div id="checklistWrap"></div>
       <h3 style="font-size:17px;margin:28px 0 12px;">Antes de embarcar (8 meses)</h3>
-      <div id="cronogramaWrap"></div>
+      <div id="cronogramaWrap" class="timeline"></div>
       <h3 style="font-size:17px;margin:28px 0 12px;">Primeiros 30 dias na Irlanda</h3>
-      <div id="dias30Wrap"></div>
+      <div id="dias30Wrap" class="timeline"></div>
     </section>
 
     <!-- GRUPOS -->
@@ -702,6 +721,14 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
   </div>
 </div>
 
+<div class="lightbox-overlay" id="photoLightbox" hidden>
+  <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Fechar foto">×</button>
+  <figure class="lightbox-figure">
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
@@ -752,7 +779,7 @@ function animateSectionEntrance(id){
   if(!animEnabled || isScrollMode()) return;
   var section = document.querySelector('.section[data-sec="'+id+'"]');
   if(!section) return;
-  var items = section.querySelectorAll(".card, .tablewrap, .rules-card, .tourism-banner, .grid > *, .proscons, .seg, .subtabs");
+  var items = section.querySelectorAll(".card, .tablewrap, .rules-card, .tourism-banner, .grid > *, .proscons, .seg, .subtabs, .timeline > .checkitem");
   if(!items.length) return;
   if(hasScrollTrigger) ScrollTrigger.getAll().forEach(function(st){ st.kill(); });
   var above = Array.prototype.slice.call(items, 0, 4);
@@ -892,6 +919,15 @@ document.getElementById("resetModal").addEventListener("click", function(e){
 document.getElementById("resetModalConfirm").addEventListener("click", function(){
   Object.keys(localStorage).filter(function(k){return k.indexOf(LS)===0 && k!==LS+"unlocked" && k!==LS+"name";}).forEach(function(k){ localStorage.removeItem(k); });
   location.reload();
+});
+
+/* ---------- lightbox de fotos ---------- */
+document.getElementById("photoLightbox").addEventListener("click", function(e){
+  if(e.target.id==="photoLightbox") closeLightbox();
+});
+document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
+document.addEventListener("keydown", function(e){
+  if(e.key==="Escape" && !document.getElementById("photoLightbox").hidden) closeLightbox();
 });
 
 /* ---------- privacidade & cookies ---------- */
@@ -1073,34 +1109,36 @@ function checklistCounts(){
 
 /* ---------- cronograma (checkable) ---------- */
 var CRONOGRAMA = [
-  {id:"c1", when:"Mês 1–2", title:"Documentos pessoais", detail:"Passaporte, identidade, cópias digitais e, se aplicável, documentos de cidadania."},
-  {id:"c2", when:"Mês 2", title:"Financeiro", detail:"Defina orçamento, comece a poupar em euros e trace a meta de reserva até a viagem."},
-  {id:"c3", when:"Mês 3", title:"Escolha da cidade e da escola", detail:"Compare Dublin, Cork e Galway; pesquise escolas de inglês credenciadas."},
-  {id:"c4", when:"Mês 4", title:"Visto (se não-UE)", detail:"Carta de aceite, comprovação financeira, seguro-saúde e agendamento do visto."},
-  {id:"c5", when:"Mês 5", title:"Inglês prático", detail:"Treine vocabulário de aeroporto, aluguel, trabalho e entrevistas."},
-  {id:"c6", when:"Mês 6", title:"Saúde &amp; seguro", detail:"Compare seguros de viagem/saúde e confirme cobertura para todo o período."},
-  {id:"c7", when:"Mês 6–7", title:"Trabalho", detail:"Prepare CV em inglês, LinkedIn e treine para entrevistas."},
-  {id:"c8", when:"Mês 7", title:"Moradia", detail:"Pesquise bairros, faixas de preço e reserve uma hospedagem temporária."},
+  {id:"c1", when:"Mês 1–2", title:"Documentos pessoais", detail:"Passaporte, identidade, cópias digitais e, se aplicável, documentos de cidadania.", link:{sec:"imigracao", label:"Ver Imigração"}},
+  {id:"c2", when:"Mês 2", title:"Financeiro", detail:"Defina orçamento, comece a poupar em euros e trace a meta de reserva até a viagem.", link:{sec:"financas", label:"Ver Finanças"}},
+  {id:"c3", when:"Mês 3", title:"Escolha da cidade e da escola", detail:"Compare Dublin, Cork e Galway; pesquise escolas de inglês credenciadas.", link:{sec:"perfil", label:"Ver Perfil & cidade"}},
+  {id:"c4", when:"Mês 4", title:"Visto (se não-UE)", detail:"Carta de aceite, comprovação financeira, seguro-saúde e agendamento do visto.", link:{sec:"imigracao", label:"Ver Imigração"}},
+  {id:"c5", when:"Mês 5", title:"Inglês prático", detail:"Treine vocabulário de aeroporto, aluguel, trabalho e entrevistas.", link:{sec:"trabalho", label:"Ver Trabalho & estudo"}},
+  {id:"c6", when:"Mês 6", title:"Saúde &amp; seguro", detail:"Compare seguros de viagem/saúde e confirme cobertura para todo o período.", link:{sec:"imigracao", label:"Ver Imigração"}},
+  {id:"c7", when:"Mês 6–7", title:"Trabalho", detail:"Prepare CV em inglês, LinkedIn e treine para entrevistas.", link:{sec:"trabalho", label:"Ver Trabalho & estudo"}},
+  {id:"c8", when:"Mês 7", title:"Moradia", detail:"Pesquise bairros, faixas de preço e reserve uma hospedagem temporária.", link:{sec:"acomodacao", label:"Ver Acomodação"}},
   {id:"c9", when:"Últimos 15 dias", title:"Revisão final", detail:"Documentos, mala, seguro, conexão e reservas confirmadas."},
   {id:"c10", when:"Dia da viagem", title:"Embarque", detail:"Brasil → Irlanda. Boa viagem!"}
 ];
 var DIAS30 = [
-  {id:"d1", when:"Dias 1–3", title:"Chegada", detail:"Vá para a hospedagem temporária, descanse, ative chip/eSIM e providencie a Leap Card."},
-  {id:"d2", when:"Dias 1–3", title:"Reconhecimento", detail:"Localize mercado, farmácia, transporte e a escola/curso mais próximos."},
-  {id:"d3", when:"Dias 4–7", title:"Moradia", detail:"Comece as visitas a quartos e compare bairros — nunca feche sem visitar."},
-  {id:"d4", when:"Dias 4–7", title:"Trabalho", detail:"Revise o CV, teste trajetos nos horários reais e comece os contatos."},
-  {id:"d5", when:"Semana 2", title:"Intensifique a busca", detail:"Envie currículos, participe de entrevistas e avance na busca por moradia."},
-  {id:"d6", when:"Semana 2", title:"Controle financeiro", detail:"Registre os gastos reais da primeira semana e recalibre seu orçamento."},
-  {id:"d7", when:"Semanas 3–4", title:"Rotina", detail:"Feche a rotina de moradia, transporte e alimentação."},
-  {id:"d8", when:"Semanas 3–4", title:"PPSN &amp; Revenue", detail:"Regularize o PPSN e o registro fiscal assim que tiver um emprego confirmado."},
-  {id:"d9", when:"Semanas 3–4", title:"Conta &amp; saúde", detail:"Avalie conta bancária local e revise seu seguro-saúde."}
+  {id:"d1", when:"Dias 1–3", title:"Chegada", detail:"Vá para a hospedagem temporária, descanse, ative chip/eSIM e providencie a Leap Card.", link:{sec:"transporte", label:"Ver Transporte"}},
+  {id:"d2", when:"Dias 1–3", title:"Reconhecimento", detail:"Localize mercado, farmácia, transporte e a escola/curso mais próximos.", link:{sec:"mercado", label:"Ver Mercado"}},
+  {id:"d3", when:"Dias 4–7", title:"Moradia", detail:"Comece as visitas a quartos e compare bairros — nunca feche sem visitar.", link:{sec:"acomodacao", label:"Ver Acomodação"}},
+  {id:"d4", when:"Dias 4–7", title:"Trabalho", detail:"Revise o CV, teste trajetos nos horários reais e comece os contatos.", link:{sec:"trabalho", label:"Ver Trabalho & estudo"}},
+  {id:"d5", when:"Semana 2", title:"Intensifique a busca", detail:"Envie currículos, participe de entrevistas e avance na busca por moradia.", link:{sec:"trabalho", label:"Ver Trabalho & estudo"}},
+  {id:"d6", when:"Semana 2", title:"Controle financeiro", detail:"Registre os gastos reais da primeira semana e recalibre seu orçamento.", link:{sec:"financas", label:"Ver Finanças"}},
+  {id:"d7", when:"Semanas 3–4", title:"Rotina", detail:"Feche a rotina de moradia, transporte e alimentação.", link:{sec:"transporte", label:"Ver Transporte"}},
+  {id:"d8", when:"Semanas 3–4", title:"PPSN &amp; Revenue", detail:"Regularize o PPSN e o registro fiscal assim que tiver um emprego confirmado.", link:{sec:"trabalho", label:"Ver Trabalho & estudo"}},
+  {id:"d9", when:"Semanas 3–4", title:"Conta &amp; saúde", detail:"Avalie conta bancária local e revise seu seguro-saúde.", link:{sec:"financas", label:"Ver Finanças"}}
 ];
 function timelineHtml(list, doneMap){
   return list.map(function(t){
     var done = !!doneMap[t.id];
+    var link = t.link ? '<a href="#'+t.link.sec+'" class="ci-link" onclick="event.stopPropagation();location.hash=\''+t.link.sec+'\';showSection(\''+t.link.sec+'\');return false;">'+t.link.label+' →</a>' : '';
     return '<label class="checkitem'+(done?' checked':'')+'" data-id="'+t.id+'"><input type="checkbox" class="checkitem-input"'+(done?' checked':'')+'><span class="box">'+CHECK_ICON+'</span>'+
-      '<div><div class="ci-label" style="text-decoration:none;">'+(done?'<span style="color:var(--muted);text-decoration:line-through;">':'')+t.title+(done?'</span>':'')+' <span style="font-weight:400;color:var(--muted);font-size:12px;">— '+t.when+'</span></div>'+
-      '<div class="ci-note">'+t.detail+'</div></div></label>';
+      '<div><span class="pill step">'+t.when+'</span>'+
+      '<div class="ci-label" style="text-decoration:none;margin-top:6px;">'+(done?'<span style="color:var(--muted);text-decoration:line-through;">':'')+t.title+(done?'</span>':'')+'</div>'+
+      '<div class="ci-note">'+t.detail+'</div>'+link+'</div></label>';
   }).join("");
 }
 function renderCheckableList(containerId, list, storeKey, afterFn){
@@ -2113,40 +2151,70 @@ var TOUR_ICONS = {
 var TOURIST_CITIES = [
   {name:"Dublin", icon:"castle", dist:"Ponto de chegada", attractions:"Trinity College, Grafton Street, Catedral de St. Patrick, Dublin Castle, Guinness Storehouse, Temple Bar.", hotel:"Ruby Molly Hotel — bem avaliado e no centro da cidade.",
     photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Dublin_-_aerial_-_2025-07-07_01.jpg/960px-Dublin_-_aerial_-_2025-07-07_01.jpg",
-    photoCredit:{name:"瑞丽江的河水", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:Dublin_-_aerial_-_2025-07-07_01.jpg"}},
+    photoCredit:{name:"瑞丽江的河水", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:Dublin_-_aerial_-_2025-07-07_01.jpg"},
+    wiki:"https://en.wikipedia.org/wiki/Dublin"},
   {name:"Wicklow &amp; Glendalough", icon:"mountain", dist:"~50 km de Dublin (1h de carro)", attractions:"Powerscourt Estate (jardins) e Glendalough, vale glacial com lagos e ruínas monásticas — clássico bate-volta de Dublin.", hotel:"Geralmente feito em excursão de um dia, sem pernoite.",
     photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/St._Kevin%27s_Kitchen%2C_Glendalough%2C_Co._Wicklow_%282023%29.jpg/960px-St._Kevin%27s_Kitchen%2C_Glendalough%2C_Co._Wicklow_%282023%29.jpg",
-    photoCredit:{name:"Denzillacey", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:St._Kevin%27s_Kitchen,_Glendalough,_Co._Wicklow_(2023).jpg"}},
+    photoCredit:{name:"Denzillacey", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:St._Kevin%27s_Kitchen,_Glendalough,_Co._Wicklow_(2023).jpg"},
+    wiki:"https://en.wikipedia.org/wiki/Glendalough"},
   {name:"Kilkenny", icon:"castle", dist:"~139 km de Dublin (1h40 de carro)", attractions:"Cidade medieval com ruas estreitas, catedral histórica e o Castelo de Kilkenny visitável.", hotel:"Também comum como bate-volta de Dublin.",
     photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Kilkenny_castle_2.jpg/960px-Kilkenny_castle_2.jpg",
-    photoCredit:{name:"Jimmy joe jazz", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:Kilkenny_castle_2.jpg"}},
+    photoCredit:{name:"Jimmy joe jazz", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:Kilkenny_castle_2.jpg"},
+    wiki:"https://en.wikipedia.org/wiki/Kilkenny"},
   {name:"Galway", icon:"music", dist:"~208 km de Dublin (2h45 de carro)", attractions:"Centro histórico boêmio com pubs de música ao vivo, ponto de partida para as Ilhas Aran e os Cliffs of Moher.", hotel:"The Dean Galway — design moderno, rooftop e localização central.",
     photo:"https://upload.wikimedia.org/wikipedia/commons/c/cb/Galway_cathedral.jpg",
-    photoCredit:{name:"Wikimedia Commons", license:"CC BY-SA 3.0", url:"https://commons.wikimedia.org/wiki/File:Galway_cathedral.jpg"}},
+    photoCredit:{name:"Wikimedia Commons", license:"CC BY-SA 3.0", url:"https://commons.wikimedia.org/wiki/File:Galway_cathedral.jpg"},
+    wiki:"https://en.wikipedia.org/wiki/Galway"},
   {name:"Ilhas Aran", icon:"island", dist:"Balsa a partir de Galway (~40min–1h)", attractions:"Três ilhas com o forte pré-histórico de Dún Aonghasa e tradições irlandesas bem preservadas.", hotel:"Geralmente visitado em bate-volta a partir de Galway.",
     photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Dun_Aonghasa_%28cropped%29.JPG/960px-Dun_Aonghasa_%28cropped%29.JPG",
-    photoCredit:{name:"Ronan Mac Giollapharaic", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:Dun_Aonghasa_(cropped).JPG"}},
+    photoCredit:{name:"Ronan Mac Giollapharaic", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:Dun_Aonghasa_(cropped).JPG"},
+    wiki:"https://en.wikipedia.org/wiki/Aran_Islands"},
   {name:"Cliffs of Moher", icon:"mountain", dist:"~1h de Galway", attractions:"Falésias de 214m de altura ao longo de 8km de costa — um dos points mais fotografados da Irlanda.", hotel:"Normalmente visitado em bate-volta a partir de Galway.",
     photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Cliffs-Of-Moher-OBriens-From-South.JPG/960px-Cliffs-Of-Moher-OBriens-From-South.JPG",
-    photoCredit:{name:"Bjørn Christian Tørrissen", license:"CC BY-SA 3.0", url:"https://commons.wikimedia.org/wiki/File:Cliffs-Of-Moher-OBriens-From-South.JPG"}},
+    photoCredit:{name:"Bjørn Christian Tørrissen", license:"CC BY-SA 3.0", url:"https://commons.wikimedia.org/wiki/File:Cliffs-Of-Moher-OBriens-From-South.JPG"},
+    wiki:"https://en.wikipedia.org/wiki/Cliffs_of_Moher"},
   {name:"Killarney / Ring of Kerry", icon:"mountain", dist:"~307 km de Dublin (4h de carro)", attractions:"Parque Nacional de Killarney, Bunratty Castle nas proximidades, e o Ring of Kerry — percurso circular de 179km com paisagens litorâneas.", hotel:"The Lake Hotel Killarney — à beira do lago, dentro do parque nacional.",
     photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Atlantic_Ocean%2C_Ring_of_Kerry_%28506559%29_%2827964189752%29.jpg/960px-Atlantic_Ocean%2C_Ring_of_Kerry_%28506559%29_%2827964189752%29.jpg",
-    photoCredit:{name:"Robert Linsdell", license:"CC BY 2.0", url:"https://commons.wikimedia.org/wiki/File:Atlantic_Ocean,_Ring_of_Kerry_(506559)_(27964189752).jpg"}},
+    photoCredit:{name:"Robert Linsdell", license:"CC BY 2.0", url:"https://commons.wikimedia.org/wiki/File:Atlantic_Ocean,_Ring_of_Kerry_(506559)_(27964189752).jpg"},
+    wiki:"https://en.wikipedia.org/wiki/Ring_of_Kerry"},
   {name:"Cork", icon:"ship", dist:"~259 km de Dublin (2h45 de carro)", attractions:"Segunda maior cidade do país, English Market, e a Pedra de Blarney nas proximidades.", hotel:"The Imperial Hotel — clássico, no centro da cidade.",
     photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d4/University_College_Cork_-_Quad_during_Eclipse_2015_%2816684104050%29.jpg/960px-University_College_Cork_-_Quad_during_Eclipse_2015_%2816684104050%29.jpg",
-    photoCredit:{name:"Darius Whelan", license:"CC BY 2.0", url:"https://commons.wikimedia.org/wiki/File:University_College_Cork_-_Quad_during_Eclipse_2015_(16684104050).jpg"}},
+    photoCredit:{name:"Darius Whelan", license:"CC BY 2.0", url:"https://commons.wikimedia.org/wiki/File:University_College_Cork_-_Quad_during_Eclipse_2015_(16684104050).jpg"},
+    wiki:"https://en.wikipedia.org/wiki/Cork_(city)"},
   {name:"Belfast &amp; Giant's Causeway", icon:"ship", dist:"~166 km de Dublin (1h30 de carro) — já na Irlanda do Norte", attractions:"Museu Titanic Belfast, Dark Hedges (cenário de Game of Thrones) e o Giant's Causeway — patrimônio da UNESCO com 40 mil colunas de basalto.", hotel:"Consulte Booking/Tripadvisor — boa oferta de hotéis no centro de Belfast.",
     photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Causeway-code_poet-4.jpg/960px-Causeway-code_poet-4.jpg",
-    photoCredit:{name:"code poet (Flickr)", license:"CC BY-SA 2.0", url:"https://commons.wikimedia.org/wiki/File:Causeway-code_poet-4.jpg"}}
+    photoCredit:{name:"code poet (Flickr)", license:"CC BY-SA 2.0", url:"https://commons.wikimedia.org/wiki/File:Causeway-code_poet-4.jpg"},
+    wiki:"https://en.wikipedia.org/wiki/Giant%27s_Causeway"}
 ];
+function openLightbox(src, captionHtml){
+  var overlay = document.getElementById("photoLightbox");
+  document.getElementById("lightboxImg").src = src;
+  document.getElementById("lightboxCaption").innerHTML = captionHtml;
+  overlay.hidden = false;
+}
+function closeLightbox(){
+  var overlay = document.getElementById("photoLightbox");
+  overlay.hidden = true;
+  document.getElementById("lightboxImg").src = "";
+}
 function renderTouristCities(){
-  document.getElementById("touristCitiesWrap").innerHTML = TOURIST_CITIES.map(function(c){
-    var photo = c.photo ? '<img class="city-card-photo" src="'+c.photo+'" alt="'+c.name.replace(/<[^>]+>/g,"")+'" loading="lazy" onerror="this.remove()">' : "";
+  document.getElementById("touristCitiesWrap").innerHTML = TOURIST_CITIES.map(function(c, i){
+    var name = c.name.replace(/<[^>]+>/g,"");
+    var photo = c.photo ? '<img class="city-card-photo" data-idx="'+i+'" src="'+c.photo+'" alt="'+name+'" loading="lazy" onerror="this.remove()">' : "";
     var credit = c.photo ? '<a class="city-card-credit" href="'+c.photoCredit.url+'" target="_blank" rel="noopener">Foto: '+c.photoCredit.name+' / Wikimedia Commons ('+c.photoCredit.license+')</a>' : "";
+    var wiki = c.wiki ? '<a class="ci-link" href="'+c.wiki+'" target="_blank" rel="noopener">Saiba mais no Wikipedia →</a>' : "";
     return '<div class="city-card">'+photo+'<div class="city-icon">'+TOUR_ICONS[c.icon]+'</div><h3>'+c.name+'</h3><div class="dist">'+c.dist+'</div>'+
       '<div class="attractions">'+c.attractions+'</div>'+
-      '<div class="hotel-pick"><b>Hotel sugerido:</b> '+c.hotel+'</div>'+credit+'</div>';
+      '<div class="hotel-pick"><b>Hotel sugerido:</b> '+c.hotel+'</div>'+
+      '<div style="margin-top:10px;">'+wiki+'</div>'+credit+'</div>';
   }).join("");
+  document.querySelectorAll("#touristCitiesWrap .city-card-photo").forEach(function(img){
+    img.addEventListener("click", function(){
+      var c = TOURIST_CITIES[img.dataset.idx];
+      var cap = c.name.replace(/<[^>]+>/g,"")+' — <a href="'+c.photoCredit.url+'" target="_blank" rel="noopener">Foto: '+c.photoCredit.name+' / Wikimedia Commons ('+c.photoCredit.license+')</a>';
+      openLightbox(c.photo, cap);
+    });
+  });
 }
 var TOURIST_BUDGET = [
   {label:"Mochilão (hostel)", value:"~€90–100/dia", note:"Cama em hostel, alimentação simples e transporte local."},
