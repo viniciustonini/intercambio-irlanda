@@ -1794,7 +1794,8 @@ var SUPERMARKETS = [
 ];
 function renderSupermarkets(){
   document.getElementById("supermarketsWrap").innerHTML = SUPERMARKETS.map(function(s){
-    return '<a class="linkcard" href="'+s.url+'" target="_blank" rel="noopener"><div class="linkcard-icon">'+LINK_ICONS.home+'</div><h4>'+s.name+'</h4><p>'+s.desc+'</p><span class="linkcard-arrow">↗</span></a>';
+    var fav = faviconUrl(s.url);
+    return '<a class="linkcard" href="'+s.url+'" target="_blank" rel="noopener"><div class="linkcard-icon">'+LINK_ICONS.home+(fav?'<img class="linkcard-favicon" src="'+fav+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div><h4>'+s.name+'</h4><p>'+s.desc+'</p><span class="linkcard-arrow">↗</span></a>';
   }).join("");
 }
 function renderMarket(){
