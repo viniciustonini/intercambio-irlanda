@@ -306,8 +306,9 @@ table td{vertical-align:middle;}
 
 .linkcard{display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;text-decoration:none;color:var(--text);position:relative;box-shadow:var(--shadow);transition:border-color .15s ease;}
 .linkcard:hover{border-color:var(--accent);}
-.linkcard-icon{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;margin-bottom:12px;color:var(--accent-strong);}
+.linkcard-icon{position:relative;width:34px;height:34px;border-radius:10px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;margin-bottom:12px;color:var(--accent-strong);}
 .linkcard-icon svg{width:18px;height:18px;}
+.linkcard-favicon{position:absolute;inset:0;margin:auto;width:20px;height:20px;object-fit:contain;border-radius:5px;background:#fff;padding:2px;}
 .linkcard h4{font-size:15px;margin:4px 0 6px;font-family:var(--font-body);font-weight:700;}
 .linkcard p{font-size:12.4px;color:var(--muted);margin:0;padding-right:16px;}
 .linkcard-arrow{position:absolute;top:20px;right:20px;color:var(--accent-strong);font-weight:700;font-size:15px;}
@@ -2063,6 +2064,10 @@ var LINKS = [
   {group:"Celular & chip", icon:"phone", label:"Vodafone Ireland", url:"https://www.vodafone.ie", desc:"Rede extensa, boa cobertura mesmo fora dos grandes centros"},
   {group:"Celular & chip", icon:"phone", label:"GoMo", url:"https://www.gomo.ie", desc:"Operadora só digital (do grupo Eir) com planos pré-pagos mais baratos"}
 ];
+function faviconUrl(url){
+  try{ return "https://www.google.com/s2/favicons?sz=64&domain="+new URL(url).hostname; }
+  catch(e){ return null; }
+}
 function renderLinks(){
   var wrap = document.getElementById("linksWrap");
   wrap.className = "grid cols-3";
@@ -2070,8 +2075,9 @@ function renderLinks(){
     var icon = LINK_ICONS[l.icon] || LINK_ICONS.users;
     var isHash = l.url === "#";
     var tag = isHash ? "div" : "a";
+    var fav = isHash ? null : faviconUrl(l.url);
     return "<"+tag+' class="linkcard"'+(isHash?"":' href="'+l.url+'" target="_blank" rel="noopener"')+'>'+
-      '<div class="linkcard-icon">'+icon+'</div>'+
+      '<div class="linkcard-icon">'+icon+(fav?'<img class="linkcard-favicon" src="'+fav+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div>'+
       '<div class="eyebrow">'+l.group+'</div>'+
       '<h4>'+l.label+'</h4><p>'+l.desc+'</p>'+
       (isHash?"":'<span class="linkcard-arrow">↗</span>')+
