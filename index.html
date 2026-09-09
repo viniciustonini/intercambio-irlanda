@@ -13,17 +13,20 @@
   --surface:#FFFFFF;
   --surface-2:#EBEEF1;
   --text:#161F2B;
-  --muted:#647082;
+  --muted:#57626F;
   --border:rgba(22,33,45,.10);
   --navy:#0F1C2B;
   --navy-2:#1C3049;
   --accent:#1B9C6B;
   --accent-strong:#0F7A51;
+  --accent-strong-2:#0B5C3B;
   --accent-soft:rgba(27,156,107,.12);
   --warn:#B54A30;
   --warn-strong:#8C3A26;
   --warn-soft:rgba(181,74,48,.10);
   --gold:#B9862E;
+  --gold-text:#7A5A12;
+  --gold-on-dark:#E6BD6E;
   --shadow:0 1px 2px rgba(16,28,43,.05), 0 14px 32px -18px rgba(16,28,43,.22);
   --radius:16px;
   --font-display:'Fraunces',Georgia,'Times New Roman',serif;
@@ -41,15 +44,16 @@ p{margin:0 0 .8em;}
 a{color:var(--accent-strong);}
 button{font-family:var(--font-body);cursor:pointer;}
 input{font-family:var(--font-body);}
-.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--accent);}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-strong);}
 .tabular{font-variant-numeric:tabular-nums;font-family:var(--font-mono);}
 ::selection{background:var(--accent-soft);}
 [hidden]{display:none!important;}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:10px;padding:12px 18px;font-size:14.5px;font-weight:600;background:var(--navy);color:#fff;width:100%;transition:background .15s ease;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:10px;padding:12px 18px;font-size:14.5px;font-weight:600;background:var(--navy);color:#fff;width:100%;transition:background .15s ease,transform .1s cubic-bezier(0.23,1,0.32,1);}
 .btn:hover{background:var(--navy-2);}
-.btn-accent{background:var(--accent);}
-.btn-accent:hover{background:var(--accent-strong);}
+.btn:active{transform:scale(.97);}
+.btn-accent{background:var(--accent-strong);}
+.btn-accent:hover{background:var(--accent-strong-2);}
 .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border);width:auto;padding:9px 15px;}
 .btn-danger{background:var(--warn);width:auto;}
 .modal-overlay{position:fixed;inset:0;background:rgba(15,28,43,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
@@ -59,10 +63,12 @@ input{font-family:var(--font-body);}
 .modal-card p{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
 .btn-ghost:hover{background:var(--surface-2);}
+.btn-ghost:active,.seg-btn:active,.subtab:active,.tab-btn:active{transform:scale(.97);}
+.btn-ghost,.seg-btn,.subtab{transition:background .15s ease,color .15s ease,border-color .15s ease,transform .1s cubic-bezier(0.23,1,0.32,1);}
 .faq-item{border-bottom:1px solid var(--border);padding:14px 0;}
 .faq-item:last-child{border-bottom:none;}
 .faq-q{display:flex;align-items:baseline;gap:9px;background:none;border:none;padding:0;text-align:left;width:100%;font-family:var(--font-body);font-weight:700;font-size:14.3px;color:var(--text);cursor:pointer;}
-.faq-caret{flex:none;color:var(--accent);font-size:11px;transition:transform .2s ease;}
+.faq-caret{flex:none;color:var(--accent-strong);font-size:11px;transition:transform .2s ease;}
 .faq-item.collapsed .faq-caret{transform:rotate(-90deg);}
 .faq-a{margin-top:8px;padding-left:20px;font-size:13.3px;color:var(--muted);}
 .faq-a p{margin:0 0 8px;}
@@ -83,17 +89,16 @@ input{font-family:var(--font-body);}
 .hero-scrim{position:absolute;inset:0;background:linear-gradient(100deg,rgba(10,16,22,.86) 18%,rgba(10,16,22,.5) 48%,rgba(10,16,22,.12) 78%);}
 .hero-topbar{position:relative;max-width:1180px;margin:0 auto 26px;display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.16);}
 .hero-topbar .avatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13.5px;flex:none;font-family:var(--font-display);}
-.hero-topbar .htb-title{font-size:11.5px;font-weight:700;letter-spacing:.07em;}
-.hero-topbar .htb-sub{font-size:11.5px;color:rgba(255,255,255,.58);margin-top:1px;}
+.hero-topbar .htb-title{font-size:12.5px;font-weight:700;letter-spacing:.06em;}
+.hero-topbar .htb-sub{font-size:12.5px;color:rgba(255,255,255,.62);margin-top:1px;}
 .htb-cotacao{margin-left:auto;flex:none;white-space:nowrap;display:flex;align-items:baseline;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:7px 14px;cursor:pointer;transition:background .15s ease;}
 .htb-cotacao:hover{background:rgba(255,255,255,.16);}
-.htb-cotacao-label{font-size:11px;color:rgba(255,255,255,.6);white-space:nowrap;}
+.htb-cotacao-label{font-size:12px;color:rgba(255,255,255,.65);white-space:nowrap;}
 .htb-cotacao-val{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;}
 @media (max-width:640px){.htb-cotacao{padding:6px 11px;}.htb-cotacao-label{display:none;}}
 .hero-inner{position:relative;max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap;}
 .hero-text{max-width:620px;padding-top:10px;}
-.hero-text .eyebrow{color:var(--accent);}
-.hero-text h1{font-size:clamp(30px,4.4vw,48px);font-weight:600;color:#fff;line-height:1.12;margin:10px 0 16px;}
+.hero-text h1{font-size:clamp(30px,4.4vw,48px);font-weight:600;color:#fff;line-height:1.12;margin:0 0 16px;}
 .hero-text p{color:rgba(255,255,255,.72);font-size:15.5px;max-width:480px;margin:0;}
 .hero-card{
   flex:none;background:var(--surface);color:var(--text);border-radius:18px;padding:22px 26px;
@@ -104,17 +109,17 @@ input{font-family:var(--font-body);}
 .hero-card .date-row{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
 .hero-card .date{font-weight:700;font-size:13.5px;}
 .hero-card .route{font-size:12px;color:var(--muted);margin-top:2px;}
-.hero-card .edit-link{font-size:11.5px;color:var(--accent-strong);font-weight:600;background:none;border:none;padding:0;}
+.hero-card .edit-link{font-size:12.5px;color:var(--accent-strong);font-weight:600;background:none;border:none;padding:0;}
 .hero-card .hero-actions{display:flex;gap:16px;margin-top:10px;}
 .hero-card .edit-link-muted{color:var(--muted);}
 .hero-card .hero-date-editor{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
-.hero-card .hero-date-editor label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:5px;}
+.hero-card .hero-date-editor label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:5px;}
 .hero-card .hero-date-editor input{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;}
 
 .tabbar-wrap{position:sticky;top:0;z-index:30;background:var(--bg);padding:14px 5vw 10px;margin-top:-30px;}
 .mini-progress{position:sticky;top:var(--tabbar-h,58px);z-index:20;background:var(--bg);padding:8px 0 12px;display:flex;align-items:center;gap:10px;}
 .mini-progress .progress-track{flex:1;height:6px;}
-.mini-progress-pct{font-family:var(--font-mono);font-size:11.5px;font-weight:600;color:var(--muted);flex:none;min-width:32px;text-align:right;}
+.mini-progress-pct{font-family:var(--font-mono);font-size:12.5px;font-weight:600;color:var(--muted);flex:none;min-width:32px;text-align:right;}
 .tabbar-outer{position:relative;max-width:1180px;margin:0 auto;}
 .tabbar{
   background:var(--surface);border-radius:999px;box-shadow:var(--shadow);
@@ -138,25 +143,25 @@ input{font-family:var(--font-body);}
 @media (max-width:640px){.tabbar-arrow{display:none;}}
 .tab-btn{
   flex:none;border:none;background:transparent;color:var(--muted);font-size:13.3px;font-weight:600;
-  padding:10px 18px;border-radius:999px;white-space:nowrap;transition:background .15s ease,color .15s ease;
+  padding:10px 18px;border-radius:999px;white-space:nowrap;transition:background .15s ease,color .15s ease,transform .1s cubic-bezier(0.23,1,0.32,1);
 }
 .tab-btn:hover{color:var(--text);}
 .tab-btn.active{background:var(--navy);color:#fff;}
-.tab-btn-alt{color:var(--gold);}
+.tab-btn-alt{color:var(--gold-text);}
 .tab-btn-alt.active{background:var(--gold);color:#231a06;}
-.eyebrow-alt{color:var(--gold)!important;}
+.eyebrow-alt{color:var(--gold-text)!important;}
 .tourism-banner{background:linear-gradient(100deg,#231a06,#3a2a0c);color:#F4E3C1;border-radius:var(--radius);padding:16px 20px;margin-bottom:24px;font-size:13px;}
-.tourism-banner b{color:var(--gold);}
+.tourism-banner b{color:var(--gold-on-dark);}
 .city-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin-bottom:16px;}
 .city-card h3{font-size:18px;margin-bottom:4px;}
-.city-card .dist{font-size:12px;color:var(--gold);font-weight:700;margin-bottom:12px;}
+.city-card .dist{font-size:12px;color:var(--gold-text);font-weight:700;margin-bottom:12px;}
 .city-card .attractions{font-size:13.3px;margin-bottom:12px;}
 .city-card .hotel-pick{background:var(--surface-2);border-radius:10px;padding:10px 14px;font-size:12.6px;}
 .city-card .hotel-pick b{color:var(--navy);}
-.city-card .city-icon{width:34px;height:34px;border-radius:10px;background:#F4E3C1;color:#7a5a12;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.city-card .city-icon{width:34px;height:34px;border-radius:10px;background:#F4E3C1;color:var(--gold-text);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
 .city-card .city-icon svg{width:18px;height:18px;}
 .exp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;}
-.exp-card .exp-icon{width:32px;height:32px;border-radius:9px;background:#F4E3C1;color:#7a5a12;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.exp-card .exp-icon{width:32px;height:32px;border-radius:9px;background:#F4E3C1;color:var(--gold-text);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
 .exp-card .exp-icon svg{width:16px;height:16px;}
 .exp-card h4{font-size:14px;margin:0 0 6px;}
 .exp-card p{font-size:12.4px;color:var(--muted);margin:0;}
@@ -192,8 +197,13 @@ input{font-family:var(--font-body);}
 
 /* stat cards */
 .stat-card{display:flex;flex-direction:column;gap:4px;}
-.stat-card .stat-val{font-family:var(--font-mono);font-size:26px;font-weight:600;color:var(--navy);}
-.stat-card .stat-sub{font-size:12px;color:var(--muted);}
+.stat-card .stat-val,.overview-progress .stat-val{font-family:var(--font-mono);font-size:26px;font-weight:600;color:var(--navy);}
+.stat-card .stat-sub,.overview-figures .stat-sub{font-size:12px;color:var(--muted);}
+.overview-summary{display:flex;align-items:center;gap:32px;flex-wrap:wrap;}
+.overview-progress{display:flex;align-items:center;gap:16px;flex:none;}
+.overview-figures{flex:1;min-width:240px;border-left:1px solid var(--border);padding-left:32px;padding-top:4px;padding-bottom:4px;}
+.overview-figures .summary-row .lbl{font-size:13.5px;color:var(--text);line-height:1.5;}
+@media (max-width:600px){.overview-figures{border-left:none;padding-left:0;}}
 .ring-row{display:flex;align-items:center;gap:16px;}
 .ring{transform:rotate(-90deg);}
 .ring-track{fill:none;stroke:var(--surface-2);stroke-width:8;}
@@ -230,8 +240,11 @@ input{font-family:var(--font-body);}
 /* checklist / timeline items (checkable) */
 .checkitem{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--border);border-radius:11px;background:var(--surface);margin-bottom:8px;cursor:pointer;}
 .checkitem:hover{border-color:var(--accent);}
-.checkitem .box{width:18px;height:18px;border-radius:6px;border:2px solid var(--border);flex:none;margin-top:2px;display:flex;align-items:center;justify-content:center;}
-.checkitem.checked .box{background:var(--accent);border-color:var(--accent);}
+.checkitem{position:relative;}
+.checkitem .box{width:18px;height:18px;border-radius:6px;border:2px solid var(--border);flex:none;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:transform .1s cubic-bezier(0.23,1,0.32,1),background .15s ease,border-color .15s ease;}
+.checkitem.checked .box{background:var(--accent-strong);border-color:var(--accent-strong);}
+.checkitem-input{position:absolute;top:12px;left:14px;width:18px;height:18px;margin:0;opacity:0;cursor:pointer;z-index:1;}
+.checkitem-input:focus-visible + .box{outline:2px solid var(--accent-strong);outline-offset:2px;}
 .checkitem.checked .box svg{display:block;}
 .checkitem .box svg{display:none;width:11px;height:11px;}
 .checkitem .ci-label{font-weight:600;font-size:13.7px;}
@@ -240,13 +253,13 @@ input{font-family:var(--font-body);}
 .checkgroup{margin-bottom:22px;}
 .checkgroup > .eyebrow{margin-bottom:10px;display:block;color:var(--muted);}
 .progress-track{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;}
-.progress-fill{height:100%;background:var(--accent);border-radius:999px;transition:width .3s ease;}
+.progress-fill{height:100%;width:100%;background:var(--accent);border-radius:999px;transform-origin:left;transition:transform .3s cubic-bezier(0.23,1,0.32,1);}
 
 /* tables */
-.tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);}
-table{width:100%;border-collapse:collapse;font-size:13.1px;min-width:640px;}
+.tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);padding:5px;}
+table{width:100%;border-collapse:collapse;font-size:13.1px;min-width:640px;border-radius:calc(var(--radius) - 5px);overflow:hidden;}
 th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
-th{font-size:10.8px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;background:var(--surface-2);}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;background:var(--surface-2);}
 tr:last-child td{border-bottom:none;}
 td.num,th.num{text-align:right;font-family:var(--font-mono);}
 @media (max-width:640px){
@@ -258,7 +271,7 @@ td.num,th.num{text-align:right;font-family:var(--font-mono);}
   .tablewrap table td{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);text-align:right;}
   .tablewrap table td:last-child{border-bottom:none;}
   .tablewrap table td:empty,.tablewrap table td[data-label=""]{padding-top:4px;}
-  .tablewrap table td::before{content:attr(data-label);font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;flex:none;margin-right:8px;text-align:left;}
+  .tablewrap table td::before{content:attr(data-label);font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;flex:none;margin-right:8px;text-align:left;}
   .tablewrap table td[data-label=""]::before{content:none;}
   .tablewrap table td input,.tablewrap table td textarea{flex:1;min-width:0;width:100%!important;text-align:right;}
   .tablewrap table td[data-label="Observação"]{align-items:flex-start;}
@@ -300,7 +313,6 @@ table td{vertical-align:middle;}
 .linkcard-arrow{position:absolute;top:20px;right:20px;color:var(--accent-strong);font-weight:700;font-size:15px;}
 
 .rules-card{background:var(--navy);color:#fff;border-radius:var(--radius);padding:24px 26px;margin-top:20px;}
-.rules-card .eyebrow{color:#6FE3AE;}
 .rules-card h3{color:#fff;margin:6px 0 14px;}
 .rules-card ul{list-style:none;margin:0;padding:0;column-count:2;column-gap:28px;}
 .rules-card li{font-size:13.1px;margin-bottom:11px;break-inside:avoid;color:rgba(255,255,255,.88);padding-left:16px;position:relative;line-height:1.45;}
@@ -328,9 +340,9 @@ table td{vertical-align:middle;}
 .linklist .lbl{font-size:13.6px;font-weight:600;}
 .linklist .desc{font-size:12px;color:var(--muted);}
 .empty{padding:30px 20px;text-align:center;color:var(--muted);font-size:13.5px;border:1px dashed var(--border);border-radius:var(--radius);}
-.callout{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 10px 10px 0;padding:14px 16px;font-size:13.3px;margin:14px 0;}
-.callout.warn{border-color:var(--warn);background:var(--warn-soft);}
-.source-note{font-size:11.6px;color:var(--muted);margin-top:6px;}
+.callout{background:var(--accent-soft);border-radius:var(--radius);padding:14px 16px;font-size:13.3px;margin:14px 0;color:var(--accent-strong-2);}
+.callout.warn{background:var(--warn-soft);color:var(--warn-strong);}
+.source-note{font-size:12.5px;color:var(--muted);margin-top:6px;}
 footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--muted);font-size:12px;}
 
 @media (max-width:620px){
@@ -359,7 +371,6 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
     </div>
     <div class="hero-inner">
       <div class="hero-text">
-        <span class="eyebrow" id="heroEyebrow">INTERCÂMBIO</span>
         <h1 id="heroHeadline">Seu caminho até a Irlanda, sem perder o próximo passo.</h1>
         <p>Documentos, dinheiro, chegada e adaptação reunidos em um painel que acompanha seu progresso.</p>
       </div>
@@ -386,19 +397,19 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
     <div class="tabbar-outer">
     <button class="tabbar-arrow left" id="tabArrowLeft" type="button" aria-label="Rolar para a esquerda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <div class="tabbar-fade left" id="tabFadeLeft"></div>
-    <nav class="tabbar" id="tabbar">
-      <button class="tab-btn" data-sec="inicio">Visão geral</button>
-      <button class="tab-btn" data-sec="perfil">Perfil &amp; cidade</button>
-      <button class="tab-btn" data-sec="imigracao">Imigração</button>
-      <button class="tab-btn" data-sec="trabalho">Trabalho &amp; estudo</button>
-      <button class="tab-btn" data-sec="financas">Finanças</button>
-      <button class="tab-btn" data-sec="acomodacao">Acomodação</button>
-      <button class="tab-btn" data-sec="mercado">Mercado</button>
-      <button class="tab-btn" data-sec="transporte">Transporte</button>
-      <button class="tab-btn" data-sec="links">Links oficiais</button>
-      <button class="tab-btn" data-sec="roteiro">Roteiro completo</button>
-      <button class="tab-btn" data-sec="grupos">Grupos</button>
-      <button class="tab-btn tab-btn-alt" data-sec="turismo">✈ Turismo (poucos dias)</button>
+    <nav class="tabbar" id="tabbar" role="tablist" aria-label="Seções do guia">
+      <button class="tab-btn" id="tab-inicio" data-sec="inicio" role="tab" aria-selected="true" aria-controls="sec-inicio">Visão geral</button>
+      <button class="tab-btn" id="tab-perfil" data-sec="perfil" role="tab" aria-selected="false" aria-controls="sec-perfil">Perfil &amp; cidade</button>
+      <button class="tab-btn" id="tab-imigracao" data-sec="imigracao" role="tab" aria-selected="false" aria-controls="sec-imigracao">Imigração</button>
+      <button class="tab-btn" id="tab-trabalho" data-sec="trabalho" role="tab" aria-selected="false" aria-controls="sec-trabalho">Trabalho &amp; estudo</button>
+      <button class="tab-btn" id="tab-financas" data-sec="financas" role="tab" aria-selected="false" aria-controls="sec-financas">Finanças</button>
+      <button class="tab-btn" id="tab-acomodacao" data-sec="acomodacao" role="tab" aria-selected="false" aria-controls="sec-acomodacao">Acomodação</button>
+      <button class="tab-btn" id="tab-mercado" data-sec="mercado" role="tab" aria-selected="false" aria-controls="sec-mercado">Mercado</button>
+      <button class="tab-btn" id="tab-transporte" data-sec="transporte" role="tab" aria-selected="false" aria-controls="sec-transporte">Transporte</button>
+      <button class="tab-btn" id="tab-links" data-sec="links" role="tab" aria-selected="false" aria-controls="sec-links">Links oficiais</button>
+      <button class="tab-btn" id="tab-roteiro" data-sec="roteiro" role="tab" aria-selected="false" aria-controls="sec-roteiro">Roteiro completo</button>
+      <button class="tab-btn" id="tab-grupos" data-sec="grupos" role="tab" aria-selected="false" aria-controls="sec-grupos">Grupos</button>
+      <button class="tab-btn tab-btn-alt" id="tab-turismo" data-sec="turismo" role="tab" aria-selected="false" aria-controls="sec-turismo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:2px;"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3.5 20.5 3 18.5 3.5 17 5l-3.5 3.5L5.3 6.7c-.4-.1-.8 0-1 .3l-.6.6c-.3.3-.2.7.1 1L8 12l-3 3H2.9l-.7.7c-.3.3-.3.7 0 1L4 18.5l1.8 1.8c.3.3.7.3 1 0l.7-.7v-2.1l3-3 4.2 4.2c.3.3.7.4 1 .1l.6-.6c.3-.2.4-.6.3-1z"/></svg>Turismo (poucos dias)</button>
     </nav>
     <div class="tabbar-fade right" id="tabFadeRight"></div>
     <button class="tabbar-arrow right" id="tabArrowRight" type="button" aria-label="Rolar para a direita"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -408,31 +419,22 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
   <main class="main">
 
     <!-- VISÃO GERAL -->
-    <section class="section" id="sec-inicio" data-sec="inicio">
-      <div class="section-head"><span class="eyebrow">Situação geral</span><h2>Preparação até o embarque</h2><p>Considera checklist, cronograma e primeiros 30 dias.</p></div>
-      <div class="grid cols-3">
-        <div class="card stat-card">
-          <div class="eyebrow" style="color:var(--muted);">Progresso geral</div>
-          <div class="ring-row">
-            <svg class="ring" width="64" height="64" viewBox="0 0 64 64">
-              <circle class="ring-track" cx="32" cy="32" r="27"/>
-              <circle class="ring-fill" id="ringFill" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"/>
-            </svg>
-            <div>
-              <div class="stat-val" id="progressPct">0%</div>
-              <div class="stat-sub" id="progressFrac">0 de 0 concluídos</div>
-            </div>
+    <section class="section" id="sec-inicio" data-sec="inicio" role="tabpanel" aria-labelledby="tab-inicio">
+      <div class="section-head"><h2>Preparação até o embarque</h2><p>Considera checklist, cronograma e primeiros 30 dias.</p></div>
+      <div class="card overview-summary">
+        <div class="overview-progress">
+          <svg class="ring" width="64" height="64" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="27"/>
+            <circle class="ring-fill" id="ringFill" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"/>
+          </svg>
+          <div>
+            <div class="stat-val" id="progressPct">0%</div>
+            <div class="stat-sub" id="progressFrac">0 de 0 concluídos</div>
           </div>
         </div>
-        <div class="card stat-card">
-          <div class="eyebrow" style="color:var(--muted);">Custo mensal-base</div>
-          <div class="stat-val" id="statBudget">€0</div>
-          <div class="stat-sub" id="statBudgetSub">Defina em Finanças</div>
-        </div>
-        <div class="card stat-card">
-          <div class="eyebrow" style="color:var(--muted);">Hospedagem inicial</div>
-          <div class="stat-val" id="statStay">—</div>
-          <div class="stat-sub" id="statStaySub">Defina em Acomodação</div>
+        <div class="overview-figures">
+          <div class="summary-row"><span class="lbl">Custo mensal-base<br><span class="stat-sub" id="statBudgetSub">Defina em Finanças</span></span><span class="val" id="statBudget">€0</span></div>
+          <div class="summary-row"><span class="lbl">Hospedagem inicial<br><span class="stat-sub" id="statStaySub">Defina em Acomodação</span></span><span class="val" id="statStay">—</span></div>
         </div>
       </div>
       <div class="profile-banner" id="profileBanner"></div>
@@ -444,8 +446,8 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
     </section>
 
     <!-- PERFIL & CIDADE -->
-    <section class="section" id="sec-perfil" data-sec="perfil">
-      <div class="section-head"><span class="eyebrow">Personalize o guia</span><h2>Seu perfil e sua cidade</h2><p>Isso ajusta o que aparece em Checklist, Imigração e Trabalho.</p></div>
+    <section class="section" id="sec-perfil" data-sec="perfil" role="tabpanel" aria-labelledby="tab-perfil">
+      <div class="section-head"><h2>Seu perfil e sua cidade</h2><p>Isso ajusta o que aparece em Checklist, Imigração e Trabalho.</p></div>
       <div class="card">
         <h3>Cidadania</h3>
         <div class="seg">
@@ -475,27 +477,26 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
         </div>
       </div>
       <div class="rules-card">
-        <span class="eyebrow">Regras e leis (válidas para toda a Irlanda)</span>
         <h3>O que não muda entre as cidades</h3>
+        <p style="color:rgba(255,255,255,.6);font-size:12.5px;margin:-8px 0 14px;">Válido para toda a Irlanda — não muda entre Dublin, Cork ou Galway.</p>
         <ul id="nationalRulesList"></ul>
       </div>
       <div class="card" style="margin-top:16px;">
-        <span class="eyebrow">Comece por aqui</span>
-        <h3 style="margin:8px 0 6px;">As decisões que organizam seu intercâmbio</h3>
-        <p class="source-note" style="margin-bottom:16px;">Use este guia como ponto de partida. Seus valores e progresso ficam neste navegador; eles não são sincronizados entre aparelhos.</p>
+        <h3>As decisões que organizam seu intercâmbio</h3>
+        <p class="source-note" style="margin-bottom:16px;">Comece por aqui. Use este guia como ponto de partida. Seus valores e progresso ficam neste navegador; eles não são sincronizados entre aparelhos.</p>
         <div id="faqStartWrap"></div>
       </div>
     </section>
 
     <!-- IMIGRAÇÃO -->
-    <section class="section" id="sec-imigracao" data-sec="imigracao">
-      <div class="section-head"><span class="eyebrow">Imigração</span><h2>Stamp 2, IRP &amp; comprovação financeira</h2><p>O que essas siglas significam e como se preparar.</p></div>
+    <section class="section" id="sec-imigracao" data-sec="imigracao" role="tabpanel" aria-labelledby="tab-imigracao">
+      <div class="section-head"><h2>Stamp 2, IRP &amp; comprovação financeira</h2><p>O que essas siglas significam e como se preparar.</p></div>
       <div id="vistosWrap"></div>
     </section>
 
     <!-- TRABALHO & ESTUDO -->
-    <section class="section" id="sec-trabalho" data-sec="trabalho">
-      <div class="section-head"><span class="eyebrow">Vida financeira &amp; estudos</span><h2>Trabalho, PPSN &amp; curso de inglês</h2><p>Como regularizar sua vida fiscal e escolher o curso certo.</p></div>
+    <section class="section" id="sec-trabalho" data-sec="trabalho" role="tabpanel" aria-labelledby="tab-trabalho">
+      <div class="section-head"><h2>Trabalho, PPSN &amp; curso de inglês</h2><p>Como regularizar sua vida fiscal e escolher o curso certo.</p></div>
       <div id="trabalhoWrap"></div>
       <h3 style="margin:26px 0 4px;font-size:18px;">Regras do curso de inglês</h3>
       <div id="cursoRegrasWrap" style="margin-top:14px;"></div>
@@ -521,8 +522,8 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
     </section>
 
     <!-- FINANÇAS -->
-    <section class="section" id="sec-financas" data-sec="financas">
-      <div class="section-head"><span class="eyebrow">Planejamento financeiro</span><h2>Orçamento mensal</h2><p>Edite os valores — o cálculo e seu progresso são salvos automaticamente.</p></div>
+    <section class="section" id="sec-financas" data-sec="financas" role="tabpanel" aria-labelledby="tab-financas">
+      <div class="section-head"><h2>Orçamento mensal</h2><p>Edite os valores — o cálculo e seu progresso são salvos automaticamente.</p></div>
       <div class="budget-grid">
         <div>
           <div class="card"><h3>Salário</h3><div id="budgetIncomeFields"></div></div>
@@ -538,8 +539,8 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
     </section>
 
     <!-- ACOMODAÇÃO -->
-    <section class="section" id="sec-acomodacao" data-sec="acomodacao">
-      <div class="section-head"><span class="eyebrow">Onde morar</span><h2>Acomodação &amp; prevenção contra golpes</h2><p></p></div>
+    <section class="section" id="sec-acomodacao" data-sec="acomodacao" role="tabpanel" aria-labelledby="tab-acomodacao">
+      <div class="section-head"><h2>Acomodação &amp; prevenção contra golpes</h2><p>Como pesquisar, reservar e evitar golpes comuns antes de chegar.</p></div>
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
           <h3 style="margin-bottom:0;">Hospedagem inicial</h3>
@@ -564,8 +565,8 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
     </section>
 
     <!-- MERCADO -->
-    <section class="section" id="sec-mercado" data-sec="mercado">
-      <div class="section-head"><span class="eyebrow">Rotina</span><h2>Mercado</h2><p>Monte sua própria lista de compras a partir de preços reais.</p></div>
+    <section class="section" id="sec-mercado" data-sec="mercado" role="tabpanel" aria-labelledby="tab-mercado">
+      <div class="section-head"><h2>Mercado</h2><p>Monte sua própria lista de compras a partir de preços reais.</p></div>
       <div class="callout warn"><strong>Valores são uma base, não 100% exatos:</strong> os preços aqui servem para ter uma noção de orçamento — mudam por loja, promoção e época. Sempre confira o preço atual antes de fechar as contas.</div>
       <h3 style="margin:0 0 10px;font-size:18px;">Principais redes de mercado na Irlanda</h3>
       <div class="grid cols-3" id="supermarketsWrap" style="margin-bottom:24px;"></div>
@@ -584,8 +585,8 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
     </section>
 
     <!-- TRANSPORTE -->
-    <section class="section" id="sec-transporte" data-sec="transporte">
-      <div class="section-head"><span class="eyebrow">Como se locomover</span><h2>Transporte</h2><p>Aplicativos essenciais e as principais rotas em cada cidade.</p></div>
+    <section class="section" id="sec-transporte" data-sec="transporte" role="tabpanel" aria-labelledby="tab-transporte">
+      <div class="section-head"><h2>Transporte</h2><p>Aplicativos essenciais e as principais rotas em cada cidade.</p></div>
       <h3 style="margin:0 0 12px;font-size:18px;">Aplicativos essenciais</h3>
       <div class="grid cols-3" id="transportAppsWrap"></div>
       <h3 style="margin:28px 0 12px;font-size:18px;">Rotas por cidade</h3>
@@ -594,15 +595,15 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
     </section>
 
     <!-- LINKS OFICIAIS -->
-    <section class="section" id="sec-links" data-sec="links">
-      <div class="section-head"><span class="eyebrow">Fontes</span><h2>Links oficiais</h2><p>Regras de imigração mudam com frequência — confirme sempre nestas fontes antes de tomar decisões importantes.</p></div>
+    <section class="section" id="sec-links" data-sec="links" role="tabpanel" aria-labelledby="tab-links">
+      <div class="section-head"><h2>Links oficiais</h2><p>Regras de imigração mudam com frequência — confirme sempre nestas fontes antes de tomar decisões importantes.</p></div>
       <div id="linksWrap"></div>
     </section>
 
     <!-- ROTEIRO COMPLETO -->
-    <section class="section" id="sec-roteiro" data-sec="roteiro">
-      <div class="section-head"><span class="eyebrow">Do planejamento à chegada</span><h2>Roteiro completo</h2><p>Marque cada etapa conforme for avançando — do checklist ao planejamento em casa até os primeiros 30 dias na Irlanda.</p></div>
-      <div class="mini-progress"><div class="progress-track"><div class="progress-fill" id="miniProgressBar" style="width:0%"></div></div><span class="mini-progress-pct tabular" id="miniProgressPct">0%</span></div>
+    <section class="section" id="sec-roteiro" data-sec="roteiro" role="tabpanel" aria-labelledby="tab-roteiro">
+      <div class="section-head"><h2>Roteiro completo</h2><p>Marque cada etapa conforme for avançando — do checklist ao planejamento em casa até os primeiros 30 dias na Irlanda.</p></div>
+      <div class="mini-progress"><div class="progress-track"><div class="progress-fill" id="miniProgressBar" style="transform:scaleX(0)"></div></div><span class="mini-progress-pct tabular" id="miniProgressPct">0%</span></div>
       <h3 style="font-size:17px;margin-bottom:12px;">Checklist final</h3>
       <div id="checklistWrap"></div>
       <h3 style="font-size:17px;margin:28px 0 12px;">Antes de embarcar (8 meses)</h3>
@@ -612,16 +613,16 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
     </section>
 
     <!-- GRUPOS -->
-    <section class="section" id="sec-grupos" data-sec="grupos">
-      <div class="section-head"><span class="eyebrow">Comunidade</span><h2>Grupos de WhatsApp &amp; Facebook</h2><p>Espaços para tirar dúvidas, achar moradia e conhecer outros brasileiros já na Irlanda.</p></div>
+    <section class="section" id="sec-grupos" data-sec="grupos" role="tabpanel" aria-labelledby="tab-grupos">
+      <div class="section-head"><h2>Grupos de WhatsApp &amp; Facebook</h2><p>Espaços para tirar dúvidas, achar moradia e conhecer outros brasileiros já na Irlanda.</p></div>
       <div class="callout warn"><strong>Cuidado com golpes:</strong> nunca transfira dinheiro para reservar um quarto sem visitar, e desconfie de "oportunidades de emprego" pedindo pagamento adiantado.</div>
       <div id="groupsWrap"></div>
     </section>
 
     <!-- TURISMO (independente do resto do guia) -->
-    <section class="section" id="sec-turismo" data-sec="turismo">
+    <section class="section" id="sec-turismo" data-sec="turismo" role="tabpanel" aria-labelledby="tab-turismo">
       <div class="tourism-banner"><b>Seção independente</b> — feita para quem vai passar só alguns dias na Irlanda como turista, sem relação com o restante do guia de intercâmbio.</div>
-      <div class="section-head"><span class="eyebrow eyebrow-alt">Viagem curta</span><h2>Turismo na Irlanda</h2><p>Roteiro, cidades, distâncias e hotéis para quem vem a passeio.</p></div>
+      <div class="section-head"><h2>Turismo na Irlanda</h2><p>Roteiro, cidades, distâncias e hotéis para quem vem a passeio (fora do fluxo principal do intercâmbio).</p></div>
 
       <div class="card">
         <h3>Antes de ir</h3>
@@ -716,6 +717,7 @@ function highlightTab(id){
   document.querySelectorAll(".tab-btn").forEach(function(b){
     var on = b.dataset.sec===id;
     b.classList.toggle("active", on);
+    b.setAttribute("aria-selected", on ? "true" : "false");
     if(on) activeBtn = b;
   });
   if(activeBtn) activeBtn.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
@@ -766,12 +768,11 @@ function animateSectionEntrance(id){
 }
 function animateHeroEntrance(){
   if(!animEnabled) return;
-  var els = [".hero-topbar", ".hero-text .eyebrow", ".hero-text h1", ".hero-text p", ".hero-card"];
+  var els = [".hero-topbar", ".hero-text h1", ".hero-text p", ".hero-card"];
   gsap.set(els, {opacity:0, y:18});
   var tl = gsap.timeline({defaults:{duration:.7, ease:"power2.out"}});
   tl.to(".hero-topbar", {opacity:1, y:0})
-    .to(".hero-text .eyebrow", {opacity:1, y:0}, "-=0.45")
-    .to(".hero-text h1", {opacity:1, y:0}, "-=0.5")
+    .to(".hero-text h1", {opacity:1, y:0}, "-=0.45")
     .to(".hero-text p", {opacity:1, y:0}, "-=0.5")
     .to(".hero-card", {opacity:1, y:0, duration:.8}, "-=0.45");
   var daysEl = document.getElementById("heroDays");
@@ -969,12 +970,15 @@ var FAQ_START = [
   {q:"Como preparar saúde e adaptação?", a:"Entenda como acionar seu seguro, quais serviços cobre e onde buscar atendimento. Organize receitas e documentação de medicamentos antes do embarque. Planeje uma rotina de sono, alimentação, convivência e contato com sua rede de apoio.", src:{label:"Serviços de saúde · HSE", url:"https://www.hse.ie"}}
 ];
 function renderFaqStart(){
-  document.getElementById("faqStartWrap").innerHTML = FAQ_START.map(function(f){
-    return '<div class="faq-item"><button class="faq-q"><span class="faq-caret">▾</span>'+f.q+'</button>'+
-      '<div class="faq-a"><p>'+f.a+'</p>'+(f.src?'<a href="'+f.src.url+'" target="_blank" rel="noopener" class="source-note">'+f.src.label+' ↗</a>':'')+'</div></div>';
+  document.getElementById("faqStartWrap").innerHTML = FAQ_START.map(function(f, i){
+    return '<div class="faq-item"><button class="faq-q" aria-expanded="true" aria-controls="faqA'+i+'"><span class="faq-caret">▾</span>'+f.q+'</button>'+
+      '<div class="faq-a" id="faqA'+i+'"><p>'+f.a+'</p>'+(f.src?'<a href="'+f.src.url+'" target="_blank" rel="noopener" class="source-note">'+f.src.label+' ↗</a>':'')+'</div></div>';
   }).join("");
   document.querySelectorAll("#faqStartWrap .faq-q").forEach(function(btn){
-    btn.addEventListener("click", function(){ btn.parentElement.classList.toggle("collapsed"); });
+    btn.addEventListener("click", function(){
+      var collapsed = btn.parentElement.classList.toggle("collapsed");
+      btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    });
   });
 }
 function renderProfileSeg(){
@@ -1024,9 +1028,10 @@ var CHECKLIST = [
   ]}
 ];
 var CHECK_ICON = '<svg viewBox="0 0 12 12" fill="none"><path d="M2 6.2 4.8 9 10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var STAR_ICON = '<svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12" style="vertical-align:-1px;"><path d="M8 1.3l1.9 4.2 4.5.5-3.4 3.1.9 4.6L8 11.4l-4 2.3.9-4.6-3.4-3.1 4.5-.5z"/></svg>';
 
 function checkItemHtml(id, label, note, checked){
-  return '<label class="checkitem'+(checked?' checked':'')+'" data-id="'+id+'"><span class="box">'+CHECK_ICON+'</span>'+
+  return '<label class="checkitem'+(checked?' checked':'')+'" data-id="'+id+'"><input type="checkbox" class="checkitem-input"'+(checked?' checked':'')+'><span class="box">'+CHECK_ICON+'</span>'+
     '<div><div class="ci-label">'+label+'</div>'+(note?'<div class="ci-note">'+note+'</div>':'')+'</div></label>';
 }
 function renderChecklist(){
@@ -1043,7 +1048,7 @@ function renderChecklist(){
   if(!p){ html = '<div class="callout" style="margin-bottom:20px;">Defina seu <a href="#perfil" onclick="location.hash=\'perfil\';showSection(\'perfil\');return false;">perfil de cidadania</a> para uma lista personalizada. Por enquanto, mostrando todos os itens.</div>' + html; }
   document.getElementById("checklistWrap").innerHTML = html;
   document.querySelectorAll("#checklistWrap .checkitem").forEach(function(el){
-    el.addEventListener("click", function(){
+    el.querySelector(".checkitem-input").addEventListener("change", function(){
       var st = ls("checklist") || {};
       st[el.dataset.id] = !st[el.dataset.id];
       ls("checklist", st);
@@ -1089,7 +1094,7 @@ var DIAS30 = [
 function timelineHtml(list, doneMap){
   return list.map(function(t){
     var done = !!doneMap[t.id];
-    return '<label class="checkitem'+(done?' checked':'')+'" data-id="'+t.id+'"><span class="box">'+CHECK_ICON+'</span>'+
+    return '<label class="checkitem'+(done?' checked':'')+'" data-id="'+t.id+'"><input type="checkbox" class="checkitem-input"'+(done?' checked':'')+'><span class="box">'+CHECK_ICON+'</span>'+
       '<div><div class="ci-label" style="text-decoration:none;">'+(done?'<span style="color:var(--muted);text-decoration:line-through;">':'')+t.title+(done?'</span>':'')+' <span style="font-weight:400;color:var(--muted);font-size:12px;">— '+t.when+'</span></div>'+
       '<div class="ci-note">'+t.detail+'</div></div></label>';
   }).join("");
@@ -1098,7 +1103,7 @@ function renderCheckableList(containerId, list, storeKey, afterFn){
   var doneMap = ls(storeKey) || {};
   document.getElementById(containerId).innerHTML = timelineHtml(list, doneMap);
   document.querySelectorAll("#"+containerId+" .checkitem").forEach(function(el){
-    el.addEventListener("click", function(){
+    el.querySelector(".checkitem-input").addEventListener("change", function(){
       var dm = ls(storeKey) || {};
       dm[el.dataset.id] = !dm[el.dataset.id];
       ls(storeKey, dm);
@@ -1124,7 +1129,7 @@ function renderOverview(){
   var circumference = 169.6;
   document.getElementById("ringFill").style.strokeDashoffset = (circumference - (pct/100)*circumference);
   var miniBar = document.getElementById("miniProgressBar"), miniPct = document.getElementById("miniProgressPct");
-  if(miniBar){ miniBar.style.width = pct+"%"; miniPct.textContent = pct+"%"; }
+  if(miniBar){ miniBar.style.transform = "scaleX("+(pct/100)+")"; miniPct.textContent = pct+"%"; }
 
   var b = getBudget();
   var totalExpenses = b.rent+b.phone+b.transport+b.groceries+b.englishCourse+b.insurance+b.gym+b.leisure+b.other;
@@ -1244,7 +1249,7 @@ function renderSchoolsTable(){
   var rows = list.map(function(s){
     return '<tr>'+
       '<td data-label="Escola"><input type="text" style="width:190px;" value="'+s.name+'" data-id="'+s.id+'" data-f="name"></td>'+
-      '<td class="num" data-label="Nota">'+(s.rating?s.rating+' ★'+(s.reviews?'<div class="source-note">'+s.reviews+' aval.</div>':""):'<span class="source-note">—</span>')+'</td>'+
+      '<td class="num" data-label="Nota">'+(s.rating?s.rating+' '+STAR_ICON+(s.reviews?'<div class="source-note">'+s.reviews+' aval.</div>':""):'<span class="source-note">—</span>')+'</td>'+
       '<td data-label="Manhã €/sem"><input type="number" step="1" style="width:62px;" value="'+(s.morning!=null?s.morning:"")+'" data-id="'+s.id+'" data-f="morning" placeholder="—"></td>'+
       '<td data-label="Tarde €/sem"><input type="number" step="1" style="width:62px;" value="'+(s.afternoon!=null?s.afternoon:"")+'" data-id="'+s.id+'" data-f="afternoon" placeholder="—"></td>'+
       '<td data-label="Noite €/sem"><input type="number" step="1" style="width:62px;" value="'+(s.evening!=null?s.evening:"")+'" data-id="'+s.id+'" data-f="evening" placeholder="—"></td>'+
@@ -1348,7 +1353,7 @@ function renderJobRoleContent(){
   }).join("");
   document.getElementById("jobRoleWrap").innerHTML =
     '<div class="callout">'+data.tips+'</div>'+
-    '<h4 style="font-size:13.5px;margin:14px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Empresas/agências que costumam contratar</h4>'+
+    '<h4 style="font-size:14.5px;font-weight:700;margin:16px 0 8px;color:var(--text);">Empresas/agências que costumam contratar</h4>'+
     (rows || '<div class="empty">Nenhuma empresa cadastrada ainda.</div>');
   document.querySelectorAll("#jobRoleWrap [data-remove]").forEach(function(btn){
     btn.addEventListener("click", function(){
@@ -1640,14 +1645,14 @@ function renderTransportRoutes(){
     '<div class="card"><h3>Bilhete</h3><p style="margin:0;">'+t.card+'</p></div>'+
     '</div>';
   if(t.airport){
-    html += '<h4 style="font-size:13.5px;margin:14px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Chegando do aeroporto</h4>'+
+    html += '<h4 style="font-size:14.5px;font-weight:700;margin:16px 0 8px;color:var(--text);">Chegando do aeroporto</h4>'+
       '<div class="card">'+t.airport.map(function(l){ return tipRow(l.name, l.detail); }).join("")+'</div>';
   }
   if(t.fares){
-    html += '<h4 style="font-size:13.5px;margin:14px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Tarifas com Leap Card</h4>'+
+    html += '<h4 style="font-size:14.5px;font-weight:700;margin:16px 0 8px;color:var(--text);">Tarifas com Leap Card</h4>'+
       '<div class="card">'+t.fares.map(function(l){ return tipRow(l.name, l.detail); }).join("")+'</div>';
   }
-  html += '<h4 style="font-size:13.5px;margin:14px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Linhas</h4>'+
+  html += '<h4 style="font-size:14.5px;font-weight:700;margin:16px 0 8px;color:var(--text);">Linhas</h4>'+
     '<div class="card">'+t.lines.map(function(l){ return tipRow(l.name, l.detail); }).join("")+'</div>';
   if(t.luasStops){
     html += '<div class="card"><h3>Estações do Luas, em ordem</h3>'+
@@ -1890,7 +1895,7 @@ function renderTaxLine(){
     '<div class="summary-row"><span class="lbl">USC</span><span class="val">€'+t.uscMonth.toFixed(2)+'</span></div>'+
     '<div class="summary-row"><span class="lbl">PRSI</span><span class="val">€'+t.prsiMonth.toFixed(2)+'</span></div>'+
     '<div class="summary-row big"><span class="lbl">Total de descontos</span><span class="val">€'+t.totalMonth.toFixed(2)+'</span></div>'+
-    '<button class="btn-ghost btn" id="taxInfoToggle" type="button" style="width:auto;padding:5px 10px;font-size:11.5px;margin-top:8px;">ⓘ Como calcula?</button>'+
+    '<button class="btn-ghost btn" id="taxInfoToggle" type="button" style="width:auto;padding:5px 10px;font-size:12.5px;margin-top:8px;gap:6px;"><svg viewBox="0 0 16 16" fill="none" width="13" height="13"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2v4.1M8 5.1v.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Como calcula?</button>'+
     '<div id="taxInfoWrap" hidden style="margin-top:8px;font-size:12.6px;color:var(--muted);">'+
     '<p style="margin:0 0 8px;"><strong>PAYE:</strong> 20% até €44.000/ano, 40% acima — menos €4.000/ano de créditos fiscais padrão (com 20h/semana no mínimo, o crédito costuma zerar o PAYE).</p>'+
     '<p style="margin:0 0 8px;"><strong>USC:</strong> isento até €13.000/ano; acima disso, 0,5% até €12.012, 2% até €28.700, 3% até €70.044, 8% acima.</p>'+
@@ -2212,7 +2217,7 @@ function renderAttrProgress(){
   var pct = total ? Math.round(visited/total*100) : 0;
   document.getElementById("attrProgressWrap").innerHTML =
     '<div style="display:flex;justify-content:space-between;font-size:12.8px;color:var(--muted);margin-bottom:8px;"><span>Irlanda explorada</span><span class="tabular">'+visited+' de '+total+' · '+pct+'%</span></div>'+
-    '<div class="progress-track"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
+    '<div class="progress-track"><div class="progress-fill" style="transform:scaleX('+(pct/100)+')"></div></div>';
 }
 function renderAttrGrid(){
   var list = attrCatView==="Todos" ? ATTRACTIONS : ATTRACTIONS.filter(function(a){ return a.cat===attrCatView; });
@@ -2220,12 +2225,12 @@ function renderAttrGrid(){
     var s = attrState(a.id);
     return '<div class="exp-card">'+
       (a.top15?'<div class="eyebrow-alt" style="margin-bottom:6px;">TOP 15</div>':'')+
-      '<h4>'+a.name+'</h4><p style="margin-bottom:4px;color:var(--gold);font-size:11.5px;font-weight:700;">'+a.region+'</p>'+
+      '<h4>'+a.name+'</h4><p style="margin-bottom:4px;color:var(--gold-text);font-size:12.5px;font-weight:700;">'+a.region+'</p>'+
       '<p>'+a.desc+'</p>'+
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">'+
-      '<button class="btn-ghost btn" data-id="'+a.id+'" data-f="want" style="width:auto;padding:6px 10px;font-size:11.5px;'+(s.want?'background:var(--accent-soft);border-color:var(--accent);':'')+'">Quero ir</button>'+
-      '<button class="btn-ghost btn" data-id="'+a.id+'" data-f="visited" style="width:auto;padding:6px 10px;font-size:11.5px;'+(s.visited?'background:var(--accent-soft);border-color:var(--accent);':'')+'">Já visitei</button>'+
-      '<button class="btn-ghost btn" data-id="'+a.id+'" data-f="fav" style="width:auto;padding:6px 10px;font-size:11.5px;'+(s.fav?'background:var(--warn-soft);border-color:var(--warn);':'')+'">★ Favorito</button>'+
+      '<button class="btn-ghost btn" data-id="'+a.id+'" data-f="want" style="width:auto;padding:6px 10px;font-size:12.5px;'+(s.want?'background:var(--accent-soft);border-color:var(--accent);':'')+'">Quero ir</button>'+
+      '<button class="btn-ghost btn" data-id="'+a.id+'" data-f="visited" style="width:auto;padding:6px 10px;font-size:12.5px;'+(s.visited?'background:var(--accent-soft);border-color:var(--accent);':'')+'">Já visitei</button>'+
+      '<button class="btn-ghost btn" data-id="'+a.id+'" data-f="fav" style="width:auto;padding:6px 10px;font-size:12.5px;'+(s.fav?'background:var(--warn-soft);border-color:var(--warn);':'')+'">'+STAR_ICON+' Favorito</button>'+
       '</div></div>';
   }).join("");
   document.querySelectorAll("#attrGridWrap [data-f]").forEach(function(btn){
