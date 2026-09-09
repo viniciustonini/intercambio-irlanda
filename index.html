@@ -269,6 +269,9 @@ input{font-family:var(--font-body);}
 
 /* tables */
 .tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);padding:5px;}
+.tablewrap-scroll{max-height:420px;overflow-y:auto;}
+.tablewrap-scroll thead th{position:sticky;top:0;z-index:1;box-shadow:0 1px 0 var(--border);}
+@media (max-width:640px){.tablewrap-scroll{max-height:60vh;}}
 table{width:100%;border-collapse:collapse;font-size:13.1px;min-width:640px;border-radius:calc(var(--radius) - 5px);overflow:hidden;}
 th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
 th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;background:var(--surface-2);}
@@ -595,7 +598,7 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
       <div class="grid cols-3" id="supermarketsWrap" style="margin-bottom:24px;"></div>
       <h3 style="margin:0 0 10px;font-size:18px;">Minha cesta de mercado</h3>
       <div class="card"><div id="marketFiltersWrap"></div></div>
-      <div class="tablewrap"><table id="marketTable"></table></div>
+      <div class="tablewrap tablewrap-scroll"><table id="marketTable"></table></div>
       <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
         <span class="eyebrow" style="margin:0;">Total da cesta</span><span class="stat-val" id="marketTotal">€0</span>
       </div>
