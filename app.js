@@ -464,12 +464,10 @@ function renderProfileBanner(){
   var html =
     'Perfil: <b>'+(p==="eu"?"cidadão UE": p==="non-eu"?"não-UE":"não definido")+'</b> · Cidade: <b>'+(cname||"não definida")+'</b>'+
     '<button class="btn btn-ghost profile-banner-edit" style="padding:7px 14px;font-size:12.5px;" type="button">Editar perfil</button>';
-  ["profileBanner","profileBannerPerfil"].forEach(function(id){
-    var el = document.getElementById(id);
-    if(!el) return;
-    el.innerHTML = html;
-    el.querySelector(".profile-banner-edit").addEventListener("click", openOnboarding);
-  });
+  var el = document.getElementById("profileBanner");
+  if(!el) return;
+  el.innerHTML = html;
+  el.querySelector(".profile-banner-edit").addEventListener("click", openOnboarding);
 }
 
 /* ---------- onboarding ---------- */
@@ -602,7 +600,7 @@ function renderChecklist(){
     g.items.forEach(function(it){ html += checkItemHtml(it.id, it.label, it.note, !!state[it.id]); });
     html += '</div>';
   });
-  if(!p){ html = '<div class="callout" style="margin-bottom:20px;">Defina seu <a href="#perfil" onclick="location.hash=\'perfil\';showSection(\'perfil\');return false;">perfil de cidadania</a> para uma lista personalizada. Por enquanto, mostrando todos os itens.</div>' + html; }
+  if(!p){ html = '<div class="callout" style="margin-bottom:20px;">Defina seu <a href="#inicio" onclick="location.hash=\'inicio\';showSection(\'inicio\');return false;">perfil de cidadania</a> para uma lista personalizada. Por enquanto, mostrando todos os itens.</div>' + html; }
   document.getElementById("checklistWrap").innerHTML = html;
   document.querySelectorAll("#checklistWrap .checkitem").forEach(function(el){
     el.querySelector(".checkitem-input").addEventListener("change", function(){
@@ -628,7 +626,7 @@ function checklistCounts(){
 var CRONOGRAMA = [
   {id:"c1", when:"Mês 1–2", title:"Documentos pessoais", detail:"Passaporte, identidade, cópias digitais e, se aplicável, documentos de cidadania.", link:{sec:"imigracao", label:"Ver Imigração"}},
   {id:"c2", when:"Mês 2", title:"Financeiro", detail:"Defina orçamento, comece a poupar em euros e trace a meta de reserva até a viagem.", link:{sec:"financas", label:"Ver Finanças"}},
-  {id:"c3", when:"Mês 3", title:"Escolha da cidade e da escola", detail:"Compare Dublin, Cork e Galway; pesquise escolas de inglês credenciadas.", link:{sec:"perfil", label:"Ver Perfil & cidade"}},
+  {id:"c3", when:"Mês 3", title:"Escolha da cidade e da escola", detail:"Compare Dublin, Cork e Galway; pesquise escolas de inglês credenciadas.", link:{sec:"inicio", label:"Ver perfil e cidade"}},
   {id:"c4", when:"Mês 4", title:"Visto (se não-UE)", detail:"Carta de aceite, comprovação financeira, seguro-saúde e agendamento do visto.", link:{sec:"imigracao", label:"Ver Imigração"}},
   {id:"c5", when:"Mês 5", title:"Inglês prático", detail:"Treine vocabulário de aeroporto, aluguel, trabalho e entrevistas.", link:{sec:"trabalho", label:"Ver Trabalho & estudo"}},
   {id:"c6", when:"Mês 6", title:"Saúde &amp; seguro", detail:"Compare seguros de viagem/saúde e confirme cobertura para todo o período.", link:{sec:"imigracao", label:"Ver Imigração"}},
@@ -766,8 +764,8 @@ function renderContinueCard(){
   var el = document.getElementById("continueWrap");
   if(!el) return;
   var last = ls("lastSection");
-  var labels = {perfil:"Perfil & cidade", roteiro:"Meu Plano", imigracao:"Imigração", financas:"Finanças",
-    trabalho:"Trabalho & estudo", acomodacao:"Acomodação", mercado:"Mercado", transporte:"Transporte",
+  var labels = {roteiro:"Meu Plano", imigracao:"Imigração", financas:"Finanças",
+    trabalho:"Trabalho & estudo", ingles:"Inglês", acomodacao:"Acomodação", mercado:"Mercado", transporte:"Transporte",
     links:"Links oficiais", grupos:"Grupos", turismo:"Turismo"};
   if(!last || !labels[last]){ el.hidden = true; el.innerHTML=""; return; }
   el.hidden = false;

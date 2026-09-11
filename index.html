@@ -58,7 +58,6 @@
     <div class="tabbar-fade left" id="tabFadeLeft"></div>
     <nav class="tabbar" id="tabbar" role="tablist" aria-label="Seções do guia">
       <button class="tab-btn" id="tab-inicio" data-sec="inicio" role="tab" aria-selected="true" aria-controls="sec-inicio">Início</button>
-      <button class="tab-btn" id="tab-perfil" data-sec="perfil" role="tab" aria-selected="false" aria-controls="sec-perfil">Perfil &amp; cidade</button>
       <button class="tab-btn" id="tab-roteiro" data-sec="roteiro" role="tab" aria-selected="false" aria-controls="sec-roteiro">Meu Plano</button>
       <button class="tab-btn" id="tab-imigracao" data-sec="imigracao" role="tab" aria-selected="false" aria-controls="sec-imigracao">Imigração</button>
       <button class="tab-btn" id="tab-financas" data-sec="financas" role="tab" aria-selected="false" aria-controls="sec-financas">Finanças</button>
@@ -106,16 +105,9 @@
       </div>
       <div class="card" id="nextStepWrap" style="margin-top:16px;"></div>
       <div class="profile-banner" id="profileBanner"></div>
-      <div class="card">
-        <h3>Cronograma sugerido</h3>
-        <p class="source-note" style="margin-bottom:16px;">Um roteiro de referência de 8 meses antes do embarque. Veja a seção Cronograma para marcar cada etapa.</p>
-        <div id="miniTimeline"></div>
-      </div>
-    </section>
 
-    <!-- PERFIL & CIDADE -->
-    <section class="section" id="sec-perfil" data-sec="perfil" role="tabpanel" aria-labelledby="tab-perfil">
-      <div class="section-head"><h2>Seu perfil e sua cidade</h2><p>Isso ajusta o que aparece em Checklist, Imigração e Trabalho.</p></div>
+      <h3 style="margin:28px 0 4px;font-size:18px;">Seu perfil e sua cidade</h3>
+      <p class="source-note" style="margin-bottom:14px;">Isso ajusta o que aparece em Checklist, Imigração e Trabalho.</p>
       <div class="card">
         <h3>Cidadania</h3>
         <div class="seg">
@@ -123,7 +115,6 @@
           <button class="seg-btn" id="pickNONEU"><h4>🌎 Não sou cidadão europeu</h4><p>Rota de visto de estudante: curso credenciado, Stamp 2, IRP, comprovação financeira e limite de horas.</p></button>
         </div>
       </div>
-      <div class="profile-banner" id="profileBannerPerfil"></div>
       <div class="card">
         <h3>País e cidade</h3>
         <p class="source-note" style="margin-bottom:14px;">País: <strong style="color:var(--text);">Irlanda</strong>. Escolha a cidade para ver os pontos fortes e fracos.</p>
@@ -154,6 +145,12 @@
         <h3>As decisões que organizam seu intercâmbio</h3>
         <p class="source-note" style="margin-bottom:16px;">Comece por aqui. Use este guia como ponto de partida. Seus valores e progresso ficam neste navegador; eles não são sincronizados entre aparelhos.</p>
         <div id="faqStartWrap"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h3>Cronograma sugerido</h3>
+        <p class="source-note" style="margin-bottom:16px;">Um roteiro de referência de 8 meses antes do embarque. Veja a seção Cronograma para marcar cada etapa.</p>
+        <div id="miniTimeline"></div>
       </div>
     </section>
 
