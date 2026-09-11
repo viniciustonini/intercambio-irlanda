@@ -1946,22 +1946,41 @@ var TRANSPORT_ROUTES = {
     mapQuery:"Cork, Ireland",
     network:"Rede de ônibus urbanos (Bus Éireann) — Cork não tem Luas nem DART.",
     card:"Leap Card também funciona nos ônibus de Cork.",
+    airport:[
+      {name:"Bus Éireann — Cork Airport ↔ centro (Kent Station)", detail:"Rota regular ligando o aeroporto ao centro de Cork e à estação de trem (Kent Station). Aceita Leap Card — confirme o número da linha e a tarifa vigente no site oficial antes de embarcar."},
+      {name:"Táxi / FreeNow", detail:"Mais caro, mas direto — útil se chegar de madrugada ou com muita bagagem."}
+    ],
     lines:[
       {name:"Kent Station", detail:"Estação central de trem — conecta Cork a Dublin Heuston (Irish Rail, intercidade)."},
       {name:"Rota 205 / 219", detail:"MTU ↔ Kent Station / Mahon Point — liga universidade, centro e shopping."},
       {name:"Rota 208", detail:"Ashmount ↔ Curraheen."},
       {name:"Rota 202 / 212", detail:"Hollyhill/Kent Station ↔ Mahon Point."}
+    ],
+    officialLinks:[
+      {name:"Bus Éireann", url:"https://www.buseireann.ie/"},
+      {name:"Cork Airport", url:"https://www.corkairport.com/"},
+      {name:"Irish Rail (Kent Station)", url:"https://www.irishrail.ie/"},
+      {name:"Leap Card", url:"https://www.leapcard.ie/"}
     ]
   },
   galway: {
     mapQuery:"Galway, Ireland",
     network:"Ônibus urbanos operados por Bus Éireann e City Direct — Galway também não tem Luas nem DART.",
     card:"Leap Card funciona nos ônibus de Galway; a maioria das rotas parte do Eyre Square (centro).",
+    airport:[
+      {name:"Sem aeroporto comercial regular", detail:"O Galway Airport não opera voos comerciais regulares atualmente. A maioria de quem chega de avião desembarca em Dublin (depois ônibus/trem até Galway, ~2h30) ou em Shannon (mais próximo, também via ônibus)."}
+    ],
     lines:[
       {name:"Ceannt Station", detail:"Estação central de trem — conecta Galway a Dublin Heuston (Irish Rail, intercidade)."},
       {name:"Rota 401", detail:"Salthill via centro — liga a orla de Salthill ao Eyre Square."},
       {name:"Rota 404", detail:"Oranmore ↔ Westside."},
       {name:"City Direct 410–412", detail:"Rotas complementares operadas por empresa privada."}
+    ],
+    officialLinks:[
+      {name:"Bus Éireann", url:"https://www.buseireann.ie/"},
+      {name:"City Direct", url:"https://citydirect.ie/"},
+      {name:"Irish Rail (Ceannt Station)", url:"https://www.irishrail.ie/"},
+      {name:"Leap Card", url:"https://www.leapcard.ie/"}
     ]
   }
 };
@@ -2078,7 +2097,7 @@ function getMarketCart(){
   return seeded;
 }
 function saveMarketCart(c){ ls("marketCart", c); }
-var marketFilter = {q:"", cat:""};
+var marketFilter = {q:"", cat:"", store:""};
 var SUPERMARKETS = [
   {name:"Lidl", url:"https://www.lidl.ie", desc:"Rede alemã de desconto — geralmente a opção mais barata para o básico. Boa parte desta lista de preços vem de lá."},
   {name:"Aldi", url:"https://www.aldi.ie", desc:"Concorrente direto da Lidl, também alemã e focada em preço baixo — vale comparar as duas perto de casa."},
@@ -2094,11 +2113,13 @@ function renderSupermarkets(){
     return '<a class="linkcard" href="'+s.url+'" target="_blank" rel="noopener"><div class="linkcard-icon">'+LINK_ICONS.home+(fav?'<img class="linkcard-favicon" src="'+fav+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div><h4>'+s.name+'</h4><p>'+s.desc+'</p><span class="linkcard-arrow">↗</span></a>';
   }).join("");
 }
+var MARKET_STORES = ["","Lidl","Aldi","Tesco","SuperValu","Dunnes Stores","Centra","Spar","Outro"];
 function renderMarket(){
   renderSupermarkets();
   renderMarketFilters();
   renderMarketTable();
   renderMarketAddForm();
+  renderMarketCompare();
 }
 function renderMarketFilters(){
   var cart = getMarketCart();
@@ -2107,24 +2128,28 @@ function renderMarketFilters(){
     '<div class="mini-form-grid" style="margin-bottom:0;">'+
     '<div><label>Buscar item</label><input type="text" id="marketSearch" placeholder="Ex.: frango, arroz, limpeza..."></div>'+
     '<div><label>Categoria</label><select id="marketCatFilter"><option value="">Todas as categorias</option>'+cats.map(function(c){ return '<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>'; }).join("")+'</select></div>'+
+    '<div><label>Loja</label><select id="marketStoreFilter"><option value="">Todas as lojas</option>'+MARKET_STORES.filter(function(s){return s;}).map(function(s){ return '<option value="'+s+'">'+s+'</option>'; }).join("")+'</select></div>'+
     '</div>';
   document.getElementById("marketSearch").addEventListener("input", function(e){ marketFilter.q = e.target.value.toLowerCase(); applyMarketFilter(); });
   document.getElementById("marketCatFilter").addEventListener("change", function(e){ marketFilter.cat = e.target.value; applyMarketFilter(); });
+  document.getElementById("marketStoreFilter").addEventListener("change", function(e){ marketFilter.store = e.target.value; applyMarketFilter(); });
 }
 function applyMarketFilter(){
   document.querySelectorAll("#marketTable tbody tr").forEach(function(tr){
     var okQ = !marketFilter.q || tr.dataset.item.indexOf(marketFilter.q) !== -1;
     var okCat = !marketFilter.cat || tr.dataset.cat === marketFilter.cat;
-    tr.style.display = (okQ && okCat) ? "" : "none";
+    var okStore = !marketFilter.store || tr.dataset.store === marketFilter.store;
+    tr.style.display = (okQ && okCat && okStore) ? "" : "none";
   });
 }
 function renderMarketTable(){
   var cart = getMarketCart();
   var rows = cart.map(function(it){
-    return '<tr data-item="'+escapeHtml(it.item.toLowerCase())+'" data-cat="'+escapeHtml(it.cat)+'">'+
+    return '<tr data-item="'+escapeHtml(it.item.toLowerCase())+'" data-cat="'+escapeHtml(it.cat)+'" data-store="'+escapeHtml(it.store||"")+'">'+
       '<td data-label="Categoria"><input type="text" style="width:120px;" value="'+escapeHtml(it.cat)+'" data-id="'+it.id+'" data-f="cat"></td>'+
       '<td data-label="Item"><input type="text" style="width:190px;" value="'+escapeHtml(it.item)+'" data-id="'+it.id+'" data-f="item"></td>'+
       '<td data-label="Embalagem"><input type="text" style="width:140px;" value="'+escapeHtml(it.pkg)+'" data-id="'+it.id+'" data-f="pkg"></td>'+
+      '<td data-label="Loja"><select data-id="'+it.id+'" data-f="store">'+MARKET_STORES.map(function(s){ return '<option value="'+s+'"'+((it.store||"")===s?" selected":"")+'>'+(s||"—")+'</option>'; }).join("")+'</select></td>'+
       '<td data-label="Qtd."><input type="number" step="1" style="width:55px;" value="'+it.qty+'" data-id="'+it.id+'" data-f="qty"></td>'+
       '<td data-label="Preço unit. (€)"><input type="number" step="0.01" style="width:75px;" value="'+it.price+'" data-id="'+it.id+'" data-f="price"></td>'+
       '<td class="num tabular" data-label="Subtotal" id="sub-'+it.id+'">€'+(it.qty*it.price).toFixed(2)+'</td>'+
@@ -2132,9 +2157,10 @@ function renderMarketTable(){
       '</tr>';
   }).join("");
   document.getElementById("marketTable").innerHTML =
-    '<thead><tr><th>Categoria</th><th>Item</th><th>Embalagem</th><th class="num">Qtd.</th><th class="num">Preço unit. (€)</th><th class="num">Subtotal</th><th></th></tr></thead><tbody>'+rows+'</tbody>';
-  document.querySelectorAll("#marketTable input").forEach(function(inp){
-    inp.addEventListener("input", function(){
+    '<thead><tr><th>Categoria</th><th>Item</th><th>Embalagem</th><th>Loja</th><th class="num">Qtd.</th><th class="num">Preço unit. (€)</th><th class="num">Subtotal</th><th></th></tr></thead><tbody>'+rows+'</tbody>';
+  document.querySelectorAll("#marketTable input, #marketTable select").forEach(function(inp){
+    var evt = inp.tagName==="SELECT" ? "change" : "input";
+    inp.addEventListener(evt, function(){
       var cart2 = getMarketCart();
       var row = cart2.find(function(r){ return r.id===inp.dataset.id; });
       if(!row) return;
@@ -2144,10 +2170,12 @@ function renderMarketTable(){
       var tr = inp.closest("tr");
       if(f==="item") tr.dataset.item = inp.value.toLowerCase();
       if(f==="cat") tr.dataset.cat = inp.value;
+      if(f==="store") tr.dataset.store = inp.value;
       if(f==="qty" || f==="price"){
         document.getElementById("sub-"+row.id).textContent = "€"+(row.qty*row.price).toFixed(2);
         updateMarketTotal();
       }
+      if(f==="store" || f==="item") renderMarketCompare();
     });
   });
   document.querySelectorAll("#marketTable [data-remove]").forEach(function(btn){
@@ -2157,6 +2185,32 @@ function renderMarketTable(){
     });
   });
   updateMarketTotal();
+}
+function renderMarketCompare(){
+  var wrap = document.getElementById("marketCompareWrap");
+  if(!wrap) return;
+  var cart = getMarketCart().filter(function(it){ return it.store; });
+  var byItem = {};
+  cart.forEach(function(it){
+    var key = it.item.trim().toLowerCase();
+    if(!key) return;
+    (byItem[key] = byItem[key] || []).push(it);
+  });
+  var withMultiple = Object.keys(byItem).filter(function(k){ return byItem[k].length > 1; });
+  if(!withMultiple.length){
+    wrap.innerHTML = '<div class="empty">Marque a loja de dois ou mais itens com o mesmo nome para ver a comparação aqui.</div>';
+    return;
+  }
+  wrap.innerHTML = withMultiple.map(function(k){
+    var items = byItem[k].slice().sort(function(a,b){ return a.price-b.price; });
+    var cheapest = items[0];
+    return '<div class="card" style="margin-bottom:10px;"><h3 style="font-size:15px;">'+escapeHtml(items[0].item)+'</h3>'+
+      items.map(function(it){
+        return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;'+(it.id===cheapest.id?"color:var(--accent-strong);font-weight:700;":"")+'">'+
+          '<span>'+escapeHtml(it.store)+(it.id===cheapest.id?' · mais barata':'')+'</span><span class="tabular">€'+it.price.toFixed(2)+'</span></div>';
+      }).join("")+
+    '</div>';
+  }).join("");
 }
 function updateMarketTotal(){
   var total = getMarketCart().reduce(function(s,it){ return s+it.qty*it.price; }, 0);
@@ -2169,6 +2223,7 @@ function renderMarketAddForm(){
     '<div><label>Categoria</label><input id="newCat" type="text" placeholder="Ex.: Bebidas"></div>'+
     '<div><label>Item</label><input id="newItem" type="text"></div>'+
     '<div><label>Embalagem</label><input id="newPkg" type="text" placeholder="Ex.: 1 kg"></div>'+
+    '<div><label>Loja</label><select id="newStore">'+MARKET_STORES.map(function(s){ return '<option value="'+s+'">'+(s||"—")+'</option>'; }).join("")+'</select></div>'+
     '<div><label>Quantidade</label><input id="newQty" type="number" value="1"></div>'+
     '<div><label>Preço unitário (€)</label><input id="newPrice" type="number" step="0.01"></div>'+
     '</div>'+
@@ -2177,7 +2232,7 @@ function renderMarketAddForm(){
     var item = document.getElementById("newItem").value.trim();
     if(!item) return;
     var cart = getMarketCart();
-    cart.push({id:"m"+Date.now(), cat:document.getElementById("newCat").value.trim()||"Outros", item:item, pkg:document.getElementById("newPkg").value.trim(), qty:parseInt(document.getElementById("newQty").value)||1, price:parseFloat(document.getElementById("newPrice").value)||0});
+    cart.push({id:"m"+Date.now(), cat:document.getElementById("newCat").value.trim()||"Outros", item:item, pkg:document.getElementById("newPkg").value.trim(), store:document.getElementById("newStore").value, qty:parseInt(document.getElementById("newQty").value)||1, price:parseFloat(document.getElementById("newPrice").value)||0});
     saveMarketCart(cart);
     renderMarket();
   });
@@ -2689,7 +2744,7 @@ function renderAttrGrid(){
       var s = attrState(btn.dataset.id);
       var patch = {}; patch[btn.dataset.f] = !s[btn.dataset.f];
       setAttrState(btn.dataset.id, patch);
-      renderAttrGrid(); renderAttrProgress();
+      renderAttrGrid(); renderAttrProgress(); renderMyItinerary();
     });
   });
 }
@@ -2713,6 +2768,43 @@ function renderItinerary(){
   var list = ITINERARIES[itineraryView];
   document.getElementById("itineraryWrap").innerHTML = list.map(function(d){ return tipRow(d.d, d.t); }).join("")+
     '<p class="source-note" style="margin-top:10px;">Roteiro de referência — ajuste conforme seu ritmo, clima e se vai de carro ou transporte público.</p>';
+}
+function renderMyItinerary(){
+  var wrap = document.getElementById("myItineraryWrap");
+  if(!wrap) return;
+  var wanted = ATTRACTIONS.filter(function(a){ return attrState(a.id).want; });
+  if(!wanted.length){
+    wrap.innerHTML = '<div class="empty">Nenhuma atração marcada como "Quero ir" ainda — volte à grade acima e escolha algumas.</div>';
+    return;
+  }
+  var rows = wanted.map(function(a){
+    var day = attrState(a.id).day || "";
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">'+
+      '<input type="number" min="1" placeholder="Dia" value="'+day+'" data-day-id="'+a.id+'" style="width:56px;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">'+
+      '<div style="flex:1;"><b style="font-size:13.5px;">'+a.name+'</b><span style="color:var(--muted);font-size:12px;margin-left:6px;">'+a.region+'</span></div>'+
+      '</div>';
+  }).join("");
+  var grouped = {};
+  var noDay = [];
+  wanted.forEach(function(a){
+    var day = attrState(a.id).day;
+    if(day){ (grouped[day] = grouped[day] || []).push(a.name); }
+    else noDay.push(a.name);
+  });
+  var days = Object.keys(grouped).map(Number).sort(function(a,b){ return a-b; });
+  var summary = days.map(function(d){ return tipRow("Dia "+d, grouped[d].join(", ")); }).join("")+
+    (noDay.length ? tipRow("Sem dia definido", noDay.join(", ")) : "");
+  wrap.innerHTML =
+    '<div class="card" style="margin-bottom:14px;">'+
+    '<h3 style="font-size:15px;">Atribuir dias</h3>'+rows+
+    '</div>'+
+    '<div class="card"><h3 style="font-size:15px;">Resumo do seu roteiro</h3>'+(summary||'<div class="empty">Defina um dia para cada atração acima.</div>')+'</div>';
+  document.querySelectorAll("#myItineraryWrap [data-day-id]").forEach(function(inp){
+    inp.addEventListener("change", function(){
+      setAttrState(inp.dataset.dayId, {day: parseInt(inp.value)||null});
+      renderMyItinerary();
+    });
+  });
 }
 var MISTAKES = [
   "Tentar conhecer toda a Irlanda em poucos dias.",
@@ -2758,7 +2850,7 @@ function init(){
   renderEnglish();
   renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences();
   renderAttrCatTabs(); renderAttrGrid(); renderAttrProgress();
-  renderItineraryTabs(); renderItinerary(); renderMistakes();
+  renderItineraryTabs(); renderItinerary(); renderMyItinerary(); renderMistakes();
   renderMoradia();
   renderScamChecklist();
   renderTransportApps(); renderTransportCityTabs(); renderTransportRoutes();
