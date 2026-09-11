@@ -7,6 +7,28 @@ function ls(key, val){
 /* Escapa texto vindo do usuario antes de inserir em HTML/atributos — evita XSS
    armazenado quando esse texto (item de mercado, escola, acomodacao etc.) e
    depois re-renderizado via innerHTML. */
+/* ---------- fontes/regras com data de verificacao (base pra "OfficialSource") ---------- */
+var STALE_DAYS = 180; /* depois disso, sugerimos revisar a informacao */
+function daysSince(dateStr){
+  var d = new Date(dateStr+"T00:00:00");
+  if(isNaN(d.getTime())) return null;
+  return Math.floor((Date.now()-d.getTime())/86400000);
+}
+function oldestVerifiedAt(rules){
+  return rules.map(function(r){ return r.verifiedAt; }).sort()[0];
+}
+function formatDateBR(dateStr){
+  var p = dateStr.split("-");
+  return p.length===3 ? p[2]+"/"+p[1]+"/"+p[0] : dateStr;
+}
+function sourceVerifiedNote(verifiedAt){
+  if(!verifiedAt) return "";
+  var days = daysSince(verifiedAt);
+  var stale = days!=null && days > STALE_DAYS;
+  return '<p class="source-note" style="margin-top:4px;'+(stale?"color:var(--warn-strong);":"")+'">'+
+    (stale?"⚠ Pode estar desatualizado — ":"")+"Verificado em "+formatDateBR(verifiedAt)+(stale?". Confira a fonte oficial antes de decidir.":".")+
+    "</p>";
+}
 function escapeHtml(str){
   return String(str==null?"":str)
     .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
@@ -756,7 +778,7 @@ function renderOverview(){
   if(miniBar){ miniBar.style.transform = "scaleX("+(pct/100)+")"; miniPct.textContent = pct+"%"; }
 
   var b = getBudget();
-  var totalExpenses = b.rent+b.phone+b.transport+b.groceries+b.englishCourse+b.insurance+b.gym+b.leisure+b.other;
+  var totalExpenses = sumExpenses(b);
   document.getElementById("statBudget").textContent = "€"+totalExpenses.toFixed(0);
   document.getElementById("statBudgetSub").textContent = "Quarto €"+b.rent+" · transporte €"+b.transport+" · mercado €"+b.groceries;
 
@@ -1482,28 +1504,53 @@ function renderMoneyTips(){
 }
 
 /* ---------- orçamento ---------- */
-var BUDGET_DEFAULTS = {wage:14.15, hoursWeek:20, weeksMonth:4.33, rent:900, phone:20, transport:80, groceries:200, englishCourse:0, insurance:0, gym:0, leisure:0, other:0};
+var BUDGET_DEFAULTS = {wage:14.15, hoursWeek:20, weeksMonth:4.33, rent:900, phone:20, internet:0, transport:80, groceries:200, englishCourse:0, insurance:0, gym:0, leisure:0, other:0};
+var EXPENSE_KEYS = ["rent","phone","internet","transport","groceries","englishCourse","insurance","gym","leisure","other"];
 function getBudget(){ return Object.assign({}, BUDGET_DEFAULTS, ls("budget")||{}); }
+function sumExpenses(b){ return EXPENSE_KEYS.reduce(function(sum,k){ return sum+(b[k]||0); }, 0); }
 function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderTaxLine(); renderOverview(); }
-/* Estimativa de PAYE + USC + PRSI para 2026 (pessoa solteira, PAYE, sem filhos/outra renda,
-   créditos fiscais padrão) — aproximação para planejamento, não substitui o Revenue.
-   Baseado sempre em 52 semanas/ano (padrão fiscal), independente do campo "Semanas por mês". */
+/* Regras fiscais irlandesas usadas na estimativa de PAYE + USC + PRSI.
+   Estrutura pensada pra ser facil de atualizar ano a ano sem mexer na
+   formula de calculo — so trocar os valores/fontes/datas aqui. */
+var TAX_CONFIG_2026 = {
+  year: 2026,
+  paye: {
+    cutoffYear: 44000, creditYear: 4000, rateLow: 0.20, rateHigh: 0.40,
+    source: "Revenue — Calculating your Income Tax", sourceUrl: "https://www.revenue.ie/en/jobs-and-pensions/calculating-your-income-tax/index.aspx",
+    verifiedAt: "2026-09-08"
+  },
+  usc: {
+    exemptYear: 13000, band1: 12012, band2: 28700, band3: 70044,
+    rate1: 0.005, rate2: 0.02, rate3: 0.03, rate4: 0.08,
+    source: "Revenue — USC", sourceUrl: "https://www.revenue.ie/en/jobs-and-pensions/usc/index.aspx",
+    verifiedAt: "2026-09-08"
+  },
+  prsi: {
+    exemptWeek: 352, rateBefore: 0.042, rateAfter: 0.0435, rateChangeDate: "2026-10-01",
+    source: "gov.ie — PRSI Class A rates", sourceUrl: "https://www.gov.ie/en/department-of-social-protection/publications/prsi-class-a-rates/",
+    verifiedAt: "2026-09-08"
+  }
+};
+/* Estimativa de PAYE + USC + PRSI (pessoa solteira, PAYE, sem filhos/outra
+   renda, creditos fiscais padrao) — aproximacao para planejamento, nao
+   substitui o Revenue. Baseado sempre em 52 semanas/ano (padrao fiscal),
+   independente do campo "Semanas por mes". */
 function calcIrishTax(wage, hoursWeek){
+  var cfg = TAX_CONFIG_2026;
   var grossWeek = wage*hoursWeek;
   var grossYear = grossWeek*52;
-  var cutoff = 44000, creditYear = 4000;
-  var payeBeforeCredit = grossYear<=cutoff ? grossYear*0.20 : cutoff*0.20 + (grossYear-cutoff)*0.40;
-  var payeYear = Math.max(0, payeBeforeCredit - creditYear);
+  var payeBeforeCredit = grossYear<=cfg.paye.cutoffYear ? grossYear*cfg.paye.rateLow : cfg.paye.cutoffYear*cfg.paye.rateLow + (grossYear-cfg.paye.cutoffYear)*cfg.paye.rateHigh;
+  var payeYear = Math.max(0, payeBeforeCredit - cfg.paye.creditYear);
   var uscYear = 0;
-  if(grossYear > 13000){
-    var b1 = Math.min(grossYear, 12012)*0.005;
-    var b2 = Math.max(0, Math.min(grossYear,28700)-12012)*0.02;
-    var b3 = Math.max(0, Math.min(grossYear,70044)-28700)*0.03;
-    var b4 = Math.max(0, grossYear-70044)*0.08;
+  if(grossYear > cfg.usc.exemptYear){
+    var b1 = Math.min(grossYear, cfg.usc.band1)*cfg.usc.rate1;
+    var b2 = Math.max(0, Math.min(grossYear,cfg.usc.band2)-cfg.usc.band1)*cfg.usc.rate2;
+    var b3 = Math.max(0, Math.min(grossYear,cfg.usc.band3)-cfg.usc.band2)*cfg.usc.rate3;
+    var b4 = Math.max(0, grossYear-cfg.usc.band3)*cfg.usc.rate4;
     uscYear = b1+b2+b3+b4;
   }
-  var prsiRate = new Date() >= new Date("2026-10-01T00:00:00") ? 0.0435 : 0.042;
-  var prsiYear = (grossWeek > 352 ? grossWeek*prsiRate : 0)*52;
+  var prsiRate = new Date() >= new Date(cfg.prsi.rateChangeDate+"T00:00:00") ? cfg.prsi.rateAfter : cfg.prsi.rateBefore;
+  var prsiYear = (grossWeek > cfg.prsi.exemptWeek ? grossWeek*prsiRate : 0)*52;
   var totalYear = payeYear+uscYear+prsiYear;
   return {
     grossWeek:grossWeek, grossYear:grossYear,
@@ -1526,7 +1573,8 @@ function renderTaxLine(){
     '<p style="margin:0 0 8px;"><strong>USC:</strong> isento até €13.000/ano; acima disso, 0,5% até €12.012, 2% até €28.700, 3% até €70.044, 8% acima.</p>'+
     '<p style="margin:0;"><strong>PRSI (Classe A):</strong> isento até €352/semana; acima disso, 4,20% (até 30/09/2026) ou 4,35% (a partir de 01/10/2026).</p>'+
     '</div>'+
-    '<p class="source-note" style="margin-top:10px;">Referência fiscal: <strong>2026</strong> (pessoa solteira, sem filhos/outra renda) — estimativa para planejamento, não substitui o Revenue. <a href="https://www.revenue.ie/en/jobs-and-pensions/calculating-your-income-tax/index.aspx" target="_blank" rel="noopener">Tabelas</a> · <a href="https://www.revenue.ie/en/jobs-and-pensions/usc/index.aspx" target="_blank" rel="noopener">USC</a> · <a href="https://www.gov.ie/en/department-of-social-protection/publications/prsi-class-a-rates/" target="_blank" rel="noopener">PRSI</a> · <a href="https://www.ros.ie/myaccount-web/sign_in.html" target="_blank" rel="noopener">Revenue myAccount ↗</a></p>';
+    '<p class="source-note" style="margin-top:10px;">Referência fiscal: <strong>'+TAX_CONFIG_2026.year+'</strong> (pessoa solteira, sem filhos/outra renda) — estimativa para planejamento, não substitui o Revenue. <a href="'+TAX_CONFIG_2026.paye.sourceUrl+'" target="_blank" rel="noopener">Tabelas</a> · <a href="'+TAX_CONFIG_2026.usc.sourceUrl+'" target="_blank" rel="noopener">USC</a> · <a href="'+TAX_CONFIG_2026.prsi.sourceUrl+'" target="_blank" rel="noopener">PRSI</a> · <a href="https://www.ros.ie/myaccount-web/sign_in.html" target="_blank" rel="noopener">Revenue myAccount ↗</a></p>'+
+    sourceVerifiedNote(oldestVerifiedAt([TAX_CONFIG_2026.paye,TAX_CONFIG_2026.usc,TAX_CONFIG_2026.prsi]));
   document.getElementById("taxInfoToggle").addEventListener("click", function(){
     var wrap = document.getElementById("taxInfoWrap");
     wrap.hidden = !wrap.hidden;
@@ -1549,7 +1597,7 @@ function renderBudget(){
     '</span>'+
     '</div>'+
     '<div id="taxDetailWrap" style="display:none;padding-top:10px;"></div>';
-  var expenseFields = [{k:"rent",l:"Aluguel / quarto"},{k:"phone",l:"Celular / contas extras"},{k:"transport",l:"Transporte"},{k:"groceries",l:"Mercado"},{k:"englishCourse",l:"Escola de inglês"},{k:"insurance",l:"Seguro-saúde"},{k:"gym",l:"Academia"},{k:"leisure",l:"Lazer / saídas"},{k:"other",l:"Outros gastos"}];
+  var expenseFields = [{k:"rent",l:"Aluguel / quarto"},{k:"phone",l:"Celular / contas extras"},{k:"internet",l:"Internet (se separado)"},{k:"transport",l:"Transporte"},{k:"groceries",l:"Mercado"},{k:"englishCourse",l:"Escola de inglês"},{k:"insurance",l:"Seguro-saúde"},{k:"gym",l:"Academia"},{k:"leisure",l:"Lazer / saídas"},{k:"other",l:"Outros gastos"}];
   document.getElementById("budgetExpenseFields").innerHTML = expenseFields.map(function(f){ return '<div class="numfield"><label>'+f.l+'</label><input type="number" step="1" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("");
   document.querySelectorAll("#budgetIncomeFields input, #budgetExpenseFields input").forEach(function(inp){ inp.addEventListener("input", function(){ setBudgetField(inp.dataset.k, parseFloat(inp.value)||0); }); });
   document.querySelectorAll("#hoursPreset .subtab").forEach(function(btn){
@@ -1569,13 +1617,32 @@ function updateBudgetSummary(){
   var t = calcIrishTax(b.wage, b.hoursWeek);
   var grossMonth = b.wage*b.hoursWeek*b.weeksMonth;
   var netMonth = grossMonth - t.totalMonth;
-  var totalExpenses = b.rent+b.phone+b.transport+b.groceries+b.englishCourse+b.insurance+b.gym+b.leisure+b.other;
+  var totalExpenses = sumExpenses(b);
   var freeBalance = netMonth-totalExpenses, pctCommitted = netMonth>0 ? (totalExpenses/netMonth*100):0, yearlyReserve = freeBalance*12;
   function row(lbl,val,cls){ return '<div class="summary-row '+(cls||"")+'"><span class="lbl">'+lbl+'</span><span class="val">'+val+'</span></div>'; }
   document.getElementById("budgetSummary").innerHTML =
     row("Salário bruto semanal","€"+t.grossWeek.toFixed(2))+row("Salário bruto mensal","€"+grossMonth.toFixed(2))+row("Salário líquido estimado","€"+netMonth.toFixed(2))+
     row("Total de gastos mensais","€"+totalExpenses.toFixed(2))+row("Saldo livre no mês","€"+freeBalance.toFixed(2), freeBalance<0?"warn big":"big")+
     row("% da renda comprometida", pctCommitted.toFixed(1)+"%", pctCommitted>85?"warn":"")+row("Reserva possível em 12 meses","€"+yearlyReserve.toFixed(2));
+  renderSurvivalCard(totalExpenses);
+}
+function renderConverter(){
+  var eurEl = document.getElementById("convEur"), brlEl = document.getElementById("convBrl");
+  if(!eurEl) return;
+  eurEl.addEventListener("input", function(){
+    var v = parseFloat(eurEl.value);
+    brlEl.value = isNaN(v) ? "" : (v*getCotacao()).toFixed(2);
+  });
+  brlEl.addEventListener("input", function(){
+    var v = parseFloat(brlEl.value);
+    eurEl.value = isNaN(v) ? "" : (v/getCotacao()).toFixed(2);
+  });
+}
+function renderSurvivalCard(totalExpenses){
+  var el = document.getElementById("survivalWrap");
+  if(!el) return;
+  function row(months){ return '<div class="summary-row"><span class="lbl">'+months+' '+(months===1?"mês":"meses")+'</span><span class="val">€'+(totalExpenses*months).toFixed(0)+'</span></div>'; }
+  el.innerHTML = row(1)+row(2)+row(3)+row(6);
 }
 
 /* ---------- grupos / links ---------- */
@@ -1988,7 +2055,7 @@ function init(){
   renderItineraryTabs(); renderItinerary(); renderMistakes();
   renderMoradia();
   renderTransportApps(); renderTransportCityTabs(); renderTransportRoutes();
-  renderMarket(); renderBudget(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();
+  renderMarket(); renderBudget(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();
   renderAll();
   setInterval(renderHero, 60000);
   document.getElementById("lastUpdated").textContent = LAST_UPDATED;
