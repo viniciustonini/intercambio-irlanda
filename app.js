@@ -1164,65 +1164,6 @@ function renderJobAddForm(){
   });
 }
 
-/* ---------- rastreador de candidaturas de emprego ---------- */
-var APP_STATUSES = [
-  {id:"aplicado", label:"Aplicado"},
-  {id:"entrevista", label:"Entrevista marcada"},
-  {id:"oferta", label:"Oferta recebida"},
-  {id:"recusado", label:"Não seguiu"}
-];
-function getJobApplications(){ return ls("jobApplications") || []; }
-function saveJobApplications(list){ ls("jobApplications", list); }
-function renderApplicationsTable(){
-  var apps = getJobApplications();
-  var rows = apps.length ? apps.map(function(a){
-    var statusOptions = APP_STATUSES.map(function(s){ return '<option value="'+s.id+'"'+(a.status===s.id?" selected":"")+'>'+s.label+'</option>'; }).join("");
-    return '<tr>'+
-      '<td data-label="Empresa"><input type="text" style="width:150px;" value="'+escapeHtml(a.empresa)+'" data-id="'+a.id+'" data-f="empresa"></td>'+
-      '<td data-label="Vaga"><input type="text" style="width:130px;" value="'+escapeHtml(a.vaga||"")+'" data-id="'+a.id+'" data-f="vaga"></td>'+
-      '<td data-label="Data"><input type="date" value="'+escapeHtml(a.data||"")+'" data-id="'+a.id+'" data-f="data"></td>'+
-      '<td data-label="Status"><select data-id="'+a.id+'" data-f="status">'+statusOptions+'</select></td>'+
-      '<td data-label="Nota"><input type="text" style="width:150px;" placeholder="Contato, link..." value="'+escapeHtml(a.nota||"")+'" data-id="'+a.id+'" data-f="nota"></td>'+
-      '<td data-label=""><button class="btn-ghost btn" style="width:auto;padding:5px 10px;font-size:12px;" data-remove="'+a.id+'">Remover</button></td>'+
-      '</tr>';
-  }).join("") : '<tr><td colspan="6" class="empty">Nenhuma candidatura registrada ainda — adicione abaixo.</td></tr>';
-  document.getElementById("applicationsTable").innerHTML =
-    '<thead><tr><th>Empresa</th><th>Vaga</th><th>Data</th><th>Status</th><th>Nota</th><th></th></tr></thead><tbody>'+rows+'</tbody>';
-  document.querySelectorAll('#applicationsTable input[data-f], #applicationsTable select[data-f]').forEach(function(inp){
-    inp.addEventListener("change", function(){
-      var list = getJobApplications();
-      var row = list.find(function(a){ return a.id===inp.dataset.id; });
-      if(!row) return;
-      row[inp.dataset.f] = inp.value;
-      saveJobApplications(list);
-    });
-  });
-  document.querySelectorAll('#applicationsTable [data-remove]').forEach(function(btn){
-    btn.addEventListener("click", function(){
-      saveJobApplications(getJobApplications().filter(function(a){ return a.id!==btn.dataset.remove; }));
-      renderApplicationsTable();
-    });
-  });
-}
-function renderApplicationsAddForm(){
-  document.getElementById("applicationsAddForm").innerHTML =
-    '<div class="mini-form-grid">'+
-    '<div><label>Empresa</label><input id="newAppEmpresa" type="text" placeholder="Ex.: Costa Coffee"></div>'+
-    '<div><label>Vaga</label><input id="newAppVaga" type="text" placeholder="Ex.: Barista"></div>'+
-    '<div><label>Data</label><input id="newAppData" type="date"></div>'+
-    '</div>'+
-    '<button class="btn btn-accent" style="width:auto;padding:10px 18px;" id="addAppBtn" type="button">Adicionar candidatura</button>';
-  document.getElementById("addAppBtn").addEventListener("click", function(){
-    var empresa = document.getElementById("newAppEmpresa").value.trim();
-    if(!empresa) return;
-    var list = getJobApplications();
-    list.push({id:"app"+Date.now(), empresa:empresa, vaga:document.getElementById("newAppVaga").value.trim(), data:document.getElementById("newAppData").value, status:"aplicado", nota:""});
-    saveJobApplications(list);
-    renderApplicationsTable();
-    document.getElementById("newAppEmpresa").value=""; document.getElementById("newAppVaga").value=""; document.getElementById("newAppData").value="";
-  });
-}
-
 /* ---------- inglês ---------- */
 var ENGLISH_LEVELS = [
   {id:"a1", label:"A1", desc:"Iniciante — frases básicas do dia a dia."},
@@ -1939,17 +1880,18 @@ function updateScamChecklistProgress(){
   if(el) el.textContent = done+"/"+SCAM_CHECKLIST.length+" verificados";
 }
 var TRANSPORT_APPS = [
-  {name:"TFI Live", desc:"App oficial nacional com horários em tempo real de ônibus, Luas, DART e trens — rotas, partidas e paradas próximas."},
-  {name:"TFI Go", desc:"Usado principalmente para comprar bilhetes em determinados serviços de Bus Éireann, Local Link e operadoras comerciais participantes — não é o app principal para pagar Dublin Bus/Luas/DART no dia a dia (isso é feito com o Leap Card)."},
-  {name:"Leap Card App (TFI Leap Top-Up)", desc:"Consulta de saldo, recarga do Leap Card e histórico de transações pelo celular."},
-  {name:"Google Maps", desc:"Boa cobertura de rotas de transporte público nas três cidades e integração a pé até a parada."},
-  {name:"FreeNow", desc:"Aplicativo de táxi mais usado na Irlanda — bom para madrugada ou com muita bagagem."},
-  {name:"TFI Driver Check", desc:"Verifica se o motorista, veículo e licença do táxi são os cadastrados oficialmente antes de embarcar."},
-  {name:"Irish Rail (app)", desc:"Horários e bilhetes de trens intercidades (Dublin ↔ Cork ↔ Galway) e do DART."}
+  {name:"TFI Live", url:"https://www.transportforireland.ie/", desc:"App oficial nacional com horários em tempo real de ônibus, Luas, DART e trens — rotas, partidas e paradas próximas."},
+  {name:"TFI Go", url:"https://www.transportforireland.ie/", desc:"Usado principalmente para comprar bilhetes em determinados serviços de Bus Éireann, Local Link e operadoras comerciais participantes — não é o app principal para pagar Dublin Bus/Luas/DART no dia a dia (isso é feito com o Leap Card)."},
+  {name:"Leap Card App (TFI Leap Top-Up)", url:"https://www.leapcard.ie/", desc:"Consulta de saldo, recarga do Leap Card e histórico de transações pelo celular."},
+  {name:"Google Maps", url:"https://maps.google.com/", desc:"Boa cobertura de rotas de transporte público nas três cidades e integração a pé até a parada."},
+  {name:"FreeNow", url:"https://free-now.com/ie/", desc:"Aplicativo de táxi mais usado na Irlanda — bom para madrugada ou com muita bagagem."},
+  {name:"TFI Driver Check", url:"https://www.transportforireland.ie/", desc:"Verifica se o motorista, veículo e licença do táxi são os cadastrados oficialmente antes de embarcar."},
+  {name:"Irish Rail (app)", url:"https://www.irishrail.ie/", desc:"Horários e bilhetes de trens intercidades (Dublin ↔ Cork ↔ Galway) e do DART."}
 ];
 function renderTransportApps(){
   document.getElementById("transportAppsWrap").innerHTML = TRANSPORT_APPS.map(function(a){
-    return '<div class="card"><h3>'+a.name+'</h3><p style="margin:0;">'+a.desc+'</p></div>';
+    var fav = faviconUrl(a.url);
+    return '<a class="linkcard" href="'+a.url+'" target="_blank" rel="noopener"><div class="linkcard-icon">'+LINK_ICONS.phone+(fav?'<img class="linkcard-favicon" src="'+fav+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div><h4>'+a.name+'</h4><p>'+a.desc+'</p><span class="linkcard-arrow">↗</span></a>';
   }).join("");
 }
 var TRANSPORT_VERIFIED_AT = "2026-09-11";
@@ -1972,7 +1914,7 @@ function renderLeapCards(){
       (c.badge?'<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);">'+c.badge+'</span>':'')+
       rows+'</div>';
   }).join("")+
-  '<div class="callout" style="grid-column:1/-1;">Valores de referência para Dublin (Zona 1) — confirme sempre o valor vigente em <a href="https://about.leapcard.ie/" target="_blank" rel="noopener">about.leapcard.ie</a> antes de comprar.'+sourceVerifiedNote(TRANSPORT_VERIFIED_AT)+'</div>';
+  '<div class="callout" style="grid-column:1/-1;">Valores de referência para Dublin (Zona 1) — confirme sempre o valor vigente em <a href="https://www.leapcard.ie/" target="_blank" rel="noopener">leapcard.ie</a> antes de comprar.'+sourceVerifiedNote(TRANSPORT_VERIFIED_AT)+'</div>';
 }
 var TRANSPORT_ROUTES = {
   dublin: {
@@ -1991,8 +1933,8 @@ var TRANSPORT_ROUTES = {
       {name:"Acessibilidade (cadeira de rodas)", detail:"Aircoach e Dublin Bus têm veículos de piso baixo. Dublin Bus oferece assistência gratuita de viagem (seg-sex, 8h-18h, tel (01) 703 3204, e-mail customercomment@dublinbus.ie). Bus Éireann exige reserva prévia para embarque acessível."}
     ],
     fares:[
-      {name:"Leap Card comum (recarregável)", detail:"A opção certa pra quem vai morar em Dublin — recarrega crédito conforme precisa. Custa €10 (com algum crédito já incluso). Compre em lojas Spar/Centra/SuperValu, nas máquinas de bilhete das estações, ou <a href=\"https://about.leapcard.ie/about/where-to-buy\" target=\"_blank\" rel=\"noopener\">peça online</a> — nesse caso chega pelo correio, então peça com antecedência."},
-      {name:"Leap Visitor Card (só estadias curtas)", detail:"Viagens ilimitadas por período fixo em Dublin Bus, Go-Ahead, Luas e DART (Zona Curta): <b>24h €8,00 · 72h €18,00 · 7 dias €24,00</b>. <b>Não vale</b> nos ônibus Aircoach nem Dublin Express do aeroporto. Vendido no Aeroporto de Dublin (loja Wrights no T1, Spar no T2) e em pontos no centro como Trinity College, Estação Connolly e O'Connell Street — <a href=\"https://www.leapcard.ie/Home/index.html\" target=\"_blank\" rel=\"noopener\">ou compre pelo site</a> antes da viagem (não é digital, chega pelo correio)."},
+      {name:"Leap Card comum (recarregável)", detail:"A opção certa pra quem vai morar em Dublin — recarrega crédito conforme precisa. Custa €10 (com algum crédito já incluso). Compre em lojas Spar/Centra/SuperValu, nas máquinas de bilhete das estações, ou <a href=\"https://www.leapcard.ie/\" target=\"_blank\" rel=\"noopener\">peça online</a> — nesse caso chega pelo correio, então peça com antecedência."},
+      {name:"Leap Visitor Card (só estadias curtas)", detail:"Viagens ilimitadas por período fixo em Dublin Bus, Go-Ahead, Luas e DART (Zona Curta): <b>24h €8,00 · 72h €18,00 · 7 dias €24,00</b>. <b>Não vale</b> nos ônibus Aircoach nem Dublin Express do aeroporto. Vendido no Aeroporto de Dublin (loja Wrights no T1, Spar no T2) e em pontos no centro como Trinity College, Estação Connolly e O'Connell Street — <a href=\"https://www.leapcard.ie/\" target=\"_blank\" rel=\"noopener\">ou compre pelo site</a> antes da viagem (não é digital, chega pelo correio)."},
       {name:"Tarifa Leap 90 minutos (Zona 1)", detail:"€2,00 adulto · €1,00 Young Adult/Student · €0,65 criança — na janela de 90 min você troca de ônibus/Luas/DART sem pagar de novo. É a tarifa que vale pra quase todo mundo morando e estudando dentro de Dublin."},
       {name:"Ônibus suburbano / Nitelink / Xpresso (Zona 1)", detail:"€2,40 adulto · €1,20 Young Adult/Student."},
       {name:"Viajando para fora da Zona 1", detail:"Só importa se você sair da área central de Dublin para outra zona (ex: Naas, Maynooth, Wicklow). Trem: Zona 1↔2 €3,90 · ↔3 €6,00 · ↔4 €7,50 (metade do valor para criança/jovem). Ônibus: Zona 1↔2 €3,70 · ↔3 €5,30 · ↔4 €6,30 (metade do valor para criança/jovem). A grande maioria dos intercambistas mora e estuda dentro da Zona 1, sem precisar dessas tarifas."},
@@ -2075,12 +2017,19 @@ var TRANSPORT_GALLERY_DUBLIN = [
 function renderTransportGallery(){
   var wrap = document.getElementById("transportGalleryWrap");
   if(!wrap) return;
-  wrap.innerHTML = TRANSPORT_GALLERY_DUBLIN.map(function(g){
-    return '<div class="city-card"><img class="city-card-photo" src="'+g.photo+'" alt="'+g.name+'" loading="lazy" onerror="this.remove()">'+
+  wrap.innerHTML = TRANSPORT_GALLERY_DUBLIN.map(function(g, i){
+    return '<div class="city-card"><img class="city-card-photo" data-idx="'+i+'" src="'+g.photo+'" alt="'+g.name+'" loading="lazy" onerror="this.remove()">'+
       '<h3 style="font-size:14.5px;">'+g.name+'</h3>'+
       '<a class="city-card-credit" href="'+g.photoCredit.url+'" target="_blank" rel="noopener">Foto: '+g.photoCredit.name+' / Wikimedia Commons ('+g.photoCredit.license+')</a>'+
       '</div>';
   }).join("");
+  document.querySelectorAll("#transportGalleryWrap .city-card-photo").forEach(function(img){
+    img.addEventListener("click", function(){
+      var g = TRANSPORT_GALLERY_DUBLIN[img.dataset.idx];
+      var cap = g.name+' — <a href="'+g.photoCredit.url+'" target="_blank" rel="noopener">Foto: '+g.photoCredit.name+' / Wikimedia Commons ('+g.photoCredit.license+')</a>';
+      openLightbox(g.photo, cap);
+    });
+  });
 }
 var TRANSPORT_OVERNIGHT_DUBLIN = {
   intro:"Fora do horário normal, a rede encolhe bastante — vale planejar com antecedência quando o compromisso terminar tarde.",
@@ -2955,7 +2904,6 @@ function init(){
   renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm();
   renderJobRoleTabs(); renderJobRoleContent(); renderJobAddForm();
   renderAgencias();
-  renderApplicationsTable(); renderApplicationsAddForm();
   renderEnglish();
   renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences();
   renderAttrCatTabs(); renderAttrGrid(); renderAttrProgress();
