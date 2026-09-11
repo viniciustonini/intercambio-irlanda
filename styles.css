@@ -1,3 +1,5 @@
+.skip-link{position:absolute;left:-9999px;top:0;z-index:1000;background:var(--navy,#0F1C2B);color:#fff;padding:12px 18px;border-radius:0 0 10px 0;font-size:14px;font-weight:600;text-decoration:none;}
+.skip-link:focus{left:0;}
 :root{
   --bg:#F3F5F7;
   --surface:#FFFFFF;
