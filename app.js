@@ -300,6 +300,28 @@ function downloadBackup(){
   a.href = url; a.download = "intercambio-irlanda-backup-"+stamp+".json";
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  ls("lastBackupAt", stamp);
+  renderBackupReminder();
+}
+var BACKUP_REMINDER_DAYS = 21;
+function renderBackupReminder(){
+  var wrap = document.getElementById("backupReminderWrap");
+  if(!wrap) return;
+  var hasData = Object.keys(localStorage).some(function(k){ return k.indexOf(LS)===0 && k!==LS+"schemaVersion" && k!==LS+"lastBackupAt"; });
+  var last = ls("lastBackupAt");
+  var days = last ? daysSince(last) : null;
+  var needsBackup = hasData && (last==null || (days!=null && days > BACKUP_REMINDER_DAYS));
+  if(!needsBackup){ wrap.hidden = true; wrap.innerHTML = ""; return; }
+  wrap.hidden = false;
+  wrap.innerHTML = '<div class="callout" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">'+
+    '<span>'+(last?"Seu último backup foi há "+days+" dias.":"Você ainda não baixou um backup dos seus dados.")+' Baixe um agora para não perder seu progresso.</span>'+
+    '<button type="button" class="btn btn-accent" id="backupReminderBtn" style="width:auto;padding:8px 16px;font-size:12.8px;">Fazer backup</button>'+
+    '</div>';
+  document.getElementById("backupReminderBtn").addEventListener("click", openBackupModal);
+}
+function openBackupModal(){
+  document.getElementById("backupStatus").textContent = "";
+  document.getElementById("backupModal").hidden = false;
 }
 function restoreBackup(file, statusEl){
   var reader = new FileReader();
@@ -329,10 +351,8 @@ function restoreBackup(file, statusEl){
   };
   reader.readAsText(file);
 }
-document.getElementById("heroBackupBtn").addEventListener("click", function(){
-  document.getElementById("backupStatus").textContent = "";
-  document.getElementById("backupModal").hidden = false;
-});
+document.getElementById("heroBackupBtn").addEventListener("click", openBackupModal);
+document.getElementById("exportPdfBtn").addEventListener("click", function(){ window.print(); });
 document.getElementById("backupModalClose").addEventListener("click", function(){
   document.getElementById("backupModal").hidden = true;
 });
@@ -776,6 +796,7 @@ function renderContinueCard(){
 function renderOverview(){
   renderNextStepCard();
   renderContinueCard();
+  renderBackupReminder();
   var cl = checklistCounts(), cr = countsFor(CRONOGRAMA,"cronogramaDone"), d3 = countsFor(DIAS30,"dias30Done");
   var total = cl.total+cr.total+d3.total, done = cl.done+cr.done+d3.done;
   var pct = total ? Math.round(done/total*100) : 0;
@@ -2864,3 +2885,8 @@ function init(){
   if(!isScrollMode()) animateHeroEntrance();
 }
 init();
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){ /* offline/PWA é um extra — sem service worker o site continua funcionando normal */ });
+  });
+}

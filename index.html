@@ -3,6 +3,11 @@
      crossorigin="anonymous"></script>
 <title>Intercâmbio Irlanda</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%8D%80</text></svg>">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="theme-color" content="#0F7A51">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Interc. Irlanda">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -87,6 +92,7 @@
     <section class="section" id="sec-inicio" data-sec="inicio" role="tabpanel" aria-labelledby="tab-inicio">
       <div class="section-head"><h2>Preparação até o embarque</h2><p>Considera checklist, cronograma e primeiros 30 dias.</p></div>
       <div id="continueWrap" hidden style="margin-bottom:14px;"></div>
+      <div id="backupReminderWrap" hidden style="margin-bottom:14px;"></div>
       <div class="card overview-summary">
         <div class="overview-progress">
           <svg class="ring" width="64" height="64" viewBox="0 0 64 64">
@@ -390,7 +396,10 @@
 
     <!-- ROTEIRO COMPLETO -->
     <section class="section" id="sec-roteiro" data-sec="roteiro" role="tabpanel" aria-labelledby="tab-roteiro">
-      <div class="section-head"><h2>Meu Plano</h2><p>Marque cada etapa conforme for avançando — do checklist ao planejamento em casa até os primeiros 30 dias na Irlanda.</p></div>
+      <div class="section-head" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+        <div><h2>Meu Plano</h2><p>Marque cada etapa conforme for avançando — do checklist ao planejamento em casa até os primeiros 30 dias na Irlanda.</p></div>
+        <button type="button" class="btn btn-ghost pdf-hide" id="exportPdfBtn" style="width:auto;padding:9px 16px;font-size:13px;">⤓ Exportar em PDF</button>
+      </div>
       <div class="mini-progress"><div class="progress-track"><div class="progress-fill" id="miniProgressBar" style="transform:scaleX(0)"></div></div><span class="mini-progress-pct tabular" id="miniProgressPct">0%</span></div>
       <h3 style="font-size:17px;margin-bottom:12px;">Checklist final</h3>
       <div id="checklistWrap"></div>

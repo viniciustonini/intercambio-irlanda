@@ -411,3 +411,12 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
   .hero-inner{align-items:stretch;}
   .hero-card{width:100%;}
 }
+
+@media print{
+  .hero,.tabbar-wrap,.more-menu,.more-menu-backdrop,.cookie-bar,.modal-overlay,footer.site,.pdf-hide,.checkitem-input,.plan-note-toggle{display:none!important;}
+  body,.main{background:#fff;}
+  .main{max-width:100%;padding:0;}
+  .section{color:#000;}
+  .card,.checkitem,.checkitem-wrap{box-shadow:none!important;border:1px solid #ccc!important;break-inside:avoid;}
+  a{color:#000!important;text-decoration:underline;}
+}

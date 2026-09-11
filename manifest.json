@@ -1,0 +1,19 @@
+{
+  "name": "Intercâmbio Irlanda",
+  "short_name": "Interc. Irlanda",
+  "description": "Planejamento pessoal para quem vai estudar, morar ou trabalhar na Irlanda.",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0F1C2B",
+  "theme_color": "#0F7A51",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
