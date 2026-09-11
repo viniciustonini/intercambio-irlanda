@@ -454,11 +454,15 @@ function renderProfileSeg(){
 function renderProfileBanner(){
   var p = getProfile(), city = getCity();
   var cname = city ? CITIES.find(function(c){return c.id===city;}).name : null;
-  document.getElementById("profileBanner").innerHTML =
+  var html =
     'Perfil: <b>'+(p==="eu"?"cidadão UE": p==="non-eu"?"não-UE":"não definido")+'</b> · Cidade: <b>'+(cname||"não definida")+'</b>'+
-    '<button class="btn btn-ghost" style="padding:7px 14px;font-size:12.5px;" id="editProfileBtn" type="button">Editar perfil</button>';
-  var btn = document.getElementById("editProfileBtn");
-  if(btn) btn.addEventListener("click", openOnboarding);
+    '<button class="btn btn-ghost profile-banner-edit" style="padding:7px 14px;font-size:12.5px;" type="button">Editar perfil</button>';
+  ["profileBanner","profileBannerPerfil"].forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = html;
+    el.querySelector(".profile-banner-edit").addEventListener("click", openOnboarding);
+  });
 }
 
 /* ---------- onboarding ---------- */
@@ -1068,6 +1072,8 @@ function fetchLiveCotacao(){
       var note = document.getElementById("cotacaoAutoNote");
       if(note) note.textContent = "Atualizada automaticamente hoje ("+today.split("-").reverse().join("/")+"), a partir do Banco Central Europeu.";
       if(typeof updateStayComputed === "function") updateStayComputed();
+      var rateNote = document.getElementById("convRateNote");
+      if(rateNote) rateNote.textContent = "1 € = R$ "+rate.toFixed(2).replace(".",",")+" (cotação de "+today.split("-").reverse().join("/")+")";
     })
     .catch(function(){ /* sem internet ou API fora do ar — mantém o último valor salvo */ });
 }
@@ -1629,6 +1635,11 @@ function updateBudgetSummary(){
 function renderConverter(){
   var eurEl = document.getElementById("convEur"), brlEl = document.getElementById("convBrl");
   if(!eurEl) return;
+  var rateNote = document.getElementById("convRateNote");
+  if(rateNote){
+    var updated = ls("cotacaoUpdatedAt");
+    rateNote.textContent = "1 € = R$ "+getCotacao().toFixed(2).replace(".",",")+(updated?" (cotação de "+updated.split("-").reverse().join("/")+")":"");
+  }
   eurEl.addEventListener("input", function(){
     var v = parseFloat(eurEl.value);
     brlEl.value = isNaN(v) ? "" : (v*getCotacao()).toFixed(2);
