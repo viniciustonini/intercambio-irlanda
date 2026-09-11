@@ -1119,25 +1119,33 @@ var ENGLISH_TOPICS = {
     {id:"a1-verbtobe", title:"Verb to be (am / is / are)", body:"Usado para identidade, nacionalidade e descrições. Ex.: <i>I am Brazilian. She is a student.</i>"},
     {id:"a1-presentsimple", title:"Present Simple", body:"Rotinas e fatos. Ex.: <i>I work on Mondays. She lives in Dublin.</i>"},
     {id:"a1-articles", title:"Artigos (a / an / the)", body:"\"a/an\" para algo não específico, \"the\" para algo já conhecido. Ex.: <i>I have a room. The room is small.</i>"},
-    {id:"a1-numbers", title:"Números e horas", body:"Essencial para preços, horários e endereços. Ex.: <i>It's half past nine. That's twelve euros.</i>"}
+    {id:"a1-numbers", title:"Números e horas", body:"Essencial para preços, horários e endereços. Ex.: <i>It's half past nine. That's twelve euros.</i>"},
+    {id:"a1-thereis", title:"There is / there are", body:"Dizer o que existe em um lugar. Ex.: <i>There's a desk next to the window. Is there a pharmacy nearby?</i>"},
+    {id:"a1-canpolite", title:"Can / could — pedidos educados", body:"\"Could you...?\" costuma soar mais educado que \"Can you...?\", mas os dois são comuns. Ex.: <i>Could you repeat that, please?</i>"}
   ],
   a2: [
     {id:"a2-pastsimple", title:"Past Simple", body:"Ações concluídas no passado. Ex.: <i>I arrived last week. I didn't have a SIM card yet.</i>"},
     {id:"a2-future", title:"Futuro (going to / will)", body:"\"going to\" para planos já decididos, \"will\" para decisões espontâneas. Ex.: <i>I'm going to apply for a PPSN. I'll call them now.</i>"},
     {id:"a2-comparatives", title:"Comparativos e superlativos", body:"Comparar preços, cidades, empregos. Ex.: <i>Dublin is more expensive than Cork. This is the cheapest option.</i>"},
-    {id:"a2-modals", title:"Can / could / have to", body:"Habilidade, pedidos educados e obrigação. Ex.: <i>Can I pay by card? I have to register my address.</i>"}
+    {id:"a2-modals", title:"Can / could / have to", body:"Habilidade, pedidos educados e obrigação. Ex.: <i>Can I pay by card? I have to register my address.</i>"},
+    {id:"a2-presentperfectintro", title:"Present Perfect (already / yet / just)", body:"Experiências recentes, sem dizer quando exatamente. Ex.: <i>I've just arrived. She hasn't opened an account yet.</i>"},
+    {id:"a2-shouldmust", title:"Should / must / have to", body:"Conselho, proibição e obrigação. Ex.: <i>You should view the room first. You mustn't smoke here.</i>"}
   ],
   b1: [
     {id:"b1-presentperfect", title:"Present Perfect", body:"Experiências e resultados até agora. Ex.: <i>I have already sent my CV. Have you found a room yet?</i>"},
     {id:"b1-conditionals", title:"First Conditional", body:"Consequências prováveis. Ex.: <i>If I get the job, I'll need a PPSN.</i>"},
     {id:"b1-passive", title:"Voz passiva (básica)", body:"Comum em avisos e regras formais. Ex.: <i>Payments are accepted by card only.</i>"},
-    {id:"b1-phrasal", title:"Phrasal verbs comuns no trabalho", body:"Ex.: <i>fill in</i> (preencher), <i>sign up</i> (se inscrever), <i>look for</i> (procurar), <i>sort out</i> (resolver)."}
+    {id:"b1-phrasal", title:"Phrasal verbs comuns no trabalho", body:"Ex.: <i>fill in</i> (preencher), <i>sign up</i> (se inscrever), <i>look for</i> (procurar), <i>sort out</i> (resolver)."},
+    {id:"b1-pastperfect", title:"Past Perfect em narrativas", body:"Diz o que já tinha acontecido antes de outro evento passado. Ex.: <i>I realised I had left my keys at work.</i>"},
+    {id:"b1-relative", title:"Relative clauses (who / which / that)", body:"Dar detalhes sem começar outra frase. Ex.: <i>A GP is a doctor who provides general care.</i>"}
   ],
   b2: [
     {id:"b2-secondcond", title:"Second Conditional", body:"Situações hipotéticas. Ex.: <i>If I had more savings, I would rent a bigger room.</i>"},
     {id:"b2-reported", title:"Reported speech", body:"Relatar o que alguém disse — comum em e-mails e ligações. Ex.: <i>She said the room was still available.</i>"},
     {id:"b2-relative", title:"Orações relativas", body:"Dar mais detalhes de forma natural. Ex.: <i>The school, which is ILEP-listed, starts in January.</i>"},
-    {id:"b2-formal", title:"Linguagem formal em e-mails", body:"Ex.: <i>I am writing to enquire about... / I would appreciate your response.</i>"}
+    {id:"b2-formal", title:"Linguagem formal em e-mails", body:"Ex.: <i>I am writing to enquire about... / I would appreciate your response.</i>"},
+    {id:"b2-wishusedto", title:"Wish / used to / get used to", body:"Desejos, hábitos passados e adaptação. Ex.: <i>I wish I spoke more confidently. I'm getting used to the weather.</i>"},
+    {id:"b2-diplomatic", title:"Diplomatic English", body:"Suavizar discordância no trabalho. Ex.: <i>I'm not sure this approach will give us the result we need.</i>"}
   ]
 };
 var ENGLISH_MODULES = [
@@ -1165,8 +1173,318 @@ var ENGLISH_MODULES = [
     "I'd like to register with a GP. — Gostaria de me registrar com um médico de família.",
     "I have an allergy to... — Tenho alergia a...",
     "Can you recommend something for...? — Você recomenda algo para...?"
+  ]},
+  {id:"transport", title:"Transporte", phrases:[
+    "Does this bus go to the city centre? — Esse ônibus vai para o centro?",
+    "Can I top up my Leap Card here? — Posso recarregar meu Leap Card aqui?",
+    "Is this the right platform for Cork? — Essa é a plataforma certa para Cork?"
+  ]},
+  {id:"bank", title:"Banco e pagamentos", phrases:[
+    "I'd like to open a current account. — Gostaria de abrir uma conta corrente.",
+    "What documents do I need? — Quais documentos eu preciso?",
+    "My card has been declined. — Meu cartão foi recusado."
+  ]},
+  {id:"restaurant", title:"Restaurante / café", phrases:[
+    "Could we have a table for two? — Podemos ter uma mesa para dois?",
+    "Does this contain nuts? — Isso contém nozes/castanhas?",
+    "Could I have the bill, please? — Pode trazer a conta, por favor?"
+  ]},
+  {id:"emergency", title:"Emergências", phrases:[
+    "I need an ambulance / the Gardaí / the fire brigade. — Preciso de uma ambulância / da polícia / dos bombeiros.",
+    "There's been an accident. — Aconteceu um acidente.",
+    "My location is... — Minha localização é..."
   ]}
 ];
+var ENGLISH_MISTAKES = [
+  {wrong:"I have 25 years.", right:"I am 25 years old.", why:"Idade usa o verbo <i>to be</i>."},
+  {wrong:"I have hungry.", right:"I am hungry.", why:"Estado usa <i>to be</i>."},
+  {wrong:"I don't can go.", right:"I can't go.", why:"Modal não usa <i>do</i>."},
+  {wrong:"He don't work.", right:"He doesn't work.", why:"Terceira pessoa do singular."},
+  {wrong:"She have a car.", right:"She has a car.", why:"Forma irregular de <i>have</i>."},
+  {wrong:"I am agree.", right:"I agree.", why:"<i>Agree</i> já é verbo."},
+  {wrong:"People is friendly.", right:"People are friendly.", why:"<i>People</i> é plural."},
+  {wrong:"I live here since May.", right:"I've lived here since May.", why:"Situação iniciada no passado e ainda atual usa Present Perfect."},
+  {wrong:"I didn't went.", right:"I didn't go.", why:"Depois de <i>did</i>, usa-se a forma base do verbo."},
+  {wrong:"More easier.", right:"Easier.", why:"Não duplicar o comparativo."},
+  {wrong:"Depends of.", right:"Depends on.", why:"Preposição correta."},
+  {wrong:"Married with.", right:"Married to.", why:"Preposição correta."},
+  {wrong:"Explain me.", right:"Explain it to me.", why:"Construção com <i>to</i>."},
+  {wrong:"Ask to him.", right:"Ask him.", why:"<i>Ask</i> aceita objeto direto."},
+  {wrong:"I made a course.", right:"I took/did a course.", why:"Colocação natural."},
+  {wrong:"I did a mistake.", right:"I made a mistake.", why:"Colocação com <i>make</i>."},
+  {wrong:"I lost the bus.", right:"I missed the bus.", why:"<i>Miss</i> para transporte."},
+  {wrong:"Pass an exam.", right:"Take an exam.", why:"<i>Take</i> = fazer a prova; <i>pass</i> = ser aprovado."},
+  {wrong:"I'm boring.", right:"I'm bored.", why:"<i>Bored</i> sente; <i>boring</i> causa o tédio."},
+  {wrong:"The news are good.", right:"The news is good.", why:"<i>News</i> é gramaticalmente singular."},
+  {wrong:"Informations.", right:"Information.", why:"Substantivo incontável."},
+  {wrong:"In the weekend.", right:"At the weekend / on the weekend.", why:"Na Irlanda e no Reino Unido, <i>at</i> é muito comum."},
+  {wrong:"I go to home.", right:"I go home.", why:"Sem <i>to</i> antes de <i>home</i> nesse uso."},
+  {wrong:"I'm here for study.", right:"I'm here to study.", why:"Propósito usa infinitivo com <i>to</i>."}
+];
+var ENGLISH_FALSE_FRIENDS = [
+  {word:"actually", meaning:"na verdade", not:"atualmente", example:"Actually, I live in Cork."},
+  {word:"currently", meaning:"atualmente", not:"corretamente", example:"I'm currently studying."},
+  {word:"pretend", meaning:"fingir", not:"pretender", example:"He pretended to be asleep."},
+  {word:"intend", meaning:"pretender / ter intenção", not:"entender", example:"I intend to apply."},
+  {word:"parents", meaning:"pais", not:"parentes", example:"My parents live in Brazil."},
+  {word:"relatives", meaning:"parentes", not:"relativos", example:"I visited my relatives."},
+  {word:"sensible", meaning:"sensato", not:"sensível", example:"That sounds sensible."},
+  {word:"sensitive", meaning:"sensível", not:"sensato", example:"This information is sensitive."},
+  {word:"library", meaning:"biblioteca", not:"livraria", example:"I studied at the library."},
+  {word:"bookshop", meaning:"livraria", not:"biblioteca", example:"I bought it at a bookshop."},
+  {word:"college", meaning:"faculdade / instituição", not:"colégio, em muitos contextos", example:"She's at college in Dublin."},
+  {word:"lecture", meaning:"palestra / aula universitária", not:"leitura", example:"The lecture starts at ten."},
+  {word:"fabric", meaning:"tecido", not:"fábrica", example:"This fabric is waterproof."},
+  {word:"factory", meaning:"fábrica", not:"tecido", example:"He works in a factory."},
+  {word:"push", meaning:"empurrar", not:"puxar", example:"Push the door."},
+  {word:"pull", meaning:"puxar", not:"pular", example:"Pull the handle."},
+  {word:"lunch", meaning:"almoço", not:"lanche", example:"I have lunch at one."},
+  {word:"snack", meaning:"lanche", not:"almoço", example:"I had a quick snack."},
+  {word:"costume", meaning:"fantasia / traje", not:"costume / hábito", example:"He wore a pirate costume."},
+  {word:"custom", meaning:"costume / tradição", not:"fantasia", example:"It's a local custom."},
+  {word:"eventually", meaning:"finalmente / com o tempo", not:"eventualmente", example:"Eventually, we found a room."},
+  {word:"occasionally", meaning:"às vezes", not:"finalmente", example:"I occasionally work late."},
+  {word:"assist", meaning:"ajudar", not:"assistir", example:"Can I assist you?"},
+  {word:"attend", meaning:"comparecer / frequentar", not:"atender", example:"I attended the meeting."}
+];
+var ENGLISH_PHRASAL_GROUPS = [
+  {id:"daily", label:"Vida diária e viagem", items:[
+    {v:"wake up", pt:"acordar", ex:"I wake up at seven."},
+    {v:"get up", pt:"levantar-se", ex:"I got up late."},
+    {v:"go out", pt:"sair", ex:"We're going out tonight."},
+    {v:"come back", pt:"voltar", ex:"I'll come back at six."},
+    {v:"pick up", pt:"buscar / pegar", ex:"I'll pick you up at the airport."},
+    {v:"drop off", pt:"deixar", ex:"Can you drop me off at the station?"},
+    {v:"check in", pt:"fazer check-in", ex:"We checked in online."},
+    {v:"check out", pt:"sair do hotel / verificar", ex:"We need to check out by eleven."},
+    {v:"find out", pt:"descobrir", ex:"I found out which bus to take."},
+    {v:"run out of", pt:"ficar sem", ex:"I've run out of credit."},
+    {v:"look for", pt:"procurar", ex:"I'm looking for a room."},
+    {v:"look after", pt:"cuidar de", ex:"She looks after two children."},
+    {v:"get along with", pt:"dar-se bem com", ex:"I get along with my flatmates."},
+    {v:"turn up", pt:"aparecer / aumentar", ex:"He turned up late."}
+  ]},
+  {id:"work", label:"Trabalho e tecnologia", items:[
+    {v:"set up", pt:"configurar / montar", ex:"I'll set up your account."},
+    {v:"log in", pt:"entrar no sistema", ex:"I can't log in."},
+    {v:"sign out", pt:"sair da conta", ex:"Sign out and try again."},
+    {v:"shut down", pt:"desligar / encerrar", ex:"Please shut down the laptop."},
+    {v:"back up", pt:"fazer backup / apoiar", ex:"Back up the files first."},
+    {v:"look into", pt:"investigar", ex:"We're looking into the issue."},
+    {v:"figure out", pt:"descobrir / entender", ex:"I'm trying to figure out the cause."},
+    {v:"carry out", pt:"realizar", ex:"We carried out several tests."},
+    {v:"deal with", pt:"lidar com", ex:"I deal with customer requests."},
+    {v:"take over", pt:"assumir", ex:"Niamh will take over the project."},
+    {v:"follow up", pt:"acompanhar", ex:"I'll follow up tomorrow."},
+    {v:"get back to", pt:"responder mais tarde", ex:"I'll get back to you by Friday."},
+    {v:"point out", pt:"destacar", ex:"She pointed out an error."},
+    {v:"go over", pt:"revisar", ex:"Let's go over the requirements."},
+    {v:"roll out", pt:"lançar gradualmente", ex:"The update will be rolled out next week."}
+  ]}
+];
+var englishPhrasalView = ls("englishPhrasalView") || "daily";
+var ENGLISH_SLANG = [
+  {term:"grand", meaning:"tudo bem; bom o suficiente", example:"“That's grand, thanks.” — informal."},
+  {term:"cheers", meaning:"obrigado; saúde; despedida curta", example:"“Cheers for your help.”"},
+  {term:"sound", meaning:"legal, confiável; valeu", example:"“He's sound.” / “Sound, thanks.” — informal."},
+  {term:"craic", meaning:"diversão, novidades, ambiente", example:"“What's the craic?” — muito informal, soa como “crack”."},
+  {term:"fair play", meaning:"parabéns; reconhecimento", example:"“You passed? Fair play to you.”"},
+  {term:"no bother", meaning:"sem problema", example:"“Could you send it today?” “No bother.”"},
+  {term:"howya", meaning:"forma rápida de “How are you?”", example:"Cumprimento informal; não exige resposta longa."},
+  {term:"what's the story?", meaning:"como estão as coisas? / novidades?", example:"Muito informal."},
+  {term:"your man / your one", meaning:"aquele homem / aquela mulher do contexto", example:"Informal; pode confundir iniciantes."},
+  {term:"press", meaning:"armário, especialmente embutido", example:"“The towels are in the hot press.”"},
+  {term:"runners", meaning:"tênis esportivo", example:"Equivale a “trainers/sneakers”."},
+  {term:"chips / crisps", meaning:"batatas fritas / batata de pacote", example:"Diferença comum no inglês da Irlanda/Reino Unido."},
+  {term:"Garda / Gardaí", meaning:"policial / polícia ou policiais", example:"Termo irlandês de uso cotidiano."},
+  {term:"Eircode", meaning:"código postal irlandês", example:"Útil ao informar endereços."}
+];
+var ENGLISH_READING = [
+  {level:"a1", label:"A1", title:"My first week", text:"My name is Bruno and I'm from São Paulo. I live in a shared house in Dublin. There are four people in the house. My English class starts at nine every morning. After class, I usually have lunch with my classmates. I take the bus home at four. Ireland is new to me, but I'm happy to be here.",
+    questions:["Where is Bruno from?","How many people live in the house?","What time does class start?","How does he go home?"],
+    answers:"São Paulo/Brazil; four; at nine; by bus / he takes the bus."},
+  {level:"a2", label:"A2", title:"A room viewing", text:"Sofia viewed a room near her school yesterday. The room was smaller than the photos, but the kitchen was bright and clean. The rent included internet and heating, but electricity was separate. Two students already lived there. Sofia liked the location because she could walk to class in fifteen minutes. She hasn't decided yet because she is viewing another room tomorrow.",
+    questions:["What was different from the photos?","Which bills were included?","Why did Sofia like the location?","Has she made a final decision?"],
+    answers:"The room was smaller; internet and heating; she could walk to class in fifteen minutes; no, she hasn't."},
+  {level:"b1", label:"B1", title:"A difficult first shift", text:"On my first evening shift, the card machine stopped working while several customers were waiting. I had never dealt with that problem before, so I told the supervisor immediately. She showed me how to restart the terminal and asked me to explain the delay to the queue. Most customers were understanding because I kept them informed. By the end of the shift, I had learned both a technical process and an important lesson about communication.",
+    questions:["What happened during the shift?","Why did the writer ask the supervisor?","How did the writer help the customers?","What two things did the writer learn?"],
+    answers:"The card machine stopped working; they had never dealt with it before; they explained the delay and kept customers informed; a technical process and the value of communication."},
+  {level:"b2", label:"B2", title:"Working abroad and professional identity", text:"Moving abroad can reshape a person's professional identity. Skills that once felt automatic — making small talk, explaining a complex problem or showing confidence in an interview — may suddenly require conscious effort in another language. Nevertheless, this temporary loss of ease should not be mistaken for a loss of competence. International workers often develop valuable abilities precisely because they must observe more carefully, adapt their communication and ask clearer questions. Employers can support this process by assessing evidence of performance rather than treating accent or speed as measures of intelligence.",
+    questions:["What mistaken conclusion might a worker make?","Which abilities can international workers develop?","What does the text recommend employers assess?"],
+    answers:"They may mistake reduced ease for reduced competence; careful observation, adaptable communication and clearer questioning; evidence of performance, not accent or speed."}
+];
+var englishReadingView = ls("englishReadingView") || "a1";
+var ENGLISH_LISTENING = [
+  {level:"a1", label:"A1", title:"At the café", lines:[
+    "Barista: Hi there. What can I get you?",
+    "Customer: A tea and a cheese sandwich, please.",
+    "Barista: Is that for here or to take away?",
+    "Customer: For here, please. How much is it?",
+    "Barista: It's eight euro fifty."
+  ], questions:["What drink did the customer order?","What food?","For here or to take away?","How much is it?"],
+    answers:"Tea; cheese sandwich; for here; €8.50."},
+  {level:"a2", label:"A2", title:"Transport announcement", lines:[
+    "Attention, please. The 14:20 service to Galway is delayed by approximately twenty minutes.",
+    "It will now depart from platform six, not platform four.",
+    "We apologise for the delay."
+  ], questions:["Destination?","Original time?","How long is the delay?","New platform?"],
+    answers:"Galway; 14:20; about 20 minutes; platform 6."},
+  {level:"b1", label:"B1", title:"Voicemail about a viewing", lines:[
+    "Hi Larissa, this is Patrick calling about the room in Drumcondra.",
+    "Tomorrow's viewing has moved from half past five to quarter past six because the current tenant will be home late.",
+    "The address is 42 Cedar Road, and the blue door is beside a small grocery shop.",
+    "Text me if the new time doesn't suit you."
+  ], questions:["Why did Patrick call?","What was the original time?","What is the new time?","What's the reference point for the address?","What should she do if the time doesn't work?"],
+    answers:"About a room viewing; 5:30; 6:15; blue door beside a grocery shop; text Patrick."},
+  {level:"b2", label:"B2", title:"Project update", lines:[
+    "We've identified the cause of yesterday's login failures.",
+    "A configuration change was deployed without one of the required security rules.",
+    "The team rolled the change back at 9:40, and access has been stable since then.",
+    "We're now reviewing the deployment process.",
+    "Although no customer data was exposed, we'll contact affected users and publish a short incident summary this afternoon."
+  ], questions:["What was the root cause?","What action was taken?","At what time?","Was any customer data exposed?","What are the next steps?"],
+    answers:"A missing security rule in a configuration change; rollback of the change; 9:40; no customer data was exposed; contact affected users and publish an incident summary."}
+];
+var englishListeningView = ls("englishListeningView") || "a1";
+var ENGLISH_YOUTUBE = [
+  {name:"BBC Learning English", url:"https://www.youtube.com/@bbclearningenglish", desc:"Vídeos curtos sobre gramática, vocabulário e inglês das notícias, com legendas."},
+  {name:"Cambridge English", url:"https://www.youtube.com/@CambridgeEnglish", desc:"Conteúdo alinhado ao CEFR (A1–C2), útil para acompanhar o próprio nível."},
+  {name:"English with Lucy", url:"https://www.youtube.com/@EnglishwithLucy", desc:"Pronúncia, vocabulário do dia a dia e expressões naturais, em ritmo bom para A2–B2."},
+  {name:"engVid", url:"https://www.youtube.com/@engvid", desc:"Vários professores, aulas curtas de gramática e vocabulário organizadas por tema."},
+  {name:"Speak English With Vanessa", url:"https://www.youtube.com/@SpeakEnglishWithVanessa", desc:"Foco em fluência e expressões idiomáticas do inglês americano."},
+  {name:"TED-Ed", url:"https://www.youtube.com/@TEDEd", desc:"Listening mais avançado (B2+): vídeos curtos com legendas em inglês sobre temas variados."}
+];
+var ENGLISH_WRITING = [
+  {level:"a1", label:"A1", prompts:["Preencha um formulário pessoal simples (nome, país, profissão).","Escreva uma mensagem de 30 palavras se apresentando.","Descreva sua rotina em cinco frases.","Escreva uma lista de compras com seis itens."],
+    model:"Hi, I'm Ana. I'm from Brazil. I'm a student. I live in Dublin with two flatmates. I study English in the morning and I work part-time in the afternoon."},
+  {level:"a2", label:"A2", prompts:["Escreva uma mensagem perguntando sobre a visita a um quarto.","Relate em 80 palavras seu primeiro dia em uma cidade nova.","Escreva um convite para um colega.","Peça informação sobre um curso por e-mail."],
+    model:"Hi, I saw your ad for the room in Rathmines. Is it still available? I'd like to know if bills are included and when I could arrange a viewing. Thanks, Marcos."},
+  {level:"b1", label:"B1", prompts:["Escreva um e-mail de candidatura a uma vaga.","Escreva uma reclamação educada sobre um problema no apartamento.","Conte uma experiência inesperada em 130 palavras.","Escreva um perfil profissional curto para o LinkedIn."],
+    model:"Dear Hiring Team, I'm writing to apply for the Barista position advertised on your website. I have two years of experience in customer service and I'm available for morning and weekend shifts. I've attached my CV and would welcome the opportunity to discuss my application further. Kind regards, Camila Souza."},
+  {level:"b2", label:"B2", prompts:["Escreva uma cover letter de 180–220 palavras para uma vaga real.","Resuma os pontos principais de uma reunião fictícia.","Escreva um texto de opinião sobre morar no exterior.","Escreva um relatório curto de um incidente técnico."],
+    model:"Subject: Follow-up on Support Analyst Interview\n\nDear Ms Byrne,\n\nThank you for meeting with me today. I enjoyed learning more about the role and the team. Our discussion reinforced my interest in the position, particularly the opportunity to work with cloud support. Please let me know if I can provide any further information.\n\nKind regards,\nMariana Costa"}
+];
+var englishWritingView = ls("englishWritingView") || "a1";
+function getEnglishWritingDraft(level){ return (ls("englishWritingDrafts")||{})[level] || ""; }
+function setEnglishWritingDraft(level, text){
+  var drafts = ls("englishWritingDrafts") || {};
+  if(text) drafts[level] = text; else delete drafts[level];
+  ls("englishWritingDrafts", drafts);
+}
+function wireRevealToggles(containerId){
+  document.querySelectorAll("#"+containerId+" .reveal-toggle").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var box = document.querySelector('#'+containerId+' [data-reveal-box="'+btn.dataset.revealToggle+'"]');
+      if(!box) return;
+      box.hidden = !box.hidden;
+      btn.textContent = box.hidden ? "Ver respostas" : "Ocultar respostas";
+    });
+  });
+}
+function renderEnglishMistakes(){
+  var rows = ENGLISH_MISTAKES.map(function(m){
+    return '<tr><td data-label="Evitar" style="color:var(--warn-strong);">'+m.wrong+'</td><td data-label="Prefira"><strong>'+m.right+'</strong></td><td data-label="Por quê">'+m.why+'</td></tr>';
+  }).join("");
+  document.getElementById("englishMistakesTable").innerHTML =
+    '<thead><tr><th>Evitar</th><th>Prefira</th><th>Por quê</th></tr></thead><tbody>'+rows+'</tbody>';
+}
+function renderEnglishFalseFriends(){
+  var rows = ENGLISH_FALSE_FRIENDS.map(function(f){
+    return '<tr><td data-label="Palavra"><strong>'+f.word+'</strong></td><td data-label="Significado certo">'+f.meaning+'</td><td data-label="Não significa">'+f.not+'</td><td data-label="Exemplo"><i>'+f.example+'</i></td></tr>';
+  }).join("");
+  document.getElementById("englishFalseFriendsTable").innerHTML =
+    '<thead><tr><th>Palavra</th><th>Significado certo</th><th>Não significa</th><th>Exemplo</th></tr></thead><tbody>'+rows+'</tbody>';
+}
+function renderEnglishPhrasalTabs(){
+  document.getElementById("englishPhrasalTabs").innerHTML = ENGLISH_PHRASAL_GROUPS.map(function(g){
+    return '<button class="subtab'+(englishPhrasalView===g.id?' active':'')+'" data-group="'+g.id+'">'+g.label+'</button>';
+  }).join("");
+  document.querySelectorAll("#englishPhrasalTabs .subtab").forEach(function(b){
+    b.addEventListener("click", function(){ englishPhrasalView = b.dataset.group; ls("englishPhrasalView", englishPhrasalView); renderEnglishPhrasalTabs(); renderEnglishPhrasalContent(); });
+  });
+}
+function renderEnglishPhrasalContent(){
+  var group = ENGLISH_PHRASAL_GROUPS.find(function(g){ return g.id===englishPhrasalView; });
+  var items = group ? group.items : [];
+  document.getElementById("englishPhrasalWrap").innerHTML = '<div class="grid cols-3">'+items.map(function(it){
+    return '<div class="card"><h3 style="font-size:15px;">'+it.v+'</h3><p style="margin:0 0 6px;color:var(--muted);font-size:13px;">'+it.pt+'</p><p style="margin:0;font-size:13.5px;"><i>'+it.ex+'</i></p></div>';
+  }).join("")+'</div>';
+}
+function renderEnglishSlang(){
+  var rows = ENGLISH_SLANG.map(function(s){
+    return '<tr><td data-label="Expressão"><strong>'+s.term+'</strong></td><td data-label="Sentido">'+s.meaning+'</td><td data-label="Exemplo">'+s.example+'</td></tr>';
+  }).join("");
+  document.getElementById("englishSlangTable").innerHTML =
+    '<thead><tr><th>Expressão</th><th>Sentido provável</th><th>Registro / exemplo</th></tr></thead><tbody>'+rows+'</tbody>';
+}
+function renderEnglishReadingTabs(){
+  document.getElementById("englishReadingTabs").innerHTML = ENGLISH_READING.map(function(r){
+    return '<button class="subtab'+(englishReadingView===r.level?' active':'')+'" data-level="'+r.level+'">'+r.label+'</button>';
+  }).join("");
+  document.querySelectorAll("#englishReadingTabs .subtab").forEach(function(b){
+    b.addEventListener("click", function(){ englishReadingView = b.dataset.level; ls("englishReadingView", englishReadingView); renderEnglishReadingTabs(); renderEnglishReadingContent(); });
+  });
+}
+function renderEnglishReadingContent(){
+  var r = ENGLISH_READING.find(function(x){ return x.level===englishReadingView; });
+  if(!r) return;
+  document.getElementById("englishReadingWrap").innerHTML =
+    '<div class="card"><h3>'+r.title+'</h3><p style="margin:0 0 16px;">'+r.text+'</p>'+
+    '<ol style="margin:0 0 12px;padding-left:20px;font-size:13.5px;">'+r.questions.map(function(q){ return "<li>"+q+"</li>"; }).join("")+'</ol>'+
+    '<button type="button" class="btn btn-ghost reveal-toggle" data-reveal-toggle="reading" style="width:auto;padding:8px 16px;font-size:12.5px;">Ver respostas</button>'+
+    '<div data-reveal-box="reading" hidden style="margin-top:10px;"><p class="source-note" style="margin:0;">'+r.answers+'</p></div>'+
+    '</div>';
+  wireRevealToggles("englishReadingWrap");
+}
+function renderEnglishListeningTabs(){
+  document.getElementById("englishListeningTabs").innerHTML = ENGLISH_LISTENING.map(function(l){
+    return '<button class="subtab'+(englishListeningView===l.level?' active':'')+'" data-level="'+l.level+'">'+l.label+'</button>';
+  }).join("");
+  document.querySelectorAll("#englishListeningTabs .subtab").forEach(function(b){
+    b.addEventListener("click", function(){ englishListeningView = b.dataset.level; ls("englishListeningView", englishListeningView); renderEnglishListeningTabs(); renderEnglishListeningContent(); });
+  });
+}
+function renderEnglishListeningContent(){
+  var l = ENGLISH_LISTENING.find(function(x){ return x.level===englishListeningView; });
+  if(!l) return;
+  document.getElementById("englishListeningWrap").innerHTML =
+    '<div class="card"><h3>'+l.title+'</h3>'+
+    '<div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13.5px;line-height:1.7;">'+l.lines.map(function(ln){ return "<p style=\"margin:0 0 6px;\">"+ln+"</p>"; }).join("")+'</div>'+
+    '<ol style="margin:0 0 12px;padding-left:20px;font-size:13.5px;">'+l.questions.map(function(q){ return "<li>"+q+"</li>"; }).join("")+'</ol>'+
+    '<button type="button" class="btn btn-ghost reveal-toggle" data-reveal-toggle="listening" style="width:auto;padding:8px 16px;font-size:12.5px;">Ver respostas</button>'+
+    '<div data-reveal-box="listening" hidden style="margin-top:10px;"><p class="source-note" style="margin:0;">'+l.answers+'</p></div>'+
+    '</div>';
+  wireRevealToggles("englishListeningWrap");
+}
+function renderEnglishYoutube(){
+  document.getElementById("englishYoutubeWrap").innerHTML = '<div class="grid cols-3">'+ENGLISH_YOUTUBE.map(function(y){
+    return '<a class="linkcard" href="'+y.url+'" target="_blank" rel="noopener"><h4>'+y.name+'</h4><p>'+y.desc+'</p><span class="linkcard-arrow">↗</span></a>';
+  }).join("")+'</div>';
+}
+function renderEnglishWritingTabs(){
+  document.getElementById("englishWritingTabs").innerHTML = ENGLISH_WRITING.map(function(w){
+    return '<button class="subtab'+(englishWritingView===w.level?' active':'')+'" data-level="'+w.level+'">'+w.label+'</button>';
+  }).join("");
+  document.querySelectorAll("#englishWritingTabs .subtab").forEach(function(b){
+    b.addEventListener("click", function(){ englishWritingView = b.dataset.level; ls("englishWritingView", englishWritingView); renderEnglishWritingTabs(); renderEnglishWritingContent(); });
+  });
+}
+function renderEnglishWritingContent(){
+  var w = ENGLISH_WRITING.find(function(x){ return x.level===englishWritingView; });
+  if(!w) return;
+  document.getElementById("englishWritingWrap").innerHTML =
+    '<div class="card">'+
+    '<h3>Temas para praticar</h3>'+
+    '<ul style="margin:0 0 14px;padding-left:20px;font-size:13.5px;line-height:1.7;">'+w.prompts.map(function(p){ return "<li>"+p+"</li>"; }).join("")+'</ul>'+
+    '<label style="font-size:13px;color:var(--muted);display:block;margin-bottom:6px;">Seu rascunho (fica salvo só neste navegador)</label>'+
+    '<textarea id="englishWritingDraft" rows="4" placeholder="Escreva sua versão em inglês aqui..." style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13.5px;font-family:inherit;">'+escapeHtml(getEnglishWritingDraft(w.level))+'</textarea>'+
+    '<button type="button" class="btn btn-ghost reveal-toggle" data-reveal-toggle="writing" style="width:auto;padding:8px 16px;font-size:12.5px;margin-top:10px;">Ver modelo</button>'+
+    '<div data-reveal-box="writing" hidden style="margin-top:10px;white-space:pre-wrap;font-size:13.5px;background:var(--bg);border-radius:10px;padding:12px 14px;">'+escapeHtml(w.model)+'</div>'+
+    '</div>';
+  var ta = document.getElementById("englishWritingDraft");
+  ta.addEventListener("change", function(){ setEnglishWritingDraft(w.level, ta.value); });
+  wireRevealToggles("englishWritingWrap");
+}
 function englishProgressState(){ return ls("inglesProgress") || {}; }
 function englishAllIds(){
   var ids = [];
@@ -1236,6 +1554,18 @@ function renderEnglish(){
   renderEnglishLevelTabs();
   renderEnglishTopics();
   renderEnglishModules();
+  renderEnglishMistakes();
+  renderEnglishFalseFriends();
+  renderEnglishPhrasalTabs();
+  renderEnglishPhrasalContent();
+  renderEnglishSlang();
+  renderEnglishReadingTabs();
+  renderEnglishReadingContent();
+  renderEnglishListeningTabs();
+  renderEnglishListeningContent();
+  renderEnglishYoutube();
+  renderEnglishWritingTabs();
+  renderEnglishWritingContent();
   renderEnglishProgress();
 }
 
