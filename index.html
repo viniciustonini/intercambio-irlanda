@@ -41,6 +41,7 @@
         </div>
         <div class="hero-actions">
           <button class="edit-link" id="heroEditDate" type="button">editar data</button>
+          <button class="edit-link edit-link-muted" id="heroBackupBtn" type="button">meus dados</button>
           <button class="edit-link edit-link-muted" id="heroResetBtn" type="button">resetar progresso</button>
         </div>
         <div class="hero-date-editor" id="heroDateEditor" hidden>
@@ -56,22 +57,28 @@
     <button class="tabbar-arrow left" id="tabArrowLeft" type="button" aria-label="Rolar para a esquerda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <div class="tabbar-fade left" id="tabFadeLeft"></div>
     <nav class="tabbar" id="tabbar" role="tablist" aria-label="Seções do guia">
-      <button class="tab-btn" id="tab-inicio" data-sec="inicio" role="tab" aria-selected="true" aria-controls="sec-inicio">Visão geral</button>
-      <button class="tab-btn" id="tab-perfil" data-sec="perfil" role="tab" aria-selected="false" aria-controls="sec-perfil">Perfil &amp; cidade</button>
+      <button class="tab-btn" id="tab-inicio" data-sec="inicio" role="tab" aria-selected="true" aria-controls="sec-inicio">Início</button>
+      <button class="tab-btn" id="tab-roteiro" data-sec="roteiro" role="tab" aria-selected="false" aria-controls="sec-roteiro">Meu Plano</button>
       <button class="tab-btn" id="tab-imigracao" data-sec="imigracao" role="tab" aria-selected="false" aria-controls="sec-imigracao">Imigração</button>
-      <button class="tab-btn" id="tab-trabalho" data-sec="trabalho" role="tab" aria-selected="false" aria-controls="sec-trabalho">Trabalho &amp; estudo</button>
       <button class="tab-btn" id="tab-financas" data-sec="financas" role="tab" aria-selected="false" aria-controls="sec-financas">Finanças</button>
-      <button class="tab-btn" id="tab-acomodacao" data-sec="acomodacao" role="tab" aria-selected="false" aria-controls="sec-acomodacao">Acomodação</button>
-      <button class="tab-btn" id="tab-mercado" data-sec="mercado" role="tab" aria-selected="false" aria-controls="sec-mercado">Mercado</button>
-      <button class="tab-btn" id="tab-transporte" data-sec="transporte" role="tab" aria-selected="false" aria-controls="sec-transporte">Transporte</button>
-      <button class="tab-btn" id="tab-links" data-sec="links" role="tab" aria-selected="false" aria-controls="sec-links">Links oficiais</button>
-      <button class="tab-btn" id="tab-roteiro" data-sec="roteiro" role="tab" aria-selected="false" aria-controls="sec-roteiro">Roteiro completo</button>
-      <button class="tab-btn" id="tab-grupos" data-sec="grupos" role="tab" aria-selected="false" aria-controls="sec-grupos">Grupos</button>
-      <button class="tab-btn tab-btn-alt" id="tab-turismo" data-sec="turismo" role="tab" aria-selected="false" aria-controls="sec-turismo">✈ Turismo (poucos dias)</button>
+      <button class="tab-btn more-btn" id="tabMoreBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="moreMenu">Mais<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="margin-left:4px;"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button class="tab-btn tab-btn-alt" id="tab-turismo" data-sec="turismo" role="tab" aria-selected="false" aria-controls="sec-turismo">✈ Turismo</button>
     </nav>
     <div class="tabbar-fade right" id="tabFadeRight"></div>
     <button class="tabbar-arrow right" id="tabArrowRight" type="button" aria-label="Rolar para a direita"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
+  </div>
+
+  <div class="more-menu-backdrop" id="moreMenuBackdrop" hidden></div>
+  <div class="more-menu" id="moreMenu" role="menu" aria-label="Mais seções" hidden>
+    <div class="more-menu-handle" id="moreMenuHandle"></div>
+    <button class="tab-btn" id="tab-perfil" data-sec="perfil" role="menuitem" aria-controls="sec-perfil">Perfil &amp; cidade</button>
+    <button class="tab-btn" id="tab-trabalho" data-sec="trabalho" role="menuitem" aria-controls="sec-trabalho">Trabalho &amp; estudo</button>
+    <button class="tab-btn" id="tab-acomodacao" data-sec="acomodacao" role="menuitem" aria-controls="sec-acomodacao">Acomodação</button>
+    <button class="tab-btn" id="tab-mercado" data-sec="mercado" role="menuitem" aria-controls="sec-mercado">Mercado</button>
+    <button class="tab-btn" id="tab-transporte" data-sec="transporte" role="menuitem" aria-controls="sec-transporte">Transporte</button>
+    <button class="tab-btn" id="tab-links" data-sec="links" role="menuitem" aria-controls="sec-links">Links oficiais</button>
+    <button class="tab-btn" id="tab-grupos" data-sec="grupos" role="menuitem" aria-controls="sec-grupos">Grupos</button>
   </div>
 
   <main class="main">
@@ -260,7 +267,7 @@
 
     <!-- ROTEIRO COMPLETO -->
     <section class="section" id="sec-roteiro" data-sec="roteiro" role="tabpanel" aria-labelledby="tab-roteiro">
-      <div class="section-head"><h2>Roteiro completo</h2><p>Marque cada etapa conforme for avançando — do checklist ao planejamento em casa até os primeiros 30 dias na Irlanda.</p></div>
+      <div class="section-head"><h2>Meu Plano</h2><p>Marque cada etapa conforme for avançando — do checklist ao planejamento em casa até os primeiros 30 dias na Irlanda.</p></div>
       <div class="mini-progress"><div class="progress-track"><div class="progress-fill" id="miniProgressBar" style="transform:scaleX(0)"></div></div><span class="mini-progress-pct tabular" id="miniProgressPct">0%</span></div>
       <h3 style="font-size:17px;margin-bottom:12px;">Checklist final</h3>
       <div id="checklistWrap"></div>
@@ -345,10 +352,24 @@
   <button class="btn btn-accent" id="cookieBarAccept" type="button">Entendi</button>
 </div>
 
+<div class="modal-overlay" id="backupModal" hidden>
+  <div class="modal-card">
+    <h3>Meus dados</h3>
+    <p>Tudo o que você preenche (perfil, checklist, orçamento, mercado, acomodação, escolas) fica salvo só neste navegador — não é sincronizado entre aparelhos. Baixe um backup de vez em quando, ou antes de limpar os dados do navegador.</p>
+    <div class="modal-actions" style="justify-content:flex-start;flex-wrap:wrap;">
+      <button class="btn btn-accent" id="backupExportBtn" type="button" style="width:auto;">Exportar backup (.json)</button>
+      <button class="btn btn-ghost" id="backupImportBtn" type="button" style="width:auto;">Importar backup</button>
+      <input type="file" id="backupImportInput" accept="application/json" hidden>
+    </div>
+    <p class="source-note" id="backupStatus" style="margin-top:12px;"></p>
+    <div class="modal-actions"><button class="btn btn-ghost" id="backupModalClose" type="button">Fechar</button></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="resetModal" hidden>
   <div class="modal-card">
     <h3>Resetar progresso?</h3>
-    <p>Isso vai apagar o checklist, o cronograma, os primeiros 30 dias e o orçamento salvos neste navegador. Essa ação não pode ser desfeita.</p>
+    <p>Isso vai apagar TODOS os seus dados salvos neste navegador — perfil, checklist, cronograma, orçamento, mercado, acomodação, escolas e favoritos de turismo. Essa ação não pode ser desfeita. Considere exportar um backup antes (botão "meus dados" ao lado).</p>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="resetModalCancel" type="button">Cancelar</button>
       <button class="btn btn-danger" id="resetModalConfirm" type="button">Apagar e resetar</button>

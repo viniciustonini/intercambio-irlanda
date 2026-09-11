@@ -4,6 +4,14 @@ function ls(key, val){
   if(val===undefined){ try{ var v = localStorage.getItem(LS+key); return v===null?null:JSON.parse(v); }catch(e){ return null; } }
   try{ localStorage.setItem(LS+key, JSON.stringify(val)); }catch(e){}
 }
+/* Escapa texto vindo do usuario antes de inserir em HTML/atributos — evita XSS
+   armazenado quando esse texto (item de mercado, escola, acomodacao etc.) e
+   depois re-renderizado via innerHTML. */
+function escapeHtml(str){
+  return String(str==null?"":str)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
 
 /* ---------- nav ---------- */
 var SCROLL_MODE_MQ = window.matchMedia("(max-width:900px)");
@@ -11,10 +19,10 @@ function isScrollMode(){ return SCROLL_MODE_MQ.matches; }
 
 function highlightTab(id){
   var activeBtn = null;
-  document.querySelectorAll(".tab-btn").forEach(function(b){
+  document.querySelectorAll(".tab-btn[data-sec]").forEach(function(b){
     var on = b.dataset.sec===id;
     b.classList.toggle("active", on);
-    b.setAttribute("aria-selected", on ? "true" : "false");
+    if(b.getAttribute("role")==="tab") b.setAttribute("aria-selected", on ? "true" : "false");
     if(on) activeBtn = b;
   });
   if(activeBtn) activeBtn.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
@@ -79,7 +87,7 @@ function animateHeroEntrance(){
     gsap.to(counter, {v:target, duration:1.1, ease:"power1.out", delay:.35, onUpdate:function(){ daysEl.textContent = Math.round(counter.v); }});
   }
 }
-document.querySelectorAll(".tab-btn").forEach(function(b){
+document.querySelectorAll(".tab-btn[data-sec]").forEach(function(b){
   b.addEventListener("click", function(){ location.hash = b.dataset.sec; showSection(b.dataset.sec); });
 });
 window.addEventListener("hashchange", function(){ showSection(location.hash.replace("#","") || "inicio"); });
@@ -143,6 +151,29 @@ function updateTabbarScrollUI(){
   document.getElementById("tabArrowLeft").addEventListener("click", function(){ tb.scrollBy({left:-220, behavior:"smooth"}); });
   document.getElementById("tabArrowRight").addEventListener("click", function(){ tb.scrollBy({left:220, behavior:"smooth"}); });
 })();
+
+/* ---------- menu "Mais" ---------- */
+function openMoreMenu(){
+  document.getElementById("moreMenu").hidden = false;
+  document.getElementById("moreMenuBackdrop").hidden = false;
+  document.getElementById("tabMoreBtn").setAttribute("aria-expanded", "true");
+}
+function closeMoreMenu(){
+  document.getElementById("moreMenu").hidden = true;
+  document.getElementById("moreMenuBackdrop").hidden = true;
+  document.getElementById("tabMoreBtn").setAttribute("aria-expanded", "false");
+}
+document.getElementById("tabMoreBtn").addEventListener("click", function(){
+  var isOpen = document.getElementById("tabMoreBtn").getAttribute("aria-expanded") === "true";
+  if(isOpen) closeMoreMenu(); else openMoreMenu();
+});
+document.getElementById("moreMenuBackdrop").addEventListener("click", closeMoreMenu);
+document.querySelectorAll("#moreMenu .tab-btn").forEach(function(btn){
+  btn.addEventListener("click", closeMoreMenu);
+});
+document.addEventListener("keydown", function(e){
+  if(e.key==="Escape" && !document.getElementById("moreMenu").hidden) closeMoreMenu();
+});
 document.getElementById("heroEditDate").addEventListener("click", function(){
   var editor = document.getElementById("heroDateEditor");
   editor.hidden = !editor.hidden;
@@ -185,6 +216,90 @@ document.getElementById("resetModal").addEventListener("click", function(e){
 document.getElementById("resetModalConfirm").addEventListener("click", function(){
   Object.keys(localStorage).filter(function(k){return k.indexOf(LS)===0 && k!==LS+"unlocked" && k!==LS+"name";}).forEach(function(k){ localStorage.removeItem(k); });
   location.reload();
+});
+
+/* ---------- backup: exportar / importar / versionamento de schema ---------- */
+var STORAGE_VERSION = 1;
+/* Migracoes futuras: MIGRATIONS[2] = function(data){ ...ajusta 'data' de v1 para v2...; return data; } */
+var MIGRATIONS = {};
+function runMigrations(data, fromVersion){
+  var v = fromVersion || 1;
+  while(v < STORAGE_VERSION){
+    v++;
+    if(typeof MIGRATIONS[v] === "function") data = MIGRATIONS[v](data);
+  }
+  return data;
+}
+function ensureSchemaVersion(){
+  if(ls("schemaVersion") == null) ls("schemaVersion", STORAGE_VERSION);
+}
+function exportBackupData(){
+  var data = {};
+  Object.keys(localStorage).filter(function(k){ return k.indexOf(LS)===0; }).forEach(function(k){
+    try{ data[k.slice(LS.length)] = JSON.parse(localStorage.getItem(k)); }catch(e){}
+  });
+  return {app:"intercambio-irlanda", schemaVersion: ls("schemaVersion") || STORAGE_VERSION, exportedAt: new Date().toISOString(), data: data};
+}
+function downloadBackup(){
+  var payload = JSON.stringify(exportBackupData(), null, 2);
+  var blob = new Blob([payload], {type:"application/json"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  var stamp = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = "intercambio-irlanda-backup-"+stamp+".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+function restoreBackup(file, statusEl){
+  var reader = new FileReader();
+  reader.onload = function(){
+    var parsed;
+    try{ parsed = JSON.parse(reader.result); }catch(e){
+      statusEl.textContent = "Arquivo inválido — não parece um backup deste site.";
+      statusEl.style.color = "var(--warn-strong)";
+      return;
+    }
+    if(!parsed || parsed.app !== "intercambio-irlanda" || typeof parsed.data !== "object"){
+      statusEl.textContent = "Arquivo inválido — não parece um backup deste site.";
+      statusEl.style.color = "var(--warn-strong)";
+      return;
+    }
+    var data = runMigrations(parsed.data, parsed.schemaVersion);
+    Object.keys(localStorage).filter(function(k){ return k.indexOf(LS)===0; }).forEach(function(k){ localStorage.removeItem(k); });
+    Object.keys(data).forEach(function(key){ ls(key, data[key]); });
+    ls("schemaVersion", STORAGE_VERSION);
+    statusEl.textContent = "Backup restaurado! Recarregando...";
+    statusEl.style.color = "var(--accent-strong)";
+    setTimeout(function(){ location.reload(); }, 900);
+  };
+  reader.onerror = function(){
+    statusEl.textContent = "Não consegui ler o arquivo. Tente novamente.";
+    statusEl.style.color = "var(--warn-strong)";
+  };
+  reader.readAsText(file);
+}
+document.getElementById("heroBackupBtn").addEventListener("click", function(){
+  document.getElementById("backupStatus").textContent = "";
+  document.getElementById("backupModal").hidden = false;
+});
+document.getElementById("backupModalClose").addEventListener("click", function(){
+  document.getElementById("backupModal").hidden = true;
+});
+document.getElementById("backupModal").addEventListener("click", function(e){
+  if(e.target.id==="backupModal") document.getElementById("backupModal").hidden = true;
+});
+document.getElementById("backupExportBtn").addEventListener("click", downloadBackup);
+document.getElementById("backupImportBtn").addEventListener("click", function(){
+  document.getElementById("backupImportInput").click();
+});
+document.getElementById("backupImportInput").addEventListener("change", function(e){
+  var file = e.target.files && e.target.files[0];
+  if(!file) return;
+  var statusEl = document.getElementById("backupStatus");
+  statusEl.style.color = "var(--muted)";
+  statusEl.textContent = "Lendo arquivo...";
+  restoreBackup(file, statusEl);
+  e.target.value = "";
 });
 
 /* ---------- lightbox de fotos ---------- */
@@ -556,12 +671,12 @@ function renderSchoolsTable(){
   var list = getSchools(schoolCity);
   var rows = list.map(function(s){
     return '<tr>'+
-      '<td data-label="Escola"><input type="text" style="width:190px;" value="'+s.name+'" data-id="'+s.id+'" data-f="name"></td>'+
+      '<td data-label="Escola"><input type="text" style="width:190px;" value="'+escapeHtml(s.name)+'" data-id="'+s.id+'" data-f="name"></td>'+
       '<td class="num" data-label="Nota">'+(s.rating?s.rating+' '+STAR_ICON+(s.reviews?'<div class="source-note">'+s.reviews+' aval.</div>':""):'<span class="source-note">—</span>')+'</td>'+
       '<td data-label="Manhã €/sem"><input type="number" step="1" style="width:62px;" value="'+(s.morning!=null?s.morning:"")+'" data-id="'+s.id+'" data-f="morning" placeholder="—"></td>'+
       '<td data-label="Tarde €/sem"><input type="number" step="1" style="width:62px;" value="'+(s.afternoon!=null?s.afternoon:"")+'" data-id="'+s.id+'" data-f="afternoon" placeholder="—"></td>'+
       '<td data-label="Noite €/sem"><input type="number" step="1" style="width:62px;" value="'+(s.evening!=null?s.evening:"")+'" data-id="'+s.id+'" data-f="evening" placeholder="—"></td>'+
-      '<td data-label="Observação" style="min-width:220px;"><textarea style="width:100%;min-height:80px;resize:vertical;font:inherit;line-height:1.4;" data-id="'+s.id+'" data-f="note">'+(s.note||"")+'</textarea></td>'+
+      '<td data-label="Observação" style="min-width:220px;"><textarea style="width:100%;min-height:80px;resize:vertical;font:inherit;line-height:1.4;" data-id="'+s.id+'" data-f="note">'+escapeHtml(s.note||"")+'</textarea></td>'+
       '<td data-label=""><button class="btn-ghost btn" style="width:auto;padding:5px 10px;font-size:12px;" data-remove="'+s.id+'">Remover</button></td>'+
       '</tr>';
   }).join("");
@@ -768,7 +883,7 @@ function renderStayTable(){
     var total = s.noites*s.preco;
     return '<tr>'+
       '<td data-label="Usar" style="text-align:center;"><input type="radio" name="staySel" '+(selectedId===s.id?"checked":"")+' data-select="'+s.id+'"></td>'+
-      '<td data-label="Acomodação"><input type="text" style="width:190px;" value="'+s.nome+'" data-id="'+s.id+'" data-f="nome"></td>'+
+      '<td data-label="Acomodação"><input type="text" style="width:190px;" value="'+escapeHtml(s.nome)+'" data-id="'+s.id+'" data-f="nome"></td>'+
       '<td data-label="Noites"><input type="number" step="1" style="width:56px;" value="'+s.noites+'" data-id="'+s.id+'" data-f="noites"></td>'+
       '<td data-label="R$/noite"><input type="number" step="0.01" style="width:80px;" value="'+s.preco+'" data-id="'+s.id+'" data-f="preco"></td>'+
       '<td class="num tabular" data-label="Total" id="total-'+s.id+'">R$'+total.toFixed(2)+'</td>'+
@@ -1076,7 +1191,7 @@ function renderMarketFilters(){
   document.getElementById("marketFiltersWrap").innerHTML =
     '<div class="mini-form-grid" style="margin-bottom:0;">'+
     '<div><label>Buscar item</label><input type="text" id="marketSearch" placeholder="Ex.: frango, arroz, limpeza..."></div>'+
-    '<div><label>Categoria</label><select id="marketCatFilter"><option value="">Todas as categorias</option>'+cats.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join("")+'</select></div>'+
+    '<div><label>Categoria</label><select id="marketCatFilter"><option value="">Todas as categorias</option>'+cats.map(function(c){ return '<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>'; }).join("")+'</select></div>'+
     '</div>';
   document.getElementById("marketSearch").addEventListener("input", function(e){ marketFilter.q = e.target.value.toLowerCase(); applyMarketFilter(); });
   document.getElementById("marketCatFilter").addEventListener("change", function(e){ marketFilter.cat = e.target.value; applyMarketFilter(); });
@@ -1091,10 +1206,10 @@ function applyMarketFilter(){
 function renderMarketTable(){
   var cart = getMarketCart();
   var rows = cart.map(function(it){
-    return '<tr data-item="'+it.item.toLowerCase()+'" data-cat="'+it.cat+'">'+
-      '<td data-label="Categoria"><input type="text" style="width:120px;" value="'+it.cat+'" data-id="'+it.id+'" data-f="cat"></td>'+
-      '<td data-label="Item"><input type="text" style="width:190px;" value="'+it.item+'" data-id="'+it.id+'" data-f="item"></td>'+
-      '<td data-label="Embalagem"><input type="text" style="width:140px;" value="'+it.pkg+'" data-id="'+it.id+'" data-f="pkg"></td>'+
+    return '<tr data-item="'+escapeHtml(it.item.toLowerCase())+'" data-cat="'+escapeHtml(it.cat)+'">'+
+      '<td data-label="Categoria"><input type="text" style="width:120px;" value="'+escapeHtml(it.cat)+'" data-id="'+it.id+'" data-f="cat"></td>'+
+      '<td data-label="Item"><input type="text" style="width:190px;" value="'+escapeHtml(it.item)+'" data-id="'+it.id+'" data-f="item"></td>'+
+      '<td data-label="Embalagem"><input type="text" style="width:140px;" value="'+escapeHtml(it.pkg)+'" data-id="'+it.id+'" data-f="pkg"></td>'+
       '<td data-label="Qtd."><input type="number" step="1" style="width:55px;" value="'+it.qty+'" data-id="'+it.id+'" data-f="qty"></td>'+
       '<td data-label="Preço unit. (€)"><input type="number" step="0.01" style="width:75px;" value="'+it.price+'" data-id="'+it.id+'" data-f="price"></td>'+
       '<td class="num tabular" data-label="Subtotal" id="sub-'+it.id+'">€'+(it.qty*it.price).toFixed(2)+'</td>'+
@@ -1657,6 +1772,7 @@ function syncTabbarHeight(){
 }
 window.addEventListener("resize", syncTabbarHeight);
 function init(){
+  ensureSchemaVersion();
   renderNationalRules();
   renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm();
   renderJobRoleTabs(); renderJobRoleContent(); renderJobAddForm();
