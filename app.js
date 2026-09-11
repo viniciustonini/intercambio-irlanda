@@ -412,8 +412,66 @@ function renderProfileBanner(){
   var cname = city ? CITIES.find(function(c){return c.id===city;}).name : null;
   document.getElementById("profileBanner").innerHTML =
     'Perfil: <b>'+(p==="eu"?"cidadão UE": p==="non-eu"?"não-UE":"não definido")+'</b> · Cidade: <b>'+(cname||"não definida")+'</b>'+
-    '<button class="btn btn-ghost" style="padding:7px 14px;font-size:12.5px;" onclick="location.hash=\'perfil\';showSection(\'perfil\');">Editar perfil</button>';
+    '<button class="btn btn-ghost" style="padding:7px 14px;font-size:12.5px;" id="editProfileBtn" type="button">Editar perfil</button>';
+  var btn = document.getElementById("editProfileBtn");
+  if(btn) btn.addEventListener("click", openOnboarding);
 }
+
+/* ---------- onboarding ---------- */
+function getGoal(){ return ls("goal"); }
+function openOnboarding(){
+  document.querySelectorAll("#onbProfileSeg .seg-btn").forEach(function(b){ b.classList.toggle("selected", b.dataset.profile===getProfile()); });
+  var city = getCity();
+  document.querySelectorAll("#onbCitySeg .seg-btn").forEach(function(b){ b.classList.toggle("selected", city!==null && b.dataset.city===city); });
+  document.getElementById("onbGoal").value = getGoal() || "";
+  document.getElementById("onbTripDate").value = ls("tripDate") || "";
+  document.getElementById("onbFlight").checked = !!ls("hasFlight");
+  document.getElementById("onbAccommodation").checked = !!ls("hasAccommodation");
+  document.getElementById("onbSchool").checked = !!ls("hasSchool");
+  document.getElementById("onboardingModal").hidden = false;
+}
+function closeOnboarding(){ document.getElementById("onboardingModal").hidden = true; }
+(function(){
+  var chosenProfile = null, chosenCity = undefined;
+  document.querySelectorAll("#onbProfileSeg .seg-btn").forEach(function(b){
+    b.addEventListener("click", function(){
+      chosenProfile = b.dataset.profile;
+      document.querySelectorAll("#onbProfileSeg .seg-btn").forEach(function(x){ x.classList.toggle("selected", x===b); });
+    });
+  });
+  document.querySelectorAll("#onbCitySeg .seg-btn").forEach(function(b){
+    b.addEventListener("click", function(){
+      chosenCity = b.dataset.city;
+      document.querySelectorAll("#onbCitySeg .seg-btn").forEach(function(x){ x.classList.toggle("selected", x===b); });
+    });
+  });
+  function saveOnboarding(){
+    if(chosenProfile!=null) ls("profile", chosenProfile);
+    if(chosenCity!==undefined) ls("city", chosenCity);
+    var goal = document.getElementById("onbGoal").value;
+    if(goal) ls("goal", goal);
+    var date = document.getElementById("onbTripDate").value;
+    if(date) ls("tripDate", date);
+    ls("hasFlight", document.getElementById("onbFlight").checked);
+    ls("hasAccommodation", document.getElementById("onbAccommodation").checked);
+    ls("hasSchool", document.getElementById("onbSchool").checked);
+    ls("onboardingDone", true);
+    closeOnboarding();
+    renderAll();
+  }
+  function skipOnboarding(){
+    ls("onboardingDone", true);
+    closeOnboarding();
+  }
+  document.getElementById("onbSave").addEventListener("click", saveOnboarding);
+  document.getElementById("onbSkip").addEventListener("click", skipOnboarding);
+  document.getElementById("onboardingModal").addEventListener("click", function(e){
+    if(e.target.id==="onboardingModal") skipOnboarding();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key==="Escape" && !document.getElementById("onboardingModal").hidden) skipOnboarding();
+  });
+})();
 
 /* ---------- checklist ---------- */
 var CHECKLIST = [
@@ -1773,6 +1831,12 @@ function syncTabbarHeight(){
 window.addEventListener("resize", syncTabbarHeight);
 function init(){
   ensureSchemaVersion();
+  /* Quem ja usava o site antes do onboarding existir (ja tem perfil/cidade
+     configurados pela aba Perfil & cidade) nao precisa ver o onboarding. */
+  if(!ls("onboardingDone")){
+    if(getProfile() || getCity()) ls("onboardingDone", true);
+    else openOnboarding();
+  }
   renderNationalRules();
   renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm();
   renderJobRoleTabs(); renderJobRoleContent(); renderJobAddForm();

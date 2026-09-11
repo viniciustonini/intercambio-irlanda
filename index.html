@@ -335,6 +335,53 @@
   <footer class="site">Guia mantido por Vinicius para ajudar outros intercambistas. · Última atualização: <span id="lastUpdated"></span> · <a href="#" id="privacyLink">Política de privacidade</a></footer>
 </div>
 
+<div class="modal-overlay" id="onboardingModal" hidden>
+  <div class="modal-card modal-card-lg">
+    <div class="eyebrow" style="margin-bottom:4px;">Vamos personalizar seu guia</div>
+    <h3 style="margin-bottom:4px;">Algumas perguntas rápidas</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:18px;">Isso ajusta o que aparece pra você. Leva menos de 1 minuto — e dá pra mudar depois.</p>
+
+    <label class="onb-label">Sua cidadania</label>
+    <div class="seg" id="onbProfileSeg" style="margin-bottom:18px;">
+      <button class="seg-btn" type="button" data-profile="eu"><h4>🇪🇺 Sou cidadão europeu</h4><p>UE, EEE ou Suíço</p></button>
+      <button class="seg-btn" type="button" data-profile="non-eu"><h4>🌎 Não sou cidadão europeu</h4><p>Visto de estudante, Stamp 2</p></button>
+    </div>
+
+    <label class="onb-label">Cidade de destino</label>
+    <div class="seg" id="onbCitySeg" style="margin-bottom:18px;">
+      <button class="seg-btn" type="button" data-city="dublin"><h4>Dublin</h4></button>
+      <button class="seg-btn" type="button" data-city="cork"><h4>Cork</h4></button>
+      <button class="seg-btn" type="button" data-city="galway"><h4>Galway</h4></button>
+      <button class="seg-btn" type="button" data-city=""><h4>Ainda não sei</h4></button>
+    </div>
+
+    <label class="onb-label" for="onbGoal">Seu objetivo principal</label>
+    <select id="onbGoal" style="width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;margin-bottom:18px;">
+      <option value="">Selecione...</option>
+      <option value="ingles">Estudar inglês</option>
+      <option value="trabalhar">Trabalhar</option>
+      <option value="ingles-trabalho">Estudar + trabalhar</option>
+      <option value="morar">Morar na Irlanda</option>
+      <option value="turismo">Turismo</option>
+    </select>
+
+    <label class="onb-label" for="onbTripDate">Data prevista da viagem</label>
+    <input type="date" id="onbTripDate" style="width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;margin-bottom:18px;">
+
+    <label class="onb-label">Já garantiu? (opcional)</label>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:22px;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer;"><input type="checkbox" id="onbFlight" style="width:16px;height:16px;">Já comprou passagem</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer;"><input type="checkbox" id="onbAccommodation" style="width:16px;height:16px;">Já possui acomodação</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer;"><input type="checkbox" id="onbSchool" style="width:16px;height:16px;">Já possui escola</label>
+    </div>
+
+    <div class="modal-actions" style="justify-content:space-between;">
+      <button class="btn btn-ghost" id="onbSkip" type="button" style="width:auto;">Pular por agora</button>
+      <button class="btn btn-accent" id="onbSave" type="button" style="width:auto;">Salvar e continuar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="privacyModal" hidden>
   <div class="modal-card" style="max-width:560px;max-height:80vh;overflow-y:auto;text-align:left;">
     <h3>Política de privacidade</h3>

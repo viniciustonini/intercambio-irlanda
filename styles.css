@@ -58,6 +58,13 @@ input{font-family:var(--font-body);}
 .lightbox-close:hover{background:rgba(255,255,255,.2);}
 .city-card-photo{cursor:zoom-in;}
 .modal-card{background:var(--surface);border-radius:var(--radius);padding:24px;max-width:380px;width:100%;box-shadow:var(--shadow);}
+.modal-card-lg{max-width:480px;max-height:88vh;overflow-y:auto;text-align:left;}
+.onb-label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:8px;}
+.modal-card-lg .seg{margin-bottom:0;}
+.modal-card-lg .seg-btn{min-width:0;}
+#onbCitySeg.seg{flex-wrap:wrap;}
+#onbCitySeg .seg-btn{flex:1 1 calc(50% - 8px);text-align:center;padding:12px 8px;}
+#onbCitySeg .seg-btn h4{font-size:13.5px;}
 .modal-card h3{font-size:17px;margin-bottom:10px;}
 .modal-card p{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
