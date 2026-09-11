@@ -2728,51 +2728,56 @@ function renderTouristExperiences(){
 /* ---------- explorar a irlanda: atrações rastreáveis ---------- */
 var ATTR_CATS = ["Cidades","Natureza","Castelos e história","Pubs e experiências","Bate-voltas"];
 var ATTRACTIONS = [
-  {id:"trinity", name:"Trinity College + Book of Kells", cat:"Cidades", region:"Dublin", desc:"Campus histórico com o Book of Kells, manuscrito medieval de mais de mil anos. Reserva recomendada.", top15:true},
-  {id:"temple-bar", name:"Temple Bar", cat:"Pubs e experiências", region:"Dublin", desc:"Bairro turístico com pubs, música ao vivo e ruas movimentadas — mais caro, não limite a experiência de pub só a ele."},
-  {id:"grafton", name:"Grafton Street", cat:"Cidades", region:"Dublin", desc:"Uma das áreas comerciais mais importantes do centro, com lojas, cafés e artistas de rua."},
-  {id:"stephens-green", name:"St Stephen's Green", cat:"Natureza", region:"Dublin", desc:"Parque central gratuito, ótimo para caminhada e descanso."},
-  {id:"dublin-castle", name:"Dublin Castle", cat:"Castelos e história", region:"Dublin", desc:"Complexo histórico fundamental para entender a história política da Irlanda."},
-  {id:"christchurch", name:"Christ Church Cathedral", cat:"Castelos e história", region:"Dublin", desc:"Catedral histórica com arquitetura impressionante no centro de Dublin."},
-  {id:"stpatricks", name:"St Patrick's Cathedral", cat:"Castelos e história", region:"Dublin", desc:"Maior catedral da Irlanda, ligada à história de São Patrício."},
-  {id:"hapenny", name:"Ha'penny Bridge", cat:"Cidades", region:"Dublin", desc:"Ponte histórica e gratuita sobre o River Liffey — cartão-postal clássico de Dublin."},
-  {id:"kilmainham", name:"Kilmainham Gaol", cat:"Castelos e história", region:"Dublin", desc:"Antiga prisão ligada à luta pela independência irlandesa. Reserva fortemente recomendada."},
-  {id:"phoenix-park", name:"Phoenix Park", cat:"Natureza", region:"Dublin", desc:"Grande parque urbano gratuito — caminhada, bicicleta e piquenique."},
-  {id:"epic", name:"EPIC — The Irish Emigration Museum", cat:"Cidades", region:"Dublin", desc:"Museu interativo sobre a emigração irlandesa e sua influência pelo mundo."},
-  {id:"guinness", name:"Guinness Storehouse", cat:"Pubs e experiências", region:"Dublin", desc:"Tour sobre a cerveja mais famosa da Irlanda, terminando no Gravity Bar com vista de Dublin.", top15:true},
-  {id:"howth", name:"Howth", cat:"Bate-voltas", region:"Dublin (DART)", desc:"Vila costeira com porto, trilhas, falésias e frutos do mar — chegue de DART. Meio dia ou dia inteiro.", top15:true},
-  {id:"glendalough", name:"Wicklow &amp; Glendalough", cat:"Natureza", region:"~50km de Dublin", desc:"Antigo assentamento monástico entre montanhas e lagos (Round Tower, Upper/Lower Lake). Bate-volta clássico.", top15:true},
-  {id:"kilkenny-castle", name:"Kilkenny (Castelo + Medieval Mile)", cat:"Cidades", region:"Kilkenny", desc:"Cidade medieval fácil de explorar a pé, com castelo visitável e catedral de St Canice.", top15:true},
-  {id:"galway-centro", name:"Galway (Latin Quarter + Spanish Arch)", cat:"Cidades", region:"Galway", desc:"Centro boêmio com pubs de música ao vivo, Spanish Arch e Salthill Promenade ao pôr do sol.", top15:true},
-  {id:"cliffs", name:"Cliffs of Moher", cat:"Natureza", region:"County Clare", desc:"Falésias voltadas para o Atlântico — um dos cartões-postais da Irlanda. Depende do clima; nunca ultrapasse as barreiras de segurança.", top15:true},
-  {id:"doolin", name:"Doolin", cat:"Bate-voltas", region:"County Clare", desc:"Vila conhecida pela música tradicional, perto dos Cliffs of Moher — boa opção de pernoite."},
-  {id:"burren", name:"The Burren", cat:"Natureza", region:"County Clare", desc:"Paisagem calcária única, com o Poulnabrone Dolmen e estradas panorâmicas."},
-  {id:"connemara", name:"Connemara &amp; Kylemore Abbey", cat:"Natureza", region:"County Galway", desc:"Paisagens rurais, montanhas e lagos; Kylemore Abbey é uma construção histórica à beira de um lago.", top15:true},
-  {id:"aran", name:"Aran Islands", cat:"Natureza", region:"Balsa de Galway", desc:"Inis Mór (recomendada para primeira visita), fortalezas pré-históricas e muros de pedra — ferry + bicicleta.", top15:true},
-  {id:"cork-market", name:"Cork (English Market)", cat:"Cidades", region:"Cork", desc:"Mercado gastronômico imperdível em Cork, com St Anne's Church e Cork City Gaol por perto."},
-  {id:"blarney", name:"Blarney Castle", cat:"Castelos e história", region:"perto de Cork", desc:"Castelo famoso pela Blarney Stone e pelos jardins.", top15:true},
-  {id:"cobh", name:"Cobh", cat:"Bate-voltas", region:"perto de Cork", desc:"Último porto de escala do Titanic — Titanic Experience, St Colman's Cathedral e Deck of Cards.", top15:true},
-  {id:"kinsale", name:"Kinsale", cat:"Bate-voltas", region:"perto de Cork", desc:"Cidade costeira de gastronomia, porto e casas coloridas."},
-  {id:"killarney-np", name:"Killarney National Park", cat:"Natureza", region:"Killarney", desc:"Ross Castle, Muckross House/Gardens, Torc Waterfall, Ladies View e Gap of Dunloe.", top15:true},
-  {id:"ring-kerry", name:"Ring of Kerry", cat:"Natureza", region:"County Kerry", desc:"Road trip circular de ~1 a 2 dias: Killorglin → Cahersiveen → Waterville → Sneem → Kenmare.", top15:true},
-  {id:"dingle", name:"Dingle Peninsula", cat:"Natureza", region:"County Kerry", desc:"Slea Head Drive (Dingle → Ventry → Slea Head → Dunquin → Ballyferriter), Inch Beach e Gallarus Oratory.", top15:true},
-  {id:"cashel", name:"Rock of Cashel", cat:"Castelos e história", region:"County Tipperary", desc:"Complexo medieval no alto de uma colina — boa parada na rota Dublin → Kilkenny → Cork."},
-  {id:"belfast-centro", name:"Belfast (centro)", cat:"Cidades", region:"Irlanda do Norte", desc:"City Hall, Cathedral Quarter, St George's Market e Peace Walls — moeda Libra, parte do Reino Unido.", top15:true},
-  {id:"titanic-belfast", name:"Titanic Belfast", cat:"Castelos e história", region:"Belfast", desc:"Museu sobre a história do Titanic no estaleiro onde foi construído."},
-  {id:"giants-causeway", name:"Giant's Causeway", cat:"Natureza", region:"Irlanda do Norte", desc:"Milhares de colunas de basalto vulcânico (UNESCO). Combine com Carrick-a-Rede e Dunluce Castle.", top15:true},
-  {id:"carrick-a-rede", name:"Carrick-a-Rede Rope Bridge", cat:"Natureza", region:"Irlanda do Norte", desc:"Ponte de corda sobre penhascos — combine com Giant's Causeway e Dunluce Castle."},
-  {id:"dunluce", name:"Dunluce Castle", cat:"Castelos e história", region:"Irlanda do Norte", desc:"Ruínas de castelo junto a falésias na Causeway Coast."}
+  {id:"trinity", name:"Trinity College + Book of Kells", cat:"Cidades", region:"Dublin", country:"IE", desc:"Campus histórico com o Book of Kells, manuscrito medieval de mais de mil anos. Reserva recomendada.", top15:true},
+  {id:"temple-bar", name:"Temple Bar", cat:"Pubs e experiências", region:"Dublin", country:"IE", free:true, desc:"Bairro turístico com pubs, música ao vivo e ruas movimentadas — mais caro, não limite a experiência de pub só a ele."},
+  {id:"grafton", name:"Grafton Street", cat:"Cidades", region:"Dublin", country:"IE", free:true, desc:"Uma das áreas comerciais mais importantes do centro, com lojas, cafés e artistas de rua."},
+  {id:"stephens-green", name:"St Stephen's Green", cat:"Natureza", region:"Dublin", country:"IE", free:true, desc:"Parque central gratuito, ótimo para caminhada e descanso."},
+  {id:"dublin-castle", name:"Dublin Castle", cat:"Castelos e história", region:"Dublin", country:"IE", desc:"Complexo histórico fundamental para entender a história política da Irlanda."},
+  {id:"christchurch", name:"Christ Church Cathedral", cat:"Castelos e história", region:"Dublin", country:"IE", desc:"Catedral histórica com arquitetura impressionante no centro de Dublin."},
+  {id:"stpatricks", name:"St Patrick's Cathedral", cat:"Castelos e história", region:"Dublin", country:"IE", desc:"Maior catedral da Irlanda, ligada à história de São Patrício."},
+  {id:"hapenny", name:"Ha'penny Bridge", cat:"Cidades", region:"Dublin", country:"IE", free:true, desc:"Ponte histórica e gratuita sobre o River Liffey — cartão-postal clássico de Dublin."},
+  {id:"kilmainham", name:"Kilmainham Gaol", cat:"Castelos e história", region:"Dublin", country:"IE", desc:"Antiga prisão ligada à luta pela independência irlandesa. Reserva fortemente recomendada."},
+  {id:"phoenix-park", name:"Phoenix Park", cat:"Natureza", region:"Dublin", country:"IE", free:true, desc:"Grande parque urbano gratuito — caminhada, bicicleta e piquenique."},
+  {id:"epic", name:"EPIC — The Irish Emigration Museum", cat:"Cidades", region:"Dublin", country:"IE", desc:"Museu interativo sobre a emigração irlandesa e sua influência pelo mundo."},
+  {id:"guinness", name:"Guinness Storehouse", cat:"Pubs e experiências", region:"Dublin", country:"IE", desc:"Tour sobre a cerveja mais famosa da Irlanda, terminando no Gravity Bar com vista de Dublin.", top15:true},
+  {id:"howth", name:"Howth", cat:"Bate-voltas", region:"Dublin (DART)", country:"IE", desc:"Vila costeira com porto, trilhas, falésias e frutos do mar — chegue de DART. Meio dia ou dia inteiro.", top15:true},
+  {id:"glendalough", name:"Wicklow &amp; Glendalough", cat:"Natureza", region:"~50km de Dublin", country:"IE", desc:"Antigo assentamento monástico entre montanhas e lagos (Round Tower, Upper/Lower Lake). Bate-volta clássico.", top15:true},
+  {id:"kilkenny-castle", name:"Kilkenny (Castelo + Medieval Mile)", cat:"Cidades", region:"Kilkenny", country:"IE", desc:"Cidade medieval fácil de explorar a pé, com castelo visitável e catedral de St Canice.", top15:true},
+  {id:"galway-centro", name:"Galway (Latin Quarter + Spanish Arch)", cat:"Cidades", region:"Galway", country:"IE", free:true, desc:"Centro boêmio com pubs de música ao vivo, Spanish Arch e Salthill Promenade ao pôr do sol.", top15:true},
+  {id:"cliffs", name:"Cliffs of Moher", cat:"Natureza", region:"County Clare", country:"IE", desc:"Falésias voltadas para o Atlântico — um dos cartões-postais da Irlanda. Depende do clima; nunca ultrapasse as barreiras de segurança.", top15:true},
+  {id:"doolin", name:"Doolin", cat:"Bate-voltas", region:"County Clare", country:"IE", free:true, desc:"Vila conhecida pela música tradicional, perto dos Cliffs of Moher — boa opção de pernoite."},
+  {id:"burren", name:"The Burren", cat:"Natureza", region:"County Clare", country:"IE", desc:"Paisagem calcária única, com o Poulnabrone Dolmen e estradas panorâmicas."},
+  {id:"connemara", name:"Connemara &amp; Kylemore Abbey", cat:"Natureza", region:"County Galway", country:"IE", desc:"Paisagens rurais, montanhas e lagos; Kylemore Abbey é uma construção histórica à beira de um lago.", top15:true},
+  {id:"aran", name:"Aran Islands", cat:"Natureza", region:"Balsa de Galway", country:"IE", desc:"Inis Mór (recomendada para primeira visita), fortalezas pré-históricas e muros de pedra — ferry + bicicleta.", top15:true},
+  {id:"cork-market", name:"Cork (English Market)", cat:"Cidades", region:"Cork", country:"IE", free:true, desc:"Mercado gastronômico imperdível em Cork, com St Anne's Church e Cork City Gaol por perto."},
+  {id:"blarney", name:"Blarney Castle", cat:"Castelos e história", region:"perto de Cork", country:"IE", desc:"Castelo famoso pela Blarney Stone e pelos jardins.", top15:true},
+  {id:"cobh", name:"Cobh", cat:"Bate-voltas", region:"perto de Cork", country:"IE", free:true, desc:"Último porto de escala do Titanic — Titanic Experience, St Colman's Cathedral e Deck of Cards."},
+  {id:"kinsale", name:"Kinsale", cat:"Bate-voltas", region:"perto de Cork", country:"IE", free:true, desc:"Cidade costeira de gastronomia, porto e casas coloridas."},
+  {id:"killarney-np", name:"Killarney National Park", cat:"Natureza", region:"Killarney", country:"IE", free:true, desc:"Ross Castle, Muckross House/Gardens, Torc Waterfall, Ladies View e Gap of Dunloe."},
+  {id:"ring-kerry", name:"Ring of Kerry", cat:"Natureza", region:"County Kerry", country:"IE", desc:"Road trip circular de ~1 a 2 dias: Killorglin → Cahersiveen → Waterville → Sneem → Kenmare.", top15:true},
+  {id:"dingle", name:"Dingle Peninsula", cat:"Natureza", region:"County Kerry", country:"IE", desc:"Slea Head Drive (Dingle → Ventry → Slea Head → Dunquin → Ballyferriter), Inch Beach e Gallarus Oratory.", top15:true},
+  {id:"cashel", name:"Rock of Cashel", cat:"Castelos e história", region:"County Tipperary", country:"IE", desc:"Complexo medieval no alto de uma colina — boa parada na rota Dublin → Kilkenny → Cork."},
+  {id:"belfast-centro", name:"Belfast (centro)", cat:"Cidades", region:"Irlanda do Norte", country:"NI", free:true, desc:"City Hall, Cathedral Quarter, St George's Market e Peace Walls — moeda Libra, parte do Reino Unido.", top15:true},
+  {id:"titanic-belfast", name:"Titanic Belfast", cat:"Castelos e história", region:"Belfast", country:"NI", desc:"Museu sobre a história do Titanic no estaleiro onde foi construído."},
+  {id:"giants-causeway", name:"Giant's Causeway", cat:"Natureza", region:"Irlanda do Norte", country:"NI", free:true, desc:"Milhares de colunas de basalto vulcânico (UNESCO) — o acesso à costa é livre; só o centro de visitantes e o estacionamento são pagos. Combine com Carrick-a-Rede e Dunluce Castle.", top15:true},
+  {id:"carrick-a-rede", name:"Carrick-a-Rede Rope Bridge", cat:"Natureza", region:"Irlanda do Norte", country:"NI", desc:"Ponte de corda sobre penhascos — combine com Giant's Causeway e Dunluce Castle."},
+  {id:"dunluce", name:"Dunluce Castle", cat:"Castelos e história", region:"Irlanda do Norte", country:"NI", desc:"Ruínas de castelo junto a falésias na Causeway Coast."}
 ];
 function attrState(id){ return ls("attr_"+id) || {want:false, visited:false, fav:false}; }
 function setAttrState(id, patch){ var s = attrState(id); Object.assign(s, patch); ls("attr_"+id, s); }
 var attrCatView = ls("attrCatView") || "Todos";
+var attrFreeOnly = ls("attrFreeOnly") || false;
 function renderAttrCatTabs(){
   var cats = ["Todos"].concat(ATTR_CATS);
   document.getElementById("attrCatTabs").innerHTML = cats.map(function(c){
     return '<button class="subtab'+(attrCatView===c?' active':'')+'" data-cat="'+c+'">'+c+'</button>';
-  }).join("");
-  document.querySelectorAll("#attrCatTabs .subtab").forEach(function(b){
+  }).join("")+
+  '<button class="subtab'+(attrFreeOnly?' active':'')+'" id="attrFreeToggle" type="button" style="margin-left:6px;">€0 Só grátis</button>';
+  document.querySelectorAll("#attrCatTabs .subtab[data-cat]").forEach(function(b){
     b.addEventListener("click", function(){ attrCatView = b.dataset.cat; ls("attrCatView", attrCatView); renderAttrCatTabs(); renderAttrGrid(); });
+  });
+  document.getElementById("attrFreeToggle").addEventListener("click", function(){
+    attrFreeOnly = !attrFreeOnly; ls("attrFreeOnly", attrFreeOnly); renderAttrCatTabs(); renderAttrGrid();
   });
 }
 function renderAttrProgress(){
@@ -2785,18 +2790,21 @@ function renderAttrProgress(){
 }
 function renderAttrGrid(){
   var list = attrCatView==="Todos" ? ATTRACTIONS : ATTRACTIONS.filter(function(a){ return a.cat===attrCatView; });
-  document.getElementById("attrGridWrap").innerHTML = list.map(function(a){
+  if(attrFreeOnly) list = list.filter(function(a){ return a.free; });
+  document.getElementById("attrGridWrap").innerHTML = list.length ? list.map(function(a){
     var s = attrState(a.id);
+    var countryBadge = a.country==="NI" ? '<span class="pill" style="background:var(--warn-soft);color:var(--warn-strong);">🇬🇧 Reino Unido</span>' : '<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);">🇮🇪 Irlanda</span>';
     return '<div class="exp-card">'+
       (a.top15?'<div class="eyebrow-alt" style="margin-bottom:6px;">TOP 15</div>':'')+
       '<h4>'+a.name+'</h4><p style="margin-bottom:4px;color:var(--gold-text);font-size:12.5px;font-weight:700;">'+a.region+'</p>'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">'+countryBadge+(a.free?'<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);">Grátis</span>':'')+'</div>'+
       '<p>'+a.desc+'</p>'+
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">'+
       '<button class="btn-ghost btn" data-id="'+a.id+'" data-f="want" style="width:auto;padding:6px 10px;font-size:12.5px;'+(s.want?'background:var(--accent-soft);border-color:var(--accent);':'')+'">Quero ir</button>'+
       '<button class="btn-ghost btn" data-id="'+a.id+'" data-f="visited" style="width:auto;padding:6px 10px;font-size:12.5px;'+(s.visited?'background:var(--accent-soft);border-color:var(--accent);':'')+'">Já visitei</button>'+
       '<button class="btn-ghost btn" data-id="'+a.id+'" data-f="fav" style="width:auto;padding:6px 10px;font-size:12.5px;'+(s.fav?'background:var(--warn-soft);border-color:var(--warn);':'')+'">'+STAR_ICON+' Favorito</button>'+
       '</div></div>';
-  }).join("");
+  }).join("") : '<div class="empty">Nenhuma atração gratuita nesta categoria — tente outra categoria ou desmarque "Só grátis".</div>';
   document.querySelectorAll("#attrGridWrap [data-f]").forEach(function(btn){
     btn.addEventListener("click", function(){
       var s = attrState(btn.dataset.id);
@@ -2864,6 +2872,107 @@ function renderMyItinerary(){
     });
   });
 }
+var TOURISM_VERIFIED_AT = "2026-09-11";
+function renderNiInfo(){
+  var wrap = document.getElementById("niInfoWrap");
+  if(!wrap) return;
+  wrap.innerHTML =
+    '<div class="grid cols-2">'+
+    '<div class="card"><h3>Moeda</h3><p style="margin:0;">Na <b>República da Irlanda</b> (Dublin, Cork, Galway, Kerry, Clare etc.) usa-se o <b>Euro (€)</b>. Na <b>Irlanda do Norte</b> (Belfast, Giant\'s Causeway, Carrick-a-Rede, Dunluce Castle, Derry), a moeda é a <b>Libra Esterlina (£)</b> — é outro país, faz parte do Reino Unido. Nunca some valores em € e £ direto no orçamento sem converter.</p></div>'+
+    '<div class="card"><h3>Preciso de autorização para visitar a Irlanda do Norte?</h3><p style="margin:0;">Viajantes que não precisam de visto para entrar no Reino Unido — o que inclui brasileiros — geralmente precisam solicitar o <b>UK ETA (Electronic Travel Authorisation)</b> antes da viagem, mesmo cruzando por terra a partir da República da Irlanda. Cidadãos da UE/EEE e quem já reside legalmente no Reino Unido ou na Irlanda podem ter regras diferentes. Confirme sua situação específica antes de ir.</p></div>'+
+    '</div>'+
+    officialSourceHtml("https://www.gov.uk/guidance/apply-for-an-electronic-travel-authorisation-eta", TOURISM_VERIFIED_AT);
+}
+var TOURISM_CALENDAR = [
+  {month:"Janeiro", clima:"Frio, ~5–8°C", luz:"~8h de luz", turistas:"Baixo", preco:"Baixo", obs:"Pós-Natal calmo; dias curtos."},
+  {month:"Fevereiro", clima:"Frio, ~5–9°C", luz:"~9h de luz", turistas:"Baixo", preco:"Baixo", obs:"Ainda tranquilo e barato."},
+  {month:"Março", clima:"Ameno, ~7–11°C", luz:"~11h de luz", turistas:"Baixo-médio", preco:"Baixo", obs:"St. Patrick's Day (17/03) lota Dublin por poucos dias."},
+  {month:"Abril", clima:"Ameno, ~8–13°C", luz:"~13h de luz", turistas:"Médio", preco:"Médio", obs:"Páscoa pode elevar preços pontualmente."},
+  {month:"Maio", clima:"Agradável, ~10–15°C", luz:"~16h de luz", turistas:"Médio", preco:"Médio", obs:"Um dos melhores meses: bom clima, menos gente que o verão."},
+  {month:"Junho", clima:"Agradável, ~12–17°C", luz:"~18h de luz", turistas:"Alto", preco:"Alto", obs:"Dias muito longos; comece a reservar com antecedência."},
+  {month:"Julho", clima:"Mais quente, ~13–19°C", luz:"~17h de luz", turistas:"Muito alto", preco:"Alto", obs:"Pico de temporada — mais caro e mais cheio."},
+  {month:"Agosto", clima:"Mais quente, ~13–18°C", luz:"~16h de luz", turistas:"Muito alto", preco:"Alto", obs:"Ainda pico; férias escolares europeias."},
+  {month:"Setembro", clima:"Agradável, ~11–16°C", luz:"~13h de luz", turistas:"Médio", preco:"Médio", obs:"Outro dos melhores meses: bom clima, menos turistas que julho/agosto."},
+  {month:"Outubro", clima:"Fresco, ~9–13°C", luz:"~11h de luz", turistas:"Médio-baixo", preco:"Médio-baixo", obs:"Paisagens de outono; chuva aumenta."},
+  {month:"Novembro", clima:"Frio, ~6–10°C", luz:"~8h de luz", turistas:"Baixo", preco:"Baixo", obs:"Dias curtos e chuvosos, mas preços melhores."},
+  {month:"Dezembro", clima:"Frio, ~5–9°C", luz:"~7h de luz", turistas:"Médio (feriados)", preco:"Médio-alto", obs:"Mercados de Natal, mas Réveillon/véspera de Natal encarece hospedagem."}
+];
+function renderTourismCalendar(){
+  var el = document.getElementById("tourismCalendarTable");
+  if(!el) return;
+  var rows = TOURISM_CALENDAR.map(function(m){
+    return '<tr><td data-label="Mês"><strong>'+m.month+'</strong></td><td data-label="Clima">'+m.clima+'</td><td data-label="Luz do dia">'+m.luz+'</td><td data-label="Turistas">'+m.turistas+'</td><td data-label="Preço">'+m.preco+'</td><td data-label="Observação">'+m.obs+'</td></tr>';
+  }).join("");
+  el.innerHTML = '<thead><tr><th>Mês</th><th>Clima</th><th>Luz do dia</th><th>Turistas</th><th>Preço</th><th>Observação</th></tr></thead><tbody>'+rows+'</tbody>';
+}
+var HERITAGE_CARD = {
+  adulto:40, senior:30, estudante:10, jovem:10, familia:90,
+  sourceUrl:"https://heritageireland.ie/"
+};
+function renderTourismPasses(){
+  var wrap = document.getElementById("tourismPassesWrap");
+  if(!wrap) return;
+  wrap.innerHTML =
+    '<div class="card">'+
+    '<h3>OPW Heritage Card</h3>'+
+    '<p style="margin:0 0 10px;">Dá acesso a dezenas de sítios históricos administrados pelo OPW (castelos, abadias, sítios arqueológicos) por até um ano. Vale a pena se você for visitar vários desses locais na mesma viagem.</p>'+
+    '<div class="tablewrap" style="margin-bottom:14px;"><table><tbody>'+
+    '<tr><td>Adulto</td><td class="num tabular">€'+HERITAGE_CARD.adulto+'</td></tr>'+
+    '<tr><td>Senior (65+)</td><td class="num tabular">€'+HERITAGE_CARD.senior+'</td></tr>'+
+    '<tr><td>Estudante</td><td class="num tabular">€'+HERITAGE_CARD.estudante+'</td></tr>'+
+    '<tr><td>12–18 anos</td><td class="num tabular">€'+HERITAGE_CARD.jovem+'</td></tr>'+
+    '<tr><td>Família</td><td class="num tabular">€'+HERITAGE_CARD.familia+'</td></tr>'+
+    '</tbody></table></div>'+
+    '<h4 style="font-size:14px;margin:0 0 8px;">Vale a pena para o meu roteiro?</h4>'+
+    '<div class="mini-form-grid" style="margin-bottom:10px;">'+
+    '<div><label>Quantos sítios OPW você vai visitar?</label><input type="number" id="heritageSites" value="3" min="0"></div>'+
+    '<div><label>Preço médio do ingresso avulso (€)</label><input type="number" id="heritagePrice" value="8" step="0.5" min="0"></div>'+
+    '</div>'+
+    '<div id="heritageResult" class="callout" style="margin-top:0;"></div>'+
+    '</div>';
+  function updateHeritage(){
+    var n = parseInt(document.getElementById("heritageSites").value)||0;
+    var price = parseFloat(document.getElementById("heritagePrice").value)||0;
+    var totalAvulso = n*price;
+    var diff = totalAvulso - HERITAGE_CARD.adulto;
+    var msg = totalAvulso===0 ? "Informe quantos sítios pretende visitar para comparar."
+      : diff > 0 ? "Ingressos avulsos sairiam por €"+totalAvulso.toFixed(2)+" — o Heritage Card (€"+HERITAGE_CARD.adulto+") economizaria cerca de €"+diff.toFixed(2)+"."
+      : "Ingressos avulsos sairiam por €"+totalAvulso.toFixed(2)+" — mais barato que o Heritage Card (€"+HERITAGE_CARD.adulto+") neste caso.";
+    document.getElementById("heritageResult").textContent = msg;
+  }
+  document.getElementById("heritageSites").addEventListener("input", updateHeritage);
+  document.getElementById("heritagePrice").addEventListener("input", updateHeritage);
+  updateHeritage();
+  wrap.insertAdjacentHTML("beforeend", officialSourceHtml(HERITAGE_CARD.sourceUrl, TOURISM_VERIFIED_AT));
+}
+var TOURISM_CHECKLIST = [
+  {id:"passaporte-tur", label:"Passaporte válido (mín. 6 meses após a viagem)"},
+  {id:"seguro-tur", label:"Seguro viagem contratado para todo o período"},
+  {id:"passagem-tur", label:"Passagem aérea e conexões confirmadas"},
+  {id:"hospedagem-tur", label:"Hospedagem reservada para todas as noites"},
+  {id:"esim-tur", label:"eSIM ou chip local providenciado"},
+  {id:"cartao-tur", label:"Cartão internacional habilitado para uso na Irlanda/Reino Unido"},
+  {id:"eta-tur", label:"Verificou se precisa de UK ETA (caso vá à Irlanda do Norte)"},
+  {id:"cnh-tur", label:"Carteira de motorista + permissão internacional, se for alugar carro"},
+  {id:"adaptador-tur", label:"Adaptador de tomada (padrão britânico/irlandês, tipo G)"},
+  {id:"impermeavel-tur", label:"Roupa impermeável e casaco corta-vento"},
+  {id:"powerbank-tur", label:"Power bank carregado"},
+  {id:"medicamentos-tur", label:"Medicamentos de uso contínuo, com receita se necessário"}
+];
+function renderTourismChecklist(){
+  var wrap = document.getElementById("tourismChecklistWrap");
+  if(!wrap) return;
+  var state = ls("turistChecklist") || {};
+  wrap.innerHTML = TOURISM_CHECKLIST.map(function(it){ return checkItemHtml(it.id, it.label, null, !!state[it.id]); }).join("");
+  document.querySelectorAll("#tourismChecklistWrap .checkitem").forEach(function(el){
+    el.querySelector(".checkitem-input").addEventListener("change", function(){
+      var st = ls("turistChecklist") || {};
+      st[el.dataset.id] = !st[el.dataset.id];
+      ls("turistChecklist", st);
+      el.classList.toggle("checked", st[el.dataset.id]);
+    });
+  });
+}
 var MISTAKES = [
   "Tentar conhecer toda a Irlanda em poucos dias.",
   "Passar a viagem inteira apenas em Dublin.",
@@ -2874,7 +2983,10 @@ var MISTAKES = [
   "Subestimar estradas rurais estreitas.",
   "Não reservar atrações populares com antecedência.",
   "Deixar para comprar passagem intermunicipal em cima da hora quando há preços dinâmicos.",
-  "Montar roteiros sem considerar o horário do pôr do sol no inverno."
+  "Montar roteiros sem considerar o horário do pôr do sol no inverno.",
+  "Achar que a Irlanda do Norte usa Euro — lá a moeda é a Libra Esterlina (GBP), e é parte do Reino Unido.",
+  "Não verificar se seu passaporte precisa de autorização de viagem (ETA) para entrar no Reino Unido antes de ir a Belfast/Causeway Coast.",
+  "Ignorar o custo e a disponibilidade de estacionamento ao planejar um dia de carro em cidades pequenas."
 ];
 function renderMistakes(){
   document.getElementById("mistakesWrap").innerHTML = MISTAKES.map(function(m){ return tipRow(m, ""); }).join("");
@@ -2906,6 +3018,7 @@ function init(){
   renderAgencias();
   renderEnglish();
   renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences();
+  renderNiInfo(); renderTourismCalendar(); renderTourismPasses(); renderTourismChecklist();
   renderAttrCatTabs(); renderAttrGrid(); renderAttrProgress();
   renderItineraryTabs(); renderItinerary(); renderMyItinerary(); renderMistakes();
   renderMoradia();
