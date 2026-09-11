@@ -1050,6 +1050,65 @@ function renderJobAddForm(){
   });
 }
 
+/* ---------- rastreador de candidaturas de emprego ---------- */
+var APP_STATUSES = [
+  {id:"aplicado", label:"Aplicado"},
+  {id:"entrevista", label:"Entrevista marcada"},
+  {id:"oferta", label:"Oferta recebida"},
+  {id:"recusado", label:"Não seguiu"}
+];
+function getJobApplications(){ return ls("jobApplications") || []; }
+function saveJobApplications(list){ ls("jobApplications", list); }
+function renderApplicationsTable(){
+  var apps = getJobApplications();
+  var rows = apps.length ? apps.map(function(a){
+    var statusOptions = APP_STATUSES.map(function(s){ return '<option value="'+s.id+'"'+(a.status===s.id?" selected":"")+'>'+s.label+'</option>'; }).join("");
+    return '<tr>'+
+      '<td data-label="Empresa"><input type="text" style="width:150px;" value="'+escapeHtml(a.empresa)+'" data-id="'+a.id+'" data-f="empresa"></td>'+
+      '<td data-label="Vaga"><input type="text" style="width:130px;" value="'+escapeHtml(a.vaga||"")+'" data-id="'+a.id+'" data-f="vaga"></td>'+
+      '<td data-label="Data"><input type="date" value="'+escapeHtml(a.data||"")+'" data-id="'+a.id+'" data-f="data"></td>'+
+      '<td data-label="Status"><select data-id="'+a.id+'" data-f="status">'+statusOptions+'</select></td>'+
+      '<td data-label="Nota"><input type="text" style="width:150px;" placeholder="Contato, link..." value="'+escapeHtml(a.nota||"")+'" data-id="'+a.id+'" data-f="nota"></td>'+
+      '<td data-label=""><button class="btn-ghost btn" style="width:auto;padding:5px 10px;font-size:12px;" data-remove="'+a.id+'">Remover</button></td>'+
+      '</tr>';
+  }).join("") : '<tr><td colspan="6" class="empty">Nenhuma candidatura registrada ainda — adicione abaixo.</td></tr>';
+  document.getElementById("applicationsTable").innerHTML =
+    '<thead><tr><th>Empresa</th><th>Vaga</th><th>Data</th><th>Status</th><th>Nota</th><th></th></tr></thead><tbody>'+rows+'</tbody>';
+  document.querySelectorAll('#applicationsTable input[data-f], #applicationsTable select[data-f]').forEach(function(inp){
+    inp.addEventListener("change", function(){
+      var list = getJobApplications();
+      var row = list.find(function(a){ return a.id===inp.dataset.id; });
+      if(!row) return;
+      row[inp.dataset.f] = inp.value;
+      saveJobApplications(list);
+    });
+  });
+  document.querySelectorAll('#applicationsTable [data-remove]').forEach(function(btn){
+    btn.addEventListener("click", function(){
+      saveJobApplications(getJobApplications().filter(function(a){ return a.id!==btn.dataset.remove; }));
+      renderApplicationsTable();
+    });
+  });
+}
+function renderApplicationsAddForm(){
+  document.getElementById("applicationsAddForm").innerHTML =
+    '<div class="mini-form-grid">'+
+    '<div><label>Empresa</label><input id="newAppEmpresa" type="text" placeholder="Ex.: Costa Coffee"></div>'+
+    '<div><label>Vaga</label><input id="newAppVaga" type="text" placeholder="Ex.: Barista"></div>'+
+    '<div><label>Data</label><input id="newAppData" type="date"></div>'+
+    '</div>'+
+    '<button class="btn btn-accent" style="width:auto;padding:10px 18px;" id="addAppBtn" type="button">Adicionar candidatura</button>';
+  document.getElementById("addAppBtn").addEventListener("click", function(){
+    var empresa = document.getElementById("newAppEmpresa").value.trim();
+    if(!empresa) return;
+    var list = getJobApplications();
+    list.push({id:"app"+Date.now(), empresa:empresa, vaga:document.getElementById("newAppVaga").value.trim(), data:document.getElementById("newAppData").value, status:"aplicado", nota:""});
+    saveJobApplications(list);
+    renderApplicationsTable();
+    document.getElementById("newAppEmpresa").value=""; document.getElementById("newAppVaga").value=""; document.getElementById("newAppData").value="";
+  });
+}
+
 /* ---------- acomodação ---------- */
 var STAY_SEED = [
   {nome:"Gardiner Hostel", noites:10, preco:519.00, obs:"Dormitório 4 camas (misto) + café da manhã"},
@@ -1111,6 +1170,7 @@ function renderStayFields(){
     document.getElementById("heroCotacaoVal").textContent = "R$ " + getCotacao().toFixed(2).replace(".", ",");
   });
   renderStayTable();
+  renderStayComparator();
   renderStayAddForm();
   document.getElementById("stayTipsWrap").innerHTML =
     tipRow("A hospedagem inicial costuma ser confiável","Um hostel ou Airbnb bem avaliado pode ser reservado com confiança antes de chegar — não precisa visitar antes.")+
@@ -1141,7 +1201,7 @@ function renderStayTable(){
   document.getElementById("stayTable").innerHTML =
     '<thead><tr><th>Usar</th><th>Acomodação</th><th class="num">Noites</th><th class="num">R$/noite</th><th class="num">Total</th><th class="num">Equiv. €</th><th></th></tr></thead><tbody>'+rows+'</tbody>';
   document.querySelectorAll('#stayTable [data-select]').forEach(function(r){
-    r.addEventListener("change", function(){ ls("selectedStay", r.dataset.select); renderOverview(); });
+    r.addEventListener("change", function(){ ls("selectedStay", r.dataset.select); renderStayComparator(); renderOverview(); });
   });
   document.querySelectorAll('#stayTable input[data-f]').forEach(function(inp){
     inp.addEventListener("input", function(){
@@ -1151,6 +1211,9 @@ function renderStayTable(){
       var f = inp.dataset.f;
       row[f] = (f==="nome") ? inp.value : (parseFloat(inp.value)||0);
       saveStayOptions(opts);
+      if(f==="noites" || f==="preco" || f==="nome"){
+        renderStayComparator();
+      }
       if(f==="noites" || f==="preco"){
         var total = row.noites*row.preco;
         document.getElementById("total-"+row.id).textContent = "R$"+total.toFixed(2);
@@ -1165,6 +1228,7 @@ function renderStayTable(){
       saveStayOptions(opts);
       if(ls("selectedStay")===btn.dataset.remove) ls("selectedStay", null);
       renderStayTable();
+      renderStayComparator();
       renderOverview();
     });
   });
@@ -1178,7 +1242,31 @@ function updateStayComputed(){
     if(totalEl) totalEl.textContent = "R$"+total.toFixed(2);
     if(eurEl) eurEl.textContent = "€"+(total/cotacao).toFixed(2);
   });
+  renderStayComparator();
   renderOverview();
+}
+function renderStayComparator(){
+  var wrap = document.getElementById("stayComparatorWrap");
+  if(!wrap) return;
+  var cotacao = getCotacao();
+  var selectedId = ls("selectedStay");
+  var options = getStayOptions().map(function(s){
+    return Object.assign({}, s, {perNight: (s.preco/cotacao)});
+  }).sort(function(a,b){ return a.perNight-b.perNight; });
+  if(!options.length){ wrap.innerHTML = '<div class="empty">Adicione opções na tabela abaixo para comparar.</div>'; return; }
+  var shown = options.slice(0,4);
+  var max = Math.max.apply(null, shown.map(function(s){ return s.perNight; }));
+  var cheapestId = shown[0].id;
+  wrap.innerHTML = shown.map(function(s){
+    var pct = max>0 ? Math.max(6, Math.round(s.perNight/max*100)) : 0;
+    var badges = "";
+    if(s.id===cheapestId) badges += '<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);margin-left:6px;">Mais barata</span>';
+    if(s.id===selectedId) badges += '<span class="pill step" style="margin-left:6px;">Selecionada</span>';
+    return '<div style="margin-bottom:10px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:4px;"><span><b>'+escapeHtml(s.nome)+'</b>'+badges+'</span><span class="tabular">€'+s.perNight.toFixed(2)+'/noite</span></div>'+
+      '<div style="background:var(--border);border-radius:6px;height:8px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:var(--accent-strong);border-radius:6px;"></div></div>'+
+    '</div>';
+  }).join("");
 }
 function renderStayAddForm(){
   document.getElementById("stayAddForm").innerHTML =
@@ -1196,6 +1284,7 @@ function renderStayAddForm(){
     opts.push({id:"s"+Date.now(), nome:nome, noites:parseInt(document.getElementById("newStayNoites").value)||1, preco:parseFloat(document.getElementById("newStayPreco").value)||0, obs:document.getElementById("newStayObs").value.trim()});
     saveStayOptions(opts);
     renderStayTable();
+    renderStayComparator();
     renderStayAddForm();
   });
 }
@@ -1215,6 +1304,37 @@ function renderMoradia(){
     tipRow("Entenda \"digs\"/rent-a-room","Quando o dono mora no imóvel, as proteções legais podem ser diferentes — consulte o RTB.")+
     '</div>'+
     '<div class="callout warn"><strong>Golpes comuns:</strong> pedido de transferência internacional antes de qualquer visita, história de "dono está viajando" e preços bons demais para serem verdade.</div>';
+}
+var SCAM_CHECKLIST = [
+  {id:"visitou", label:"Visitou o imóvel (ou pediu para alguém de confiança visitar) antes de pagar qualquer depósito"},
+  {id:"identidade", label:"Confirmou a identidade de quem está alugando", note:"Nome completo, telefone, perfil verificável em site oficial (Daft, MyHome, Rent.ie)."},
+  {id:"semtransferencia", label:"Não fez nenhuma transferência internacional ou PIX para terceiros antes de ver o imóvel"},
+  {id:"porescrito", label:"Tudo combinado está registrado por escrito", note:"Mensagens, e-mail ou contrato — nunca só combinado verbalmente."},
+  {id:"preco", label:"Desconfiou de preço muito abaixo da média da região/tipo de quarto"},
+  {id:"pesquisou", label:"Pesquisou o nome do anunciante/imóvel em grupos de brasileiros antes de fechar"},
+  {id:"contrato", label:"Recebeu contrato ou recibo formal do pagamento", note:"Guarde uma cópia digital e impressa."}
+];
+function renderScamChecklist(){
+  var state = ls("scamChecklist") || {};
+  document.getElementById("scamChecklistWrap").innerHTML = SCAM_CHECKLIST.map(function(it){
+    return checkItemHtml(it.id, it.label, it.note, !!state[it.id]);
+  }).join("");
+  document.querySelectorAll("#scamChecklistWrap .checkitem").forEach(function(el){
+    el.querySelector(".checkitem-input").addEventListener("change", function(){
+      var st = ls("scamChecklist") || {};
+      st[el.dataset.id] = !st[el.dataset.id];
+      ls("scamChecklist", st);
+      el.classList.toggle("checked", st[el.dataset.id]);
+      updateScamChecklistProgress();
+    });
+  });
+  updateScamChecklistProgress();
+}
+function updateScamChecklistProgress(){
+  var state = ls("scamChecklist") || {};
+  var done = SCAM_CHECKLIST.filter(function(it){ return state[it.id]; }).length;
+  var el = document.getElementById("scamChecklistProgress");
+  if(el) el.textContent = done+"/"+SCAM_CHECKLIST.length+" verificados";
 }
 var TRANSPORT_APPS = [
   {name:"TFI Live", desc:"App oficial nacional com horários em tempo real de ônibus, Luas e DART/trens."},
@@ -2079,10 +2199,12 @@ function init(){
   renderNationalRules();
   renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm();
   renderJobRoleTabs(); renderJobRoleContent(); renderJobAddForm();
+  renderApplicationsTable(); renderApplicationsAddForm();
   renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences();
   renderAttrCatTabs(); renderAttrGrid(); renderAttrProgress();
   renderItineraryTabs(); renderItinerary(); renderMistakes();
   renderMoradia();
+  renderScamChecklist();
   renderTransportApps(); renderTransportCityTabs(); renderTransportRoutes();
   renderMarket(); renderBudget(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();
   renderAll();
