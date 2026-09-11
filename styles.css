@@ -364,6 +364,8 @@ table td{vertical-align:middle;}
 
 .subtabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
 .subtab{border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:12.8px;font-weight:700;padding:8px 16px;border-radius:999px;}
+.subtab.locked{opacity:.55;cursor:not-allowed;}
+.subtab.locked:hover{background:var(--surface);}
 .subtab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
 
 .linkcard{display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;text-decoration:none;color:var(--text);position:relative;box-shadow:var(--shadow);transition:border-color .15s ease;}

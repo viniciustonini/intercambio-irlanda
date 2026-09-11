@@ -1097,7 +1097,8 @@ function renderAgencias(){
   var wrap = document.getElementById("agenciasWrap");
   if(!wrap) return;
   wrap.innerHTML = AGENCIAS.map(function(a){
-    return '<a class="linkcard" href="'+a.url+'" target="_blank" rel="noopener"><h4>'+a.name+'</h4><p>'+a.desc+'</p><span class="linkcard-arrow">↗</span></a>';
+    var fav = faviconUrl(a.url);
+    return '<a class="linkcard" href="'+a.url+'" target="_blank" rel="noopener"><div class="linkcard-icon">'+LINK_ICONS.briefcase+(fav?'<img class="linkcard-favicon" src="'+fav+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div><h4>'+a.name+'</h4><p>'+a.desc+'</p><span class="linkcard-arrow">↗</span></a>';
   }).join("");
 }
 function getJobs(role){
@@ -1257,6 +1258,31 @@ var ENGLISH_TOPICS = {
     {id:"b2-diplomatic", title:"Diplomatic English", body:"Suavizar discordância no trabalho. Ex.: <i>I'm not sure this approach will give us the result we need.</i>"}
   ]
 };
+var ENGLISH_LEVEL_ORDER = ["a1","a2","b1","b2"];
+function englishLevelCompleted(level){
+  var topics = ENGLISH_TOPICS[level] || [];
+  if(!topics.length) return true;
+  var state = englishProgressState();
+  return topics.every(function(t){ return !!state[t.id]; });
+}
+function englishLevelUnlocked(level){
+  var idx = ENGLISH_LEVEL_ORDER.indexOf(level);
+  if(idx <= 0) return true;
+  for(var i=0;i<idx;i++){ if(!englishLevelCompleted(ENGLISH_LEVEL_ORDER[i])) return false; }
+  return true;
+}
+function renderEnglishLevelSubtabs(containerId, items, currentLevel, onSelect){
+  document.getElementById(containerId).innerHTML = items.map(function(it){
+    var locked = !englishLevelUnlocked(it.level);
+    return '<button class="subtab'+(currentLevel===it.level?' active':'')+(locked?' locked':'')+'" data-level="'+it.level+'"'+(locked?' disabled title="Complete a gramática do nível anterior para desbloquear"':'')+'>'+(locked?'🔒 ':'')+it.label+'</button>';
+  }).join("");
+  document.querySelectorAll("#"+containerId+" .subtab").forEach(function(b){
+    b.addEventListener("click", function(){
+      if(b.hasAttribute("disabled")) return;
+      onSelect(b.dataset.level);
+    });
+  });
+}
 var ENGLISH_MODULES = [
   {id:"airport", title:"No aeroporto", phrases:[
     "Where is the baggage claim? — Onde fica a esteira de bagagem?",
@@ -1423,6 +1449,7 @@ var ENGLISH_READING = [
     answers:"They may mistake reduced ease for reduced competence; careful observation, adaptable communication and clearer questioning; evidence of performance, not accent or speed."}
 ];
 var englishReadingView = ls("englishReadingView") || "a1";
+if(!englishLevelUnlocked(englishReadingView)) englishReadingView = "a1";
 var ENGLISH_LISTENING = [
   {level:"a1", label:"A1", title:"At the café", lines:[
     "Barista: Hi there. What can I get you?",
@@ -1455,6 +1482,7 @@ var ENGLISH_LISTENING = [
     answers:"A missing security rule in a configuration change; rollback of the change; 9:40; no customer data was exposed; contact affected users and publish an incident summary."}
 ];
 var englishListeningView = ls("englishListeningView") || "a1";
+if(!englishLevelUnlocked(englishListeningView)) englishListeningView = "a1";
 var ENGLISH_YOUTUBE = [
   {name:"BBC Learning English", url:"https://www.youtube.com/@bbclearningenglish", desc:"Vídeos curtos sobre gramática, vocabulário e inglês das notícias, com legendas."},
   {name:"Cambridge English", url:"https://www.youtube.com/@CambridgeEnglish", desc:"Conteúdo alinhado ao CEFR (A1–C2), útil para acompanhar o próprio nível."},
@@ -1474,6 +1502,7 @@ var ENGLISH_WRITING = [
     model:"Subject: Follow-up on Support Analyst Interview\n\nDear Ms Byrne,\n\nThank you for meeting with me today. I enjoyed learning more about the role and the team. Our discussion reinforced my interest in the position, particularly the opportunity to work with cloud support. Please let me know if I can provide any further information.\n\nKind regards,\nMariana Costa"}
 ];
 var englishWritingView = ls("englishWritingView") || "a1";
+if(!englishLevelUnlocked(englishWritingView)) englishWritingView = "a1";
 function getEnglishWritingDraft(level){ return (ls("englishWritingDrafts")||{})[level] || ""; }
 function setEnglishWritingDraft(level, text){
   var drafts = ls("englishWritingDrafts") || {};
@@ -1527,12 +1556,13 @@ function renderEnglishSlang(){
     '<thead><tr><th>Expressão</th><th>Sentido provável</th><th>Registro / exemplo</th></tr></thead><tbody>'+rows+'</tbody>';
 }
 function renderEnglishReadingTabs(){
-  document.getElementById("englishReadingTabs").innerHTML = ENGLISH_READING.map(function(r){
-    return '<button class="subtab'+(englishReadingView===r.level?' active':'')+'" data-level="'+r.level+'">'+r.label+'</button>';
-  }).join("");
-  document.querySelectorAll("#englishReadingTabs .subtab").forEach(function(b){
-    b.addEventListener("click", function(){ englishReadingView = b.dataset.level; ls("englishReadingView", englishReadingView); renderEnglishReadingTabs(); renderEnglishReadingContent(); });
+  renderEnglishLevelSubtabs("englishReadingTabs", ENGLISH_READING, englishReadingView, function(level){
+    englishReadingView = level; ls("englishReadingView", englishReadingView); renderEnglishReadingTabs(); renderEnglishReadingContent();
   });
+}
+function answersToOrderedList(answers){
+  var items = answers.replace(/\.$/,"").split(/;\s*/);
+  return '<ol style="margin:0;padding-left:20px;">'+items.map(function(a){ return "<li>"+a.trim()+"</li>"; }).join("")+'</ol>';
 }
 function renderEnglishReadingContent(){
   var r = ENGLISH_READING.find(function(x){ return x.level===englishReadingView; });
@@ -1541,16 +1571,13 @@ function renderEnglishReadingContent(){
     '<div class="card"><h3>'+r.title+'</h3><p style="margin:0 0 16px;">'+r.text+'</p>'+
     '<ol style="margin:0 0 12px;padding-left:20px;font-size:13.5px;">'+r.questions.map(function(q){ return "<li>"+q+"</li>"; }).join("")+'</ol>'+
     '<button type="button" class="btn btn-ghost reveal-toggle" data-reveal-toggle="reading" style="width:auto;padding:8px 16px;font-size:12.5px;">Ver respostas</button>'+
-    '<div data-reveal-box="reading" hidden style="margin-top:10px;"><p class="source-note" style="margin:0;">'+r.answers+'</p></div>'+
+    '<div data-reveal-box="reading" hidden style="margin-top:10px;" class="source-note">'+answersToOrderedList(r.answers)+'</div>'+
     '</div>';
   wireRevealToggles("englishReadingWrap");
 }
 function renderEnglishListeningTabs(){
-  document.getElementById("englishListeningTabs").innerHTML = ENGLISH_LISTENING.map(function(l){
-    return '<button class="subtab'+(englishListeningView===l.level?' active':'')+'" data-level="'+l.level+'">'+l.label+'</button>';
-  }).join("");
-  document.querySelectorAll("#englishListeningTabs .subtab").forEach(function(b){
-    b.addEventListener("click", function(){ englishListeningView = b.dataset.level; ls("englishListeningView", englishListeningView); renderEnglishListeningTabs(); renderEnglishListeningContent(); });
+  renderEnglishLevelSubtabs("englishListeningTabs", ENGLISH_LISTENING, englishListeningView, function(level){
+    englishListeningView = level; ls("englishListeningView", englishListeningView); renderEnglishListeningTabs(); renderEnglishListeningContent();
   });
 }
 function renderEnglishListeningContent(){
@@ -1561,21 +1588,19 @@ function renderEnglishListeningContent(){
     '<div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13.5px;line-height:1.7;">'+l.lines.map(function(ln){ return "<p style=\"margin:0 0 6px;\">"+ln+"</p>"; }).join("")+'</div>'+
     '<ol style="margin:0 0 12px;padding-left:20px;font-size:13.5px;">'+l.questions.map(function(q){ return "<li>"+q+"</li>"; }).join("")+'</ol>'+
     '<button type="button" class="btn btn-ghost reveal-toggle" data-reveal-toggle="listening" style="width:auto;padding:8px 16px;font-size:12.5px;">Ver respostas</button>'+
-    '<div data-reveal-box="listening" hidden style="margin-top:10px;"><p class="source-note" style="margin:0;">'+l.answers+'</p></div>'+
+    '<div data-reveal-box="listening" hidden style="margin-top:10px;" class="source-note">'+answersToOrderedList(l.answers)+'</div>'+
     '</div>';
   wireRevealToggles("englishListeningWrap");
 }
 function renderEnglishYoutube(){
   document.getElementById("englishYoutubeWrap").innerHTML = '<div class="grid cols-3">'+ENGLISH_YOUTUBE.map(function(y){
-    return '<a class="linkcard" href="'+y.url+'" target="_blank" rel="noopener"><h4>'+y.name+'</h4><p>'+y.desc+'</p><span class="linkcard-arrow">↗</span></a>';
+    var fav = faviconUrl(y.url);
+    return '<a class="linkcard" href="'+y.url+'" target="_blank" rel="noopener"><div class="linkcard-icon">'+LINK_ICONS.book+(fav?'<img class="linkcard-favicon" src="'+fav+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div><h4>'+y.name+'</h4><p>'+y.desc+'</p><span class="linkcard-arrow">↗</span></a>';
   }).join("")+'</div>';
 }
 function renderEnglishWritingTabs(){
-  document.getElementById("englishWritingTabs").innerHTML = ENGLISH_WRITING.map(function(w){
-    return '<button class="subtab'+(englishWritingView===w.level?' active':'')+'" data-level="'+w.level+'">'+w.label+'</button>';
-  }).join("");
-  document.querySelectorAll("#englishWritingTabs .subtab").forEach(function(b){
-    b.addEventListener("click", function(){ englishWritingView = b.dataset.level; ls("englishWritingView", englishWritingView); renderEnglishWritingTabs(); renderEnglishWritingContent(); });
+  renderEnglishLevelSubtabs("englishWritingTabs", ENGLISH_WRITING, englishWritingView, function(level){
+    englishWritingView = level; ls("englishWritingView", englishWritingView); renderEnglishWritingTabs(); renderEnglishWritingContent();
   });
 }
 function renderEnglishWritingContent(){
@@ -1602,12 +1627,11 @@ function englishAllIds(){
   return ids;
 }
 var englishLevelView = ls("englishLevelView") || "a1";
+if(!englishLevelUnlocked(englishLevelView)) englishLevelView = "a1";
 function renderEnglishLevelTabs(){
-  document.getElementById("englishLevelTabs").innerHTML = ENGLISH_LEVELS.map(function(l){
-    return '<button class="subtab'+(englishLevelView===l.id?' active':'')+'" data-level="'+l.id+'">'+l.label+'</button>';
-  }).join("");
-  document.querySelectorAll("#englishLevelTabs .subtab").forEach(function(b){
-    b.addEventListener("click", function(){ englishLevelView = b.dataset.level; ls("englishLevelView", englishLevelView); renderEnglishLevelTabs(); renderEnglishTopics(); });
+  var items = ENGLISH_LEVELS.map(function(l){ return {level:l.id, label:l.label}; });
+  renderEnglishLevelSubtabs("englishLevelTabs", items, englishLevelView, function(level){
+    englishLevelView = level; ls("englishLevelView", englishLevelView); renderEnglishLevelTabs(); renderEnglishTopics();
   });
 }
 function renderEnglishTopics(){
@@ -1625,6 +1649,7 @@ function renderEnglishTopics(){
       ls("inglesProgress", st);
       el.classList.toggle("checked", st[el.dataset.id]);
       renderEnglishProgress();
+      renderEnglishLevelTabs(); renderEnglishReadingTabs(); renderEnglishListeningTabs(); renderEnglishWritingTabs();
     });
   });
 }
@@ -2118,7 +2143,7 @@ function getMarketCart(){
   return seeded;
 }
 function saveMarketCart(c){ ls("marketCart", c); }
-var marketFilter = {q:"", cat:"", store:""};
+var marketFilter = {q:"", cat:""};
 var SUPERMARKETS = [
   {name:"Lidl", url:"https://www.lidl.ie", desc:"Rede alemã de desconto — geralmente a opção mais barata para o básico. Boa parte desta lista de preços vem de lá."},
   {name:"Aldi", url:"https://www.aldi.ie", desc:"Concorrente direto da Lidl, também alemã e focada em preço baixo — vale comparar as duas perto de casa."},
@@ -2134,13 +2159,11 @@ function renderSupermarkets(){
     return '<a class="linkcard" href="'+s.url+'" target="_blank" rel="noopener"><div class="linkcard-icon">'+LINK_ICONS.home+(fav?'<img class="linkcard-favicon" src="'+fav+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div><h4>'+s.name+'</h4><p>'+s.desc+'</p><span class="linkcard-arrow">↗</span></a>';
   }).join("");
 }
-var MARKET_STORES = ["","Lidl","Aldi","Tesco","SuperValu","Dunnes Stores","Centra","Spar","Outro"];
 function renderMarket(){
   renderSupermarkets();
   renderMarketFilters();
   renderMarketTable();
   renderMarketAddForm();
-  renderMarketCompare();
 }
 function renderMarketFilters(){
   var cart = getMarketCart();
@@ -2149,28 +2172,24 @@ function renderMarketFilters(){
     '<div class="mini-form-grid" style="margin-bottom:0;">'+
     '<div><label>Buscar item</label><input type="text" id="marketSearch" placeholder="Ex.: frango, arroz, limpeza..."></div>'+
     '<div><label>Categoria</label><select id="marketCatFilter"><option value="">Todas as categorias</option>'+cats.map(function(c){ return '<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>'; }).join("")+'</select></div>'+
-    '<div><label>Loja</label><select id="marketStoreFilter"><option value="">Todas as lojas</option>'+MARKET_STORES.filter(function(s){return s;}).map(function(s){ return '<option value="'+s+'">'+s+'</option>'; }).join("")+'</select></div>'+
     '</div>';
   document.getElementById("marketSearch").addEventListener("input", function(e){ marketFilter.q = e.target.value.toLowerCase(); applyMarketFilter(); });
   document.getElementById("marketCatFilter").addEventListener("change", function(e){ marketFilter.cat = e.target.value; applyMarketFilter(); });
-  document.getElementById("marketStoreFilter").addEventListener("change", function(e){ marketFilter.store = e.target.value; applyMarketFilter(); });
 }
 function applyMarketFilter(){
   document.querySelectorAll("#marketTable tbody tr").forEach(function(tr){
     var okQ = !marketFilter.q || tr.dataset.item.indexOf(marketFilter.q) !== -1;
     var okCat = !marketFilter.cat || tr.dataset.cat === marketFilter.cat;
-    var okStore = !marketFilter.store || tr.dataset.store === marketFilter.store;
-    tr.style.display = (okQ && okCat && okStore) ? "" : "none";
+    tr.style.display = (okQ && okCat) ? "" : "none";
   });
 }
 function renderMarketTable(){
   var cart = getMarketCart();
   var rows = cart.map(function(it){
-    return '<tr data-item="'+escapeHtml(it.item.toLowerCase())+'" data-cat="'+escapeHtml(it.cat)+'" data-store="'+escapeHtml(it.store||"")+'">'+
+    return '<tr data-item="'+escapeHtml(it.item.toLowerCase())+'" data-cat="'+escapeHtml(it.cat)+'">'+
       '<td data-label="Categoria"><input type="text" style="width:120px;" value="'+escapeHtml(it.cat)+'" data-id="'+it.id+'" data-f="cat"></td>'+
       '<td data-label="Item"><input type="text" style="width:190px;" value="'+escapeHtml(it.item)+'" data-id="'+it.id+'" data-f="item"></td>'+
       '<td data-label="Embalagem"><input type="text" style="width:140px;" value="'+escapeHtml(it.pkg)+'" data-id="'+it.id+'" data-f="pkg"></td>'+
-      '<td data-label="Loja"><select data-id="'+it.id+'" data-f="store">'+MARKET_STORES.map(function(s){ return '<option value="'+s+'"'+((it.store||"")===s?" selected":"")+'>'+(s||"—")+'</option>'; }).join("")+'</select></td>'+
       '<td data-label="Qtd."><input type="number" step="1" style="width:55px;" value="'+it.qty+'" data-id="'+it.id+'" data-f="qty"></td>'+
       '<td data-label="Preço unit. (€)"><input type="number" step="0.01" style="width:75px;" value="'+it.price+'" data-id="'+it.id+'" data-f="price"></td>'+
       '<td class="num tabular" data-label="Subtotal" id="sub-'+it.id+'">€'+(it.qty*it.price).toFixed(2)+'</td>'+
@@ -2178,10 +2197,9 @@ function renderMarketTable(){
       '</tr>';
   }).join("");
   document.getElementById("marketTable").innerHTML =
-    '<thead><tr><th>Categoria</th><th>Item</th><th>Embalagem</th><th>Loja</th><th class="num">Qtd.</th><th class="num">Preço unit. (€)</th><th class="num">Subtotal</th><th></th></tr></thead><tbody>'+rows+'</tbody>';
-  document.querySelectorAll("#marketTable input, #marketTable select").forEach(function(inp){
-    var evt = inp.tagName==="SELECT" ? "change" : "input";
-    inp.addEventListener(evt, function(){
+    '<thead><tr><th>Categoria</th><th>Item</th><th>Embalagem</th><th class="num">Qtd.</th><th class="num">Preço unit. (€)</th><th class="num">Subtotal</th><th></th></tr></thead><tbody>'+rows+'</tbody>';
+  document.querySelectorAll("#marketTable input").forEach(function(inp){
+    inp.addEventListener("input", function(){
       var cart2 = getMarketCart();
       var row = cart2.find(function(r){ return r.id===inp.dataset.id; });
       if(!row) return;
@@ -2191,12 +2209,10 @@ function renderMarketTable(){
       var tr = inp.closest("tr");
       if(f==="item") tr.dataset.item = inp.value.toLowerCase();
       if(f==="cat") tr.dataset.cat = inp.value;
-      if(f==="store") tr.dataset.store = inp.value;
       if(f==="qty" || f==="price"){
         document.getElementById("sub-"+row.id).textContent = "€"+(row.qty*row.price).toFixed(2);
         updateMarketTotal();
       }
-      if(f==="store" || f==="item") renderMarketCompare();
     });
   });
   document.querySelectorAll("#marketTable [data-remove]").forEach(function(btn){
@@ -2206,32 +2222,6 @@ function renderMarketTable(){
     });
   });
   updateMarketTotal();
-}
-function renderMarketCompare(){
-  var wrap = document.getElementById("marketCompareWrap");
-  if(!wrap) return;
-  var cart = getMarketCart().filter(function(it){ return it.store; });
-  var byItem = {};
-  cart.forEach(function(it){
-    var key = it.item.trim().toLowerCase();
-    if(!key) return;
-    (byItem[key] = byItem[key] || []).push(it);
-  });
-  var withMultiple = Object.keys(byItem).filter(function(k){ return byItem[k].length > 1; });
-  if(!withMultiple.length){
-    wrap.innerHTML = '<div class="empty">Marque a loja de dois ou mais itens com o mesmo nome para ver a comparação aqui.</div>';
-    return;
-  }
-  wrap.innerHTML = withMultiple.map(function(k){
-    var items = byItem[k].slice().sort(function(a,b){ return a.price-b.price; });
-    var cheapest = items[0];
-    return '<div class="card" style="margin-bottom:10px;"><h3 style="font-size:15px;">'+escapeHtml(items[0].item)+'</h3>'+
-      items.map(function(it){
-        return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;'+(it.id===cheapest.id?"color:var(--accent-strong);font-weight:700;":"")+'">'+
-          '<span>'+escapeHtml(it.store)+(it.id===cheapest.id?' · mais barata':'')+'</span><span class="tabular">€'+it.price.toFixed(2)+'</span></div>';
-      }).join("")+
-    '</div>';
-  }).join("");
 }
 function updateMarketTotal(){
   var total = getMarketCart().reduce(function(s,it){ return s+it.qty*it.price; }, 0);
@@ -2244,7 +2234,6 @@ function renderMarketAddForm(){
     '<div><label>Categoria</label><input id="newCat" type="text" placeholder="Ex.: Bebidas"></div>'+
     '<div><label>Item</label><input id="newItem" type="text"></div>'+
     '<div><label>Embalagem</label><input id="newPkg" type="text" placeholder="Ex.: 1 kg"></div>'+
-    '<div><label>Loja</label><select id="newStore">'+MARKET_STORES.map(function(s){ return '<option value="'+s+'">'+(s||"—")+'</option>'; }).join("")+'</select></div>'+
     '<div><label>Quantidade</label><input id="newQty" type="number" value="1"></div>'+
     '<div><label>Preço unitário (€)</label><input id="newPrice" type="number" step="0.01"></div>'+
     '</div>'+
@@ -2253,7 +2242,7 @@ function renderMarketAddForm(){
     var item = document.getElementById("newItem").value.trim();
     if(!item) return;
     var cart = getMarketCart();
-    cart.push({id:"m"+Date.now(), cat:document.getElementById("newCat").value.trim()||"Outros", item:item, pkg:document.getElementById("newPkg").value.trim(), store:document.getElementById("newStore").value, qty:parseInt(document.getElementById("newQty").value)||1, price:parseFloat(document.getElementById("newPrice").value)||0});
+    cart.push({id:"m"+Date.now(), cat:document.getElementById("newCat").value.trim()||"Outros", item:item, pkg:document.getElementById("newPkg").value.trim(), qty:parseInt(document.getElementById("newQty").value)||1, price:parseFloat(document.getElementById("newPrice").value)||0});
     saveMarketCart(cart);
     renderMarket();
   });
@@ -2392,7 +2381,6 @@ function updateBudgetSummary(){
     row("Salário bruto semanal","€"+t.grossWeek.toFixed(2))+row("Salário bruto mensal","€"+grossMonth.toFixed(2))+row("Salário líquido estimado","€"+netMonth.toFixed(2))+
     row("Total de gastos mensais","€"+totalExpenses.toFixed(2))+row("Saldo livre no mês","€"+freeBalance.toFixed(2), freeBalance<0?"warn big":"big")+
     row("% da renda comprometida", pctCommitted.toFixed(1)+"%", pctCommitted>85?"warn":"")+row("Reserva possível em 12 meses","€"+yearlyReserve.toFixed(2));
-  renderSurvivalCard(totalExpenses);
 }
 function renderConverter(){
   var eurEl = document.getElementById("convEur"), brlEl = document.getElementById("convBrl");
@@ -2411,13 +2399,6 @@ function renderConverter(){
     eurEl.value = isNaN(v) ? "" : (v/getCotacao()).toFixed(2);
   });
 }
-function renderSurvivalCard(totalExpenses){
-  var el = document.getElementById("survivalWrap");
-  if(!el) return;
-  function row(months){ return '<div class="summary-row"><span class="lbl">'+months+' '+(months===1?"mês":"meses")+'</span><span class="val">€'+(totalExpenses*months).toFixed(0)+'</span></div>'; }
-  el.innerHTML = row(1)+row(2)+row(3)+row(6);
-}
-
 /* ---------- grupos / links ---------- */
 var GROUP_CITIES = [
   {id:"dublin", label:"Dublin"},
