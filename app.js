@@ -31,6 +31,8 @@ function highlightTab(id){
 }
 
 function showSection(id){
+  if(id && id!=="inicio") ls("lastSection", id);
+  else if(id==="inicio") renderContinueCard();
   if(isScrollMode()){
     highlightTab(id);
     var target = document.querySelector('.section[data-sec="'+id+'"]');
@@ -611,19 +613,52 @@ var DIAS30 = [
   {id:"d8", when:"Semanas 3–4", title:"PPSN &amp; Revenue", detail:"Regularize o PPSN e o registro fiscal assim que tiver um emprego confirmado.", link:{sec:"trabalho", label:"Ver Trabalho & estudo"}},
   {id:"d9", when:"Semanas 3–4", title:"Conta &amp; saúde", detail:"Avalie conta bancária local e revise seu seguro-saúde.", link:{sec:"financas", label:"Ver Finanças"}}
 ];
+function getPlanNote(id){ return (ls("planNotes")||{})[id] || ""; }
+function setPlanNote(id, text){
+  var notes = ls("planNotes") || {};
+  if(text) notes[id] = text; else delete notes[id];
+  ls("planNotes", notes);
+}
 function timelineHtml(list, doneMap){
   return list.map(function(t){
     var done = !!doneMap[t.id];
     var link = t.link ? '<a href="#'+t.link.sec+'" class="ci-link" onclick="event.stopPropagation();location.hash=\''+t.link.sec+'\';showSection(\''+t.link.sec+'\');return false;">'+t.link.label+' →</a>' : '';
-    return '<label class="checkitem'+(done?' checked':'')+'" data-id="'+t.id+'"><input type="checkbox" class="checkitem-input"'+(done?' checked':'')+'><span class="box">'+CHECK_ICON+'</span>'+
+    var note = getPlanNote(t.id);
+    return '<div class="checkitem-wrap">'+
+      '<label class="checkitem'+(done?' checked':'')+'" data-id="'+t.id+'"><input type="checkbox" class="checkitem-input"'+(done?' checked':'')+'><span class="box">'+CHECK_ICON+'</span>'+
       '<div><span class="pill step">'+t.when+'</span>'+
       '<div class="ci-label" style="text-decoration:none;margin-top:6px;">'+(done?'<span style="color:var(--muted);text-decoration:line-through;">':'')+t.title+(done?'</span>':'')+'</div>'+
-      '<div class="ci-note">'+t.detail+'</div>'+link+'</div></label>';
+      '<div class="ci-note">'+t.detail+'</div>'+link+
+      '<button type="button" class="ci-link plan-note-toggle" data-note-id="'+t.id+'" style="border:none;background:none;padding:0;font:inherit;cursor:pointer;display:block;margin-top:6px;">'+(note?"✎ Editar minha observação":"+ Adicionar observação")+'</button>'+
+      '</div></label>'+
+      '<div class="plan-note-box" data-note-wrap="'+t.id+'"'+(note?"":" hidden")+' style="margin:6px 0 4px 44px;">'+
+      '<textarea class="plan-note-input" data-note-input="'+t.id+'" placeholder="Sua observação pessoal (só fica neste navegador)..." rows="2">'+escapeHtml(note)+'</textarea>'+
+      '</div></div>';
   }).join("");
+}
+function wirePlanNotes(containerId){
+  document.querySelectorAll("#"+containerId+" .plan-note-toggle").forEach(function(btn){
+    btn.addEventListener("click", function(e){
+      e.preventDefault(); e.stopPropagation();
+      var id = btn.dataset.noteId;
+      var box = document.querySelector('#'+containerId+' [data-note-wrap="'+id+'"]');
+      box.hidden = !box.hidden;
+      if(!box.hidden) box.querySelector("textarea").focus();
+    });
+  });
+  document.querySelectorAll("#"+containerId+" .plan-note-input").forEach(function(ta){
+    ta.addEventListener("click", function(e){ e.stopPropagation(); });
+    ta.addEventListener("change", function(){
+      setPlanNote(ta.dataset.noteInput, ta.value.trim());
+      var btn = document.querySelector('#'+containerId+' [data-note-id="'+ta.dataset.noteInput+'"]');
+      if(btn) btn.textContent = ta.value.trim() ? "✎ Editar minha observação" : "+ Adicionar observação";
+    });
+  });
 }
 function renderCheckableList(containerId, list, storeKey, afterFn){
   var doneMap = ls(storeKey) || {};
   document.getElementById(containerId).innerHTML = timelineHtml(list, doneMap);
+  wirePlanNotes(containerId);
   document.querySelectorAll("#"+containerId+" .checkitem").forEach(function(el){
     el.querySelector(".checkitem-input").addEventListener("change", function(){
       var dm = ls(storeKey) || {};
@@ -641,8 +676,73 @@ function countsFor(list, storeKey){
   return {total:list.length, done:done};
 }
 
+/* ---------- proximo passo / continuar de onde parou ---------- */
+function firstPendingChecklist(){
+  var p = getProfile();
+  var state = ls("checklist") || {};
+  for(var gi=0; gi<CHECKLIST.length; gi++){
+    var g = CHECKLIST[gi];
+    if(g.scope==="eu" && p==="non-eu") continue;
+    if(g.scope==="non-eu" && p==="eu") continue;
+    for(var ii=0; ii<g.items.length; ii++){
+      if(!state[g.items[ii].id]) return {title:g.items[ii].label, sec:"roteiro"};
+    }
+  }
+  return null;
+}
+function firstPendingFrom(list, storeKey){
+  var dm = ls(storeKey) || {};
+  for(var i=0;i<list.length;i++){
+    if(!dm[list[i].id]) return {title:list[i].title, sec:(list[i].link?list[i].link.sec:"roteiro")};
+  }
+  return null;
+}
+function findNextTask(){
+  var alreadyTraveled = false;
+  var tripDate = ls("tripDate");
+  if(tripDate){
+    var d = new Date(tripDate+"T00:00:00");
+    if(!isNaN(d.getTime()) && d.getTime() < Date.now()) alreadyTraveled = true;
+  }
+  var beforeTrip = firstPendingFrom(CRONOGRAMA,"cronogramaDone") || firstPendingChecklist();
+  var afterArrival = firstPendingFrom(DIAS30,"dias30Done");
+  if(alreadyTraveled) return afterArrival || beforeTrip;
+  return beforeTrip || afterArrival;
+}
+function renderNextStepCard(){
+  var el = document.getElementById("nextStepWrap");
+  if(!el) return;
+  if(!getProfile()){
+    el.innerHTML = '<div class="eyebrow" style="color:var(--muted);">Próximo passo</div>'+
+      '<div style="font-weight:700;margin-top:4px;">Configure sua viagem para criarmos seu planejamento</div>'+
+      '<button type="button" class="ci-link" style="border:none;background:none;padding:0;font:inherit;cursor:pointer;" onclick="openOnboarding()">Responder agora →</button>';
+    return;
+  }
+  var next = findNextTask();
+  if(!next){
+    el.innerHTML = '<div class="eyebrow" style="color:var(--muted);">Próximo passo</div><div style="font-weight:700;margin-top:4px;">Tudo em dia! 🎉</div><p class="ci-note" style="margin-top:2px;">Nenhuma tarefa pendente no momento.</p>';
+    return;
+  }
+  el.innerHTML = '<div class="eyebrow" style="color:var(--muted);">Próximo passo</div>'+
+    '<div style="font-weight:700;margin-top:4px;">'+escapeHtml(next.title)+'</div>'+
+    '<a href="#'+next.sec+'" class="ci-link" onclick="location.hash=\''+next.sec+'\';showSection(\''+next.sec+'\');return false;">Resolver agora →</a>';
+}
+function renderContinueCard(){
+  var el = document.getElementById("continueWrap");
+  if(!el) return;
+  var last = ls("lastSection");
+  var labels = {perfil:"Perfil & cidade", roteiro:"Meu Plano", imigracao:"Imigração", financas:"Finanças",
+    trabalho:"Trabalho & estudo", acomodacao:"Acomodação", mercado:"Mercado", transporte:"Transporte",
+    links:"Links oficiais", grupos:"Grupos", turismo:"Turismo"};
+  if(!last || !labels[last]){ el.hidden = true; el.innerHTML=""; return; }
+  el.hidden = false;
+  el.innerHTML = '<button type="button" class="btn-ghost btn" style="width:auto;" onclick="location.hash=\''+last+'\';showSection(\''+last+'\');">↺ Continuar em '+labels[last]+'</button>';
+}
+
 /* ---------- overview ---------- */
 function renderOverview(){
+  renderNextStepCard();
+  renderContinueCard();
   var cl = checklistCounts(), cr = countsFor(CRONOGRAMA,"cronogramaDone"), d3 = countsFor(DIAS30,"dias30Done");
   var total = cl.total+cr.total+d3.total, done = cl.done+cr.done+d3.done;
   var pct = total ? Math.round(done/total*100) : 0;
