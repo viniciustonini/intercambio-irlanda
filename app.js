@@ -1109,6 +1109,138 @@ function renderApplicationsAddForm(){
   });
 }
 
+/* ---------- inglês ---------- */
+var ENGLISH_LEVELS = [
+  {id:"a1", label:"A1", desc:"Iniciante — frases básicas do dia a dia."},
+  {id:"a2", label:"A2", desc:"Básico — situações rotineiras simples."},
+  {id:"b1", label:"B1", desc:"Intermediário — conversas e textos do cotidiano."},
+  {id:"b2", label:"B2", desc:"Intermediário avançado — argumentar e detalhar ideias."}
+];
+var ENGLISH_TOPICS = {
+  a1: [
+    {id:"a1-verbtobe", title:"Verb to be (am / is / are)", body:"Usado para identidade, nacionalidade e descrições. Ex.: <i>I am Brazilian. She is a student.</i>"},
+    {id:"a1-presentsimple", title:"Present Simple", body:"Rotinas e fatos. Ex.: <i>I work on Mondays. She lives in Dublin.</i>"},
+    {id:"a1-articles", title:"Artigos (a / an / the)", body:"\"a/an\" para algo não específico, \"the\" para algo já conhecido. Ex.: <i>I have a room. The room is small.</i>"},
+    {id:"a1-numbers", title:"Números e horas", body:"Essencial para preços, horários e endereços. Ex.: <i>It's half past nine. That's twelve euros.</i>"}
+  ],
+  a2: [
+    {id:"a2-pastsimple", title:"Past Simple", body:"Ações concluídas no passado. Ex.: <i>I arrived last week. I didn't have a SIM card yet.</i>"},
+    {id:"a2-future", title:"Futuro (going to / will)", body:"\"going to\" para planos já decididos, \"will\" para decisões espontâneas. Ex.: <i>I'm going to apply for a PPSN. I'll call them now.</i>"},
+    {id:"a2-comparatives", title:"Comparativos e superlativos", body:"Comparar preços, cidades, empregos. Ex.: <i>Dublin is more expensive than Cork. This is the cheapest option.</i>"},
+    {id:"a2-modals", title:"Can / could / have to", body:"Habilidade, pedidos educados e obrigação. Ex.: <i>Can I pay by card? I have to register my address.</i>"}
+  ],
+  b1: [
+    {id:"b1-presentperfect", title:"Present Perfect", body:"Experiências e resultados até agora. Ex.: <i>I have already sent my CV. Have you found a room yet?</i>"},
+    {id:"b1-conditionals", title:"First Conditional", body:"Consequências prováveis. Ex.: <i>If I get the job, I'll need a PPSN.</i>"},
+    {id:"b1-passive", title:"Voz passiva (básica)", body:"Comum em avisos e regras formais. Ex.: <i>Payments are accepted by card only.</i>"},
+    {id:"b1-phrasal", title:"Phrasal verbs comuns no trabalho", body:"Ex.: <i>fill in</i> (preencher), <i>sign up</i> (se inscrever), <i>look for</i> (procurar), <i>sort out</i> (resolver)."}
+  ],
+  b2: [
+    {id:"b2-secondcond", title:"Second Conditional", body:"Situações hipotéticas. Ex.: <i>If I had more savings, I would rent a bigger room.</i>"},
+    {id:"b2-reported", title:"Reported speech", body:"Relatar o que alguém disse — comum em e-mails e ligações. Ex.: <i>She said the room was still available.</i>"},
+    {id:"b2-relative", title:"Orações relativas", body:"Dar mais detalhes de forma natural. Ex.: <i>The school, which is ILEP-listed, starts in January.</i>"},
+    {id:"b2-formal", title:"Linguagem formal em e-mails", body:"Ex.: <i>I am writing to enquire about... / I would appreciate your response.</i>"}
+  ]
+};
+var ENGLISH_MODULES = [
+  {id:"airport", title:"No aeroporto", phrases:[
+    "Where is the baggage claim? — Onde fica a esteira de bagagem?",
+    "I'm here to study English. — Estou aqui para estudar inglês.",
+    "Do you have a SIM card for tourists? — Vocês têm chip para turistas?"
+  ]},
+  {id:"room", title:"Alugando um quarto", phrases:[
+    "Is the room available from [date]? — O quarto está disponível a partir de [data]?",
+    "Is the deposit refundable? — O depósito é reembolsável?",
+    "Are bills included? — As contas estão incluídas?"
+  ]},
+  {id:"interview", title:"Entrevista de emprego", phrases:[
+    "I'm available to start immediately. — Estou disponível para começar imediatamente.",
+    "I can work up to 20 hours a week. — Posso trabalhar até 20 horas por semana.",
+    "Do you provide training? — Vocês oferecem treinamento?"
+  ]},
+  {id:"market", title:"No mercado / loja", phrases:[
+    "Do you accept card? — Vocês aceitam cartão?",
+    "Where can I find...? — Onde eu encontro...?",
+    "Can I get a receipt, please? — Posso pegar o recibo, por favor?"
+  ]},
+  {id:"gp", title:"No médico / farmácia", phrases:[
+    "I'd like to register with a GP. — Gostaria de me registrar com um médico de família.",
+    "I have an allergy to... — Tenho alergia a...",
+    "Can you recommend something for...? — Você recomenda algo para...?"
+  ]}
+];
+function englishProgressState(){ return ls("inglesProgress") || {}; }
+function englishAllIds(){
+  var ids = [];
+  ENGLISH_LEVELS.forEach(function(l){ (ENGLISH_TOPICS[l.id]||[]).forEach(function(t){ ids.push(t.id); }); });
+  ENGLISH_MODULES.forEach(function(m){ ids.push("mod-"+m.id); });
+  return ids;
+}
+var englishLevelView = ls("englishLevelView") || "a1";
+function renderEnglishLevelTabs(){
+  document.getElementById("englishLevelTabs").innerHTML = ENGLISH_LEVELS.map(function(l){
+    return '<button class="subtab'+(englishLevelView===l.id?' active':'')+'" data-level="'+l.id+'">'+l.label+'</button>';
+  }).join("");
+  document.querySelectorAll("#englishLevelTabs .subtab").forEach(function(b){
+    b.addEventListener("click", function(){ englishLevelView = b.dataset.level; ls("englishLevelView", englishLevelView); renderEnglishLevelTabs(); renderEnglishTopics(); });
+  });
+}
+function renderEnglishTopics(){
+  var level = ENGLISH_LEVELS.find(function(l){ return l.id===englishLevelView; });
+  var topics = ENGLISH_TOPICS[englishLevelView] || [];
+  var state = englishProgressState();
+  document.getElementById("englishLevelDesc").textContent = level ? level.desc : "";
+  document.getElementById("englishTopicsWrap").innerHTML = topics.map(function(t){
+    return checkItemHtml(t.id, t.title, t.body, !!state[t.id]);
+  }).join("");
+  document.querySelectorAll("#englishTopicsWrap .checkitem").forEach(function(el){
+    el.querySelector(".checkitem-input").addEventListener("change", function(){
+      var st = englishProgressState();
+      st[el.dataset.id] = !st[el.dataset.id];
+      ls("inglesProgress", st);
+      el.classList.toggle("checked", st[el.dataset.id]);
+      renderEnglishProgress();
+    });
+  });
+}
+function renderEnglishModules(){
+  var state = englishProgressState();
+  document.getElementById("englishModulesWrap").innerHTML = ENGLISH_MODULES.map(function(m){
+    var id = "mod-"+m.id;
+    var checked = !!state[id];
+    var phrasesHtml = m.phrases.map(function(p){ return "<li>"+p+"</li>"; }).join("");
+    return '<div class="card">'+
+      '<label class="checkitem'+(checked?' checked':'')+'" data-id="'+id+'" style="margin-bottom:10px;"><input type="checkbox" class="checkitem-input"'+(checked?' checked':'')+'><span class="box">'+CHECK_ICON+'</span><div class="ci-label">'+m.title+'</div></label>'+
+      '<ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;">'+phrasesHtml+'</ul>'+
+    '</div>';
+  }).join("");
+  document.querySelectorAll("#englishModulesWrap .checkitem").forEach(function(el){
+    el.querySelector(".checkitem-input").addEventListener("change", function(){
+      var st = englishProgressState();
+      st[el.dataset.id] = !st[el.dataset.id];
+      ls("inglesProgress", st);
+      el.classList.toggle("checked", st[el.dataset.id]);
+      renderEnglishProgress();
+    });
+  });
+}
+function renderEnglishProgress(){
+  var ids = englishAllIds();
+  var state = englishProgressState();
+  var done = ids.filter(function(id){ return state[id]; }).length;
+  var pct = ids.length ? Math.round(done/ids.length*100) : 0;
+  var text = document.getElementById("englishProgressText");
+  if(text) text.textContent = done+"/"+ids.length+" concluído ("+pct+"%)";
+  var bar = document.getElementById("englishProgressBar");
+  if(bar) bar.style.width = pct+"%";
+}
+function renderEnglish(){
+  renderEnglishLevelTabs();
+  renderEnglishTopics();
+  renderEnglishModules();
+  renderEnglishProgress();
+}
+
 /* ---------- acomodação ---------- */
 var STAY_SEED = [
   {nome:"Gardiner Hostel", noites:10, preco:519.00, obs:"Dormitório 4 camas (misto) + café da manhã"},
@@ -2200,6 +2332,7 @@ function init(){
   renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm();
   renderJobRoleTabs(); renderJobRoleContent(); renderJobAddForm();
   renderApplicationsTable(); renderApplicationsAddForm();
+  renderEnglish();
   renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences();
   renderAttrCatTabs(); renderAttrGrid(); renderAttrProgress();
   renderItineraryTabs(); renderItinerary(); renderMistakes();
