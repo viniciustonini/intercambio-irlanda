@@ -386,12 +386,37 @@
 
     <!-- TRANSPORTE -->
     <section class="section" id="sec-transporte" data-sec="transporte" role="tabpanel" aria-labelledby="tab-transporte">
-      <div class="section-head"><h2>Transporte</h2><p>Aplicativos essenciais e as principais rotas em cada cidade.</p></div>
+      <div class="section-head"><h2>Transporte</h2><p>Aplicativos, Leap Card, aeroporto, transporte público e rotas para se locomover na Irlanda — foco em Dublin, com Cork e Galway em abas próprias.</p></div>
+
+      <div class="grid cols-3" style="margin-bottom:24px;">
+        <button type="button" class="tip-card scroll-to-btn" data-scroll-target="transporte-rotas"><h4>✈ Cheguei no aeroporto</h4><p style="margin:0;">Opções mais baratas, mais rápidas e 24h para sair de Dublin Airport.</p></button>
+        <button type="button" class="tip-card scroll-to-btn" data-scroll-target="transporte-leap"><h4>💳 Qual Leap Card comprar?</h4><p style="margin:0;">Adult, Young Adult, Student ou Visitor — qual é o seu caso.</p></button>
+        <button type="button" class="tip-card scroll-to-btn" data-scroll-target="transporte-madrugada"><h4>🌙 Transporte de madrugada</h4><p style="margin:0;">Nitelink, linhas 24h e quando vale a pena o táxi.</p></button>
+      </div>
+
       <h3 style="margin:0 0 12px;font-size:18px;">Aplicativos essenciais</h3>
       <div class="grid cols-3" id="transportAppsWrap"></div>
-      <h3 style="margin:28px 0 12px;font-size:18px;">Rotas por cidade</h3>
+
+      <h3 id="transporte-leap" style="margin:28px 0 4px;font-size:18px;scroll-margin-top:88px;">Qual Leap Card é ideal para mim?</h3>
+      <p class="source-note" style="margin-bottom:14px;">Adult, Young Adult, Student ou Visitor — compare antes de comprar.</p>
+      <div class="grid cols-2" id="leapCardsWrap"></div>
+
+      <h3 id="transporte-rotas" style="margin:28px 0 12px;font-size:18px;scroll-margin-top:88px;">Rotas por cidade</h3>
       <div class="subtabs" id="transportCityTabs"></div>
       <div id="transportRoutesWrap"></div>
+
+      <h3 style="margin:28px 0 12px;font-size:18px;">Trens, Luas e aeroporto — Dublin</h3>
+      <div class="grid cols-3" id="transportGalleryWrap"></div>
+
+      <h3 id="transporte-madrugada" style="margin:28px 0 4px;font-size:18px;scroll-margin-top:88px;">Transporte de madrugada em Dublin</h3>
+      <div id="transportOvernightWrap"></div>
+
+      <h3 style="margin:28px 0 4px;font-size:18px;">MetroLink</h3>
+      <div id="transportMetrolinkWrap"></div>
+
+      <h3 style="margin:28px 0 4px;font-size:18px;">Dublin ↔ Cork / Galway</h3>
+      <p class="source-note" style="margin-bottom:14px;">Trens intercidades e ônibus diretos do aeroporto para quem não fica em Dublin.</p>
+      <div id="transportIntercityWrap"></div>
     </section>
 
     <!-- LINKS OFICIAIS -->

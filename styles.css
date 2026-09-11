@@ -213,6 +213,8 @@ input{font-family:var(--font-body);}
 .exp-card h4{font-size:14px;margin:0 0 6px;}
 .exp-card p{font-size:12.4px;color:var(--muted);margin:0;}
 .tip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+.tip-card.scroll-to-btn{width:100%;display:block;text-align:left;font:inherit;color:inherit;cursor:pointer;}
+.tip-card.scroll-to-btn h4{margin:0 0 6px;}
 .tip-card h4{font-size:13.5px;margin:0 0 6px;color:var(--navy);}
 .tip-card p{font-size:12.4px;color:var(--muted);margin:0;}
 

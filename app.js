@@ -353,6 +353,12 @@ function restoreBackup(file, statusEl){
 }
 document.getElementById("heroBackupBtn").addEventListener("click", openBackupModal);
 document.getElementById("exportPdfBtn").addEventListener("click", function(){ window.print(); });
+document.querySelectorAll(".scroll-to-btn").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    var target = document.getElementById(btn.dataset.scrollTarget);
+    if(target) target.scrollIntoView({behavior:"smooth", block:"start"});
+  });
+});
 document.getElementById("backupModalClose").addEventListener("click", function(){
   document.getElementById("backupModal").hidden = true;
 });
@@ -1511,11 +1517,13 @@ function setEnglishWritingDraft(level, text){
 }
 function wireRevealToggles(containerId){
   document.querySelectorAll("#"+containerId+" .reveal-toggle").forEach(function(btn){
+    var showLabel = btn.dataset.showLabel || "Ver respostas";
+    var hideLabel = btn.dataset.hideLabel || "Ocultar respostas";
     btn.addEventListener("click", function(){
       var box = document.querySelector('#'+containerId+' [data-reveal-box="'+btn.dataset.revealToggle+'"]');
       if(!box) return;
       box.hidden = !box.hidden;
-      btn.textContent = box.hidden ? "Ver respostas" : "Ocultar respostas";
+      btn.textContent = box.hidden ? showLabel : hideLabel;
     });
   });
 }
@@ -1931,21 +1939,46 @@ function updateScamChecklistProgress(){
   if(el) el.textContent = done+"/"+SCAM_CHECKLIST.length+" verificados";
 }
 var TRANSPORT_APPS = [
-  {name:"TFI Live", desc:"App oficial nacional com horários em tempo real de ônibus, Luas e DART/trens."},
-  {name:"TFI Go", desc:"Compra e uso de bilhetes direto pelo celular, sem precisar do cartão físico."},
-  {name:"Leap Card App", desc:"Consulta de saldo e recarga do Leap Card pelo celular."},
-  {name:"Google Maps", desc:"Boa cobertura de rotas de transporte público nas três cidades."},
-  {name:"FreeNow", desc:"Aplicativo de táxi mais usado na Irlanda."},
-  {name:"Irish Rail (app)", desc:"Horários e bilhetes de trens intercidades (Dublin ↔ Cork ↔ Galway)."}
+  {name:"TFI Live", desc:"App oficial nacional com horários em tempo real de ônibus, Luas, DART e trens — rotas, partidas e paradas próximas."},
+  {name:"TFI Go", desc:"Usado principalmente para comprar bilhetes em determinados serviços de Bus Éireann, Local Link e operadoras comerciais participantes — não é o app principal para pagar Dublin Bus/Luas/DART no dia a dia (isso é feito com o Leap Card)."},
+  {name:"Leap Card App (TFI Leap Top-Up)", desc:"Consulta de saldo, recarga do Leap Card e histórico de transações pelo celular."},
+  {name:"Google Maps", desc:"Boa cobertura de rotas de transporte público nas três cidades e integração a pé até a parada."},
+  {name:"FreeNow", desc:"Aplicativo de táxi mais usado na Irlanda — bom para madrugada ou com muita bagagem."},
+  {name:"TFI Driver Check", desc:"Verifica se o motorista, veículo e licença do táxi são os cadastrados oficialmente antes de embarcar."},
+  {name:"Irish Rail (app)", desc:"Horários e bilhetes de trens intercidades (Dublin ↔ Cork ↔ Galway) e do DART."}
 ];
 function renderTransportApps(){
   document.getElementById("transportAppsWrap").innerHTML = TRANSPORT_APPS.map(function(a){
     return '<div class="card"><h3>'+a.name+'</h3><p style="margin:0;">'+a.desc+'</p></div>';
   }).join("");
 }
+var TRANSPORT_VERIFIED_AT = "2026-09-11";
+var LEAP_CARDS = [
+  {id:"adult", label:"Adult Leap Card", who:"Quem vai morar na Irlanda e não se enquadra em Young Adult ou Student — uso frequente de Dublin Bus, Go-Ahead, Luas e DART.",
+    rows:[{l:"Short Fare",v:"€1,50"},{l:"TFI 90 Minute",v:"€2,00"},{l:"Teto diário",v:"€6,00"},{l:"Teto semanal",v:"€24,00"},{l:"Mensal Zona 1 (aprox.)",v:"€96"}]},
+  {id:"young", label:"Young Adult Leap Card", who:"Principalmente pessoas de 19 a 25 anos — não precisa necessariamente estar estudando para se enquadrar.", badge:"Até ~50% de desconto em tarifas participantes",
+    rows:[{l:"Short Fare",v:"€0,75"},{l:"TFI 90 Minute",v:"€1,00"},{l:"Teto diário",v:"€3,00"},{l:"Teto semanal",v:"€12,00"},{l:"Mensal Zona 1 (aprox.)",v:"€48"}]},
+  {id:"student", label:"Student Leap Card", who:"Separado do Young Adult — pessoas de 19–25 anos normalmente devem primeiro conferir a elegibilidade ao Young Adult, que é mais simples de obter. Fora dessa faixa etária, o Student exige carta da escola confirmando matrícula em curso de pelo menos 25 semanas.",
+    rows:[]},
+  {id:"visitor", label:"Leap Visitor Card", who:"Ideal para turismo ou os primeiros dias em Dublin — não recarregável, viagens ilimitadas por período fixo.",
+    rows:[{l:"24 horas",v:"€8"},{l:"72 horas",v:"€18"},{l:"7 dias",v:"€24"}]}
+];
+function renderLeapCards(){
+  var wrap = document.getElementById("leapCardsWrap");
+  if(!wrap) return;
+  wrap.innerHTML = LEAP_CARDS.map(function(c){
+    var rows = c.rows.length ? '<div class="tablewrap" style="margin-top:10px;"><table><tbody>'+c.rows.map(function(r){ return '<tr><td>'+r.l+'</td><td class="num tabular">'+r.v+'</td></tr>'; }).join("")+'</tbody></table></div>' : "";
+    return '<div class="card"><h3 style="font-size:15.5px;">'+c.label+'</h3><p style="margin:0 0 4px;font-size:13.3px;">'+c.who+'</p>'+
+      (c.badge?'<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);">'+c.badge+'</span>':'')+
+      rows+'</div>';
+  }).join("")+
+  '<div class="callout" style="grid-column:1/-1;">Valores de referência para Dublin (Zona 1) — confirme sempre o valor vigente em <a href="https://about.leapcard.ie/" target="_blank" rel="noopener">about.leapcard.ie</a> antes de comprar.'+sourceVerifiedNote(TRANSPORT_VERIFIED_AT)+'</div>';
+}
 var TRANSPORT_ROUTES = {
   dublin: {
     mapQuery:"Dublin, Ireland",
+    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Dublin_Double_Bus.JPG/960px-Dublin_Double_Bus.JPG",
+    photoCredit:{name:"Cadaverexquisito", license:"CC BY-SA 3.0", url:"https://commons.wikimedia.org/wiki/File:Dublin_Double_Bus.JPG"},
     network:"Ônibus (Dublin Bus), Luas (VLT) e DART/trens suburbanos — Dublin não tem metrô em operação.",
     card:"Leap Card — para estadia de meses, o cartão comum costuma valer mais que o Visitor Leap Card. Custa €10 (com algum crédito já incluso) e é vendido em lojas Spar, Centra, SuperValu e nas estações DART.",
     airport:[
@@ -1990,6 +2023,8 @@ var TRANSPORT_ROUTES = {
   },
   cork: {
     mapQuery:"Cork, Ireland",
+    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Buses_in_Cork_at_the_bus_station_%28Bus_Eireann%29.jpg/960px-Buses_in_Cork_at_the_bus_station_%28Bus_Eireann%29.jpg",
+    photoCredit:{name:"JoachimKohler-HB", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:Buses_in_Cork_at_the_bus_station_(Bus_Eireann).jpg"},
     network:"Rede de ônibus urbanos (Bus Éireann) — Cork não tem Luas nem DART.",
     card:"Leap Card também funciona nos ônibus de Cork.",
     airport:[
@@ -2011,6 +2046,8 @@ var TRANSPORT_ROUTES = {
   },
   galway: {
     mapQuery:"Galway, Ireland",
+    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Galway_-_Bus_and_Rail_Station_-_geograph.org.uk_-_1647013.jpg/960px-Galway_-_Bus_and_Rail_Station_-_geograph.org.uk_-_1647013.jpg",
+    photoCredit:{name:"Joseph Mischyshyn", license:"CC BY-SA 2.0", url:"https://commons.wikimedia.org/wiki/File:Galway_-_Bus_and_Rail_Station_-_geograph.org.uk_-_1647013.jpg"},
     network:"Ônibus urbanos operados por Bus Éireann e City Direct — Galway também não tem Luas nem DART.",
     card:"Leap Card funciona nos ônibus de Galway; a maioria das rotas parte do Eyre Square (centro).",
     airport:[
@@ -2030,6 +2067,66 @@ var TRANSPORT_ROUTES = {
     ]
   }
 };
+var TRANSPORT_GALLERY_DUBLIN = [
+  {name:"Luas", photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/The_Luas_at_O%27Connell_Upper_May_2025.jpg/960px-The_Luas_at_O%27Connell_Upper_May_2025.jpg", photoCredit:{name:"4300streetcar", license:"CC BY 4.0", url:"https://commons.wikimedia.org/wiki/File:The_Luas_at_O%27Connell_Upper_May_2025.jpg"}},
+  {name:"DART", photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d4/DART_Dublin_train_2023_%281%29.jpg/960px-DART_Dublin_train_2023_%281%29.jpg", photoCredit:{name:"MOs810", license:"CC BY 4.0", url:"https://commons.wikimedia.org/wiki/File:DART_Dublin_train_2023_(1).jpg"}},
+  {name:"Dublin Airport", photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Dublin_Airport_Terminal_2_-_2024-05-18.jpg/960px-Dublin_Airport_Terminal_2_-_2024-05-18.jpg", photoCredit:{name:"瑞丽江的河水", license:"CC BY-SA 4.0", url:"https://commons.wikimedia.org/wiki/File:Dublin_Airport_Terminal_2_-_2024-05-18.jpg"}}
+];
+function renderTransportGallery(){
+  var wrap = document.getElementById("transportGalleryWrap");
+  if(!wrap) return;
+  wrap.innerHTML = TRANSPORT_GALLERY_DUBLIN.map(function(g){
+    return '<div class="city-card"><img class="city-card-photo" src="'+g.photo+'" alt="'+g.name+'" loading="lazy" onerror="this.remove()">'+
+      '<h3 style="font-size:14.5px;">'+g.name+'</h3>'+
+      '<a class="city-card-credit" href="'+g.photoCredit.url+'" target="_blank" rel="noopener">Foto: '+g.photoCredit.name+' / Wikimedia Commons ('+g.photoCredit.license+')</a>'+
+      '</div>';
+  }).join("");
+}
+var TRANSPORT_OVERNIGHT_DUBLIN = {
+  intro:"Fora do horário normal, a rede encolhe bastante — vale planejar com antecedência quando o compromisso terminar tarde.",
+  items:[
+    {name:"Nitelink", detail:"Serviço noturno que complementa parte da rede em determinados dias/horários (normalmente noites de sexta e sábado). Referência de tarifa: ~€2,40 com Leap, ~€3,10 em dinheiro — confirme dias, horários e rotas vigentes antes de contar com ele."},
+    {name:"Algumas linhas Dublin Bus 24h", detail:"Um pequeno número de linhas urbanas opera de madrugada em parte do trajeto — confira no TFI Live se a sua rota específica está entre elas antes de contar com isso no retorno."},
+    {name:"Táxi / FreeNow", detail:"A alternativa mais confiável de madrugada quando não há ônibus/Luas/DART operando — vale reservar o valor no orçamento se seus horários envolverem chegadas ou saídas noturnas com frequência."}
+  ],
+  sourceUrl:"https://www.dublinbus.ie/journey-information/night-time-services"
+};
+var TRANSPORT_METROLINK = {
+  title:"MetroLink",
+  body:"Dublin ainda não possui metrô em operação. O MetroLink é um projeto de metrô futuro, ainda em planejamento/construção — não deve ser considerado uma opção de transporte disponível hoje.",
+  sourceUrl:"https://www.metrolink.ie/"
+};
+var TRANSPORT_INTERCITY = [
+  {route:"Dublin Heuston → Cork Kent", note:"Principal ligação de trem entre as duas cidades — várias partidas por dia. Confira duração, frequência e preço atualizados no Irish Rail antes de comprar; passagem antecipada costuma sair mais barata."},
+  {route:"Dublin Heuston → Galway Ceannt", note:"Principal ligação de trem entre as duas cidades. Mesma recomendação: confira horários e preço no Irish Rail, e compre com antecedência quando possível."}
+];
+var TRANSPORT_AIRPORT_DIRECT = [
+  {city:"Cork", note:"Se seu destino final é Cork, vale comparar um ônibus direto do próprio Aeroporto de Dublin (operadoras como Aircoach/Citylink têm linhas para Cork) antes de ir primeiro ao centro de Dublin — confira rota, horário e preço atual no site de cada operadora."},
+  {city:"Galway", note:"Da mesma forma, para quem vai direto a Galway, existem ônibus diretos do Aeroporto de Dublin (Citylink/Aircoach) que evitam a ida ao centro — confira rota, horário e preço atual no site de cada operadora."}
+];
+function renderTransportOvernight(){
+  var wrap = document.getElementById("transportOvernightWrap");
+  if(!wrap) return;
+  var d = TRANSPORT_OVERNIGHT_DUBLIN;
+  wrap.innerHTML = '<div class="callout">'+d.intro+'</div>'+
+    '<div class="card">'+d.items.map(function(it){ return tipRow(it.name, it.detail); }).join("")+'</div>'+
+    officialSourceHtml(d.sourceUrl, TRANSPORT_VERIFIED_AT);
+}
+function renderTransportMetrolink(){
+  var wrap = document.getElementById("transportMetrolinkWrap");
+  if(!wrap) return;
+  wrap.innerHTML = '<div class="callout warn"><strong>'+TRANSPORT_METROLINK.title+':</strong> '+TRANSPORT_METROLINK.body+'</div>'+
+    officialSourceHtml(TRANSPORT_METROLINK.sourceUrl, TRANSPORT_VERIFIED_AT);
+}
+function renderTransportIntercity(){
+  var wrap = document.getElementById("transportIntercityWrap");
+  if(!wrap) return;
+  wrap.innerHTML = '<div class="card">'+TRANSPORT_INTERCITY.map(function(r){ return tipRow(r.route, r.note); }).join("")+
+    '<div class="callout" style="margin-top:14px;">Se o destino final é Cork ou Galway, vale verificar ônibus direto do próprio Aeroporto de Dublin antes de ir ao centro:</div>'+
+    TRANSPORT_AIRPORT_DIRECT.map(function(a){ return tipRow("Direto para "+a.city, a.note); }).join("")+
+    '</div>'+
+    officialSourceHtml("https://www.irishrail.ie/", TRANSPORT_VERIFIED_AT);
+}
 var transportCity = ls("transportCityView") || "dublin";
 function renderTransportCityTabs(){
   document.getElementById("transportCityTabs").innerHTML = SCHOOL_CITIES.map(function(c){
@@ -2043,7 +2140,14 @@ function renderTransportRoutes(){
   var t = TRANSPORT_ROUTES[transportCity];
   var mapLink = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(t.mapQuery);
   var mapEmbed = "https://maps.google.com/maps?q=" + encodeURIComponent(t.mapQuery) + "&output=embed";
-  var html = '<div class="grid cols-2" style="margin-bottom:16px;">'+
+  var html = "";
+  if(t.photo){
+    html += '<div class="card" style="padding:0;overflow:hidden;margin-bottom:16px;">'+
+      '<img src="'+t.photo+'" alt="Transporte em '+t.mapQuery+'" style="width:100%;max-height:260px;object-fit:cover;display:block;" loading="lazy" onerror="this.parentElement.remove()">'+
+      '<a class="city-card-credit" style="display:block;padding:6px 12px;" href="'+t.photoCredit.url+'" target="_blank" rel="noopener">Foto: '+t.photoCredit.name+' / Wikimedia Commons ('+t.photoCredit.license+')</a>'+
+      '</div>';
+  }
+  html += '<div class="grid cols-2" style="margin-bottom:16px;">'+
     '<div class="card"><h3>Rede</h3><p style="margin:0;">'+t.network+'</p></div>'+
     '<div class="card"><h3>Bilhete</h3><p style="margin:0;">'+t.card+'</p></div>'+
     '</div>';
@@ -2059,8 +2163,10 @@ function renderTransportRoutes(){
     '<div class="card">'+t.lines.map(function(l){ return tipRow(l.name, l.detail); }).join("")+'</div>';
   if(t.luasStops){
     html += '<div class="card"><h3>Estações do Luas, em ordem</h3>'+
-      '<p style="margin:0 0 10px;font-size:13px;"><strong>Linha Vermelha:</strong> '+t.luasStops.red+'</p>'+
-      '<p style="margin:0;font-size:13px;"><strong>Linha Verde:</strong> '+t.luasStops.green+'</p>'+
+      '<button type="button" class="btn btn-ghost reveal-toggle" data-reveal-toggle="luas-red" data-show-label="Mostrar Linha Vermelha" data-hide-label="Ocultar Linha Vermelha" style="width:auto;padding:8px 14px;font-size:12.5px;margin-bottom:8px;">Mostrar Linha Vermelha</button>'+
+      '<div data-reveal-box="luas-red" hidden style="margin-bottom:12px;"><p style="margin:0;font-size:13px;">'+t.luasStops.red+'</p></div>'+
+      '<button type="button" class="btn btn-ghost reveal-toggle" data-reveal-toggle="luas-green" data-show-label="Mostrar Linha Verde" data-hide-label="Ocultar Linha Verde" style="width:auto;padding:8px 14px;font-size:12.5px;margin-bottom:8px;">Mostrar Linha Verde</button>'+
+      '<div data-reveal-box="luas-green" hidden><p style="margin:0;font-size:13px;">'+t.luasStops.green+'</p></div>'+
       '</div>';
   }
   if(t.officialLinks){
@@ -2079,6 +2185,7 @@ function renderTransportRoutes(){
     '</div>'+
     '<p class="source-note">Rotas, tarifas e apps pesquisados em set/2026 — preços de ônibus expresso variam entre fontes, confirme sempre no site oficial antes de comprar.</p>';
   document.getElementById("transportRoutesWrap").innerHTML = html;
+  wireRevealToggles("transportRoutesWrap");
 }
 var MARKET_SEED = [
   {cat:"Hortifruti", item:"Kiwi", pkg:"Pacote com 6", qty:1, price:1.49},
@@ -2855,7 +2962,8 @@ function init(){
   renderItineraryTabs(); renderItinerary(); renderMyItinerary(); renderMistakes();
   renderMoradia();
   renderScamChecklist();
-  renderTransportApps(); renderTransportCityTabs(); renderTransportRoutes();
+  renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity();
+  renderTransportCityTabs(); renderTransportRoutes();
   renderMarket(); renderBudget(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();
   renderAll();
   setInterval(renderHero, 60000);
