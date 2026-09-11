@@ -834,8 +834,9 @@ var TRABALHO = [
   {title:"PPS Number (PPSN)", body:"Identificação fiscal e de serviços na Irlanda. Peça depois de chegar, com uma justificativa clara (ex.: proposta de emprego). Agende pelo MyWelfare.ie e leve identidade, comprovante de endereço e a justificativa.", sourceUrl:"https://www.mywelfare.ie", verifiedAt:VISTOS_VERIFIED_AT},
   {title:"MyGovID", body:"Conta verificada do governo irlandês, necessária para usar o Revenue myAccount completo, o MyWelfare e boa parte dos serviços públicos online. Depois de ter o PPSN, crie uma conta básica (nível 1) em mygovid.ie; para acessar mais serviços, faça a verificação nível 2 (por vídeo-chamada ou correspondência).", sourceUrl:"https://www.mygovid.ie", verifiedAt:VISTOS_VERIFIED_AT},
   {title:"Revenue &amp; myAccount", body:"Registre o primeiro emprego o quanto antes no Revenue (myAccount) para evitar o 'Emergency Tax' — imposto temporário mais alto cobrado até você ser regularizado.", sourceUrl:"https://www.revenue.ie", verifiedAt:VISTOS_VERIFIED_AT},
-  {title:"Salário mínimo nacional", body:"Referência para 2026: €14,15/hora, com previsão de reajuste para €14,94/hora a partir de janeiro de 2027. Confirme o valor vigente em workplacerelations.ie.", sourceUrl:"https://www.workplacerelations.ie", verifiedAt:VISTOS_VERIFIED_AT},
-  {title:"Direitos trabalhistas básicos", body:"Contrato/termo de emprego por escrito logo no início, recibo de pagamento (payslip) a cada pagamento, pausas durante o expediente e período mínimo de férias remuneradas proporcional. Guarde contratos e comprovantes.", sourceUrl:"https://www.workplacerelations.ie", verifiedAt:VISTOS_VERIFIED_AT}
+  {title:"Salário mínimo nacional (2026)", body:"Desde 1º de janeiro de 2026: <strong>€14,15/hora</strong> a partir de 20 anos; €12,74 aos 19 anos; €11,32 aos 18 anos; €9,91 para menores de 18. Há previsão de reajuste para €14,94/hora a partir de janeiro de 2027 — confirme o valor vigente antes de assinar contrato. Quem trabalha em limpeza terceirizada (contract cleaning) tem piso setorial maior: €14,80/hora a partir de 20 anos, €13,32 aos 19, €11,84 aos 18 e €10,36 para menores de 18.", sourceUrl:"https://www.workplacerelations.ie", verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"Direitos trabalhistas básicos", body:"Contrato/termo de emprego por escrito logo no início (essenciais em até 5 dias, o restante em até 1 mês), recibo de pagamento (payslip) a cada pagamento, pausas durante o expediente e período mínimo de férias remuneradas proporcional. Jornada média máxima geral de 48h/semana; intervalo de 15 min após mais de 4h30 trabalhadas e de 30 min (total) após mais de 6h. A Irlanda tem 10 feriados públicos e, desde 2026, 5 dias de sick leave pagos por ano após 13 semanas de casa. Gorjeta não pode ser usada para completar o salário mínimo contratual. Guarde contratos, escalas e payslips.", sourceUrl:"https://www.workplacerelations.ie", verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"Golpes em vagas de emprego", body:"Nunca pague para \"garantir\" uma vaga. Confirme o domínio do e-mail e candidate-se sempre pelo portal oficial da empresa. Desconfie de entrevista feita só por mensagem, pedido de criptomoeda/gift card ou de compra antecipada de equipamento. Uma agência legítima informa o empregador, o local e a forma de pagamento — o candidato normalmente não paga taxa à agência por uma vaga. Nunca entregue o passaporte original a empregador ou agência."}
 ];
 var CURSO_REGRAS = [
   {title:"Se você não é da UE", eu:false, body:"A escola precisa constar na lista oficial ILEP e o curso ter no mínimo 15h semanais presenciais. Cursos mais longos podem exigir exame de proficiência (ELP) perto da renovação."},
@@ -852,16 +853,29 @@ var SCHOOLS_SEED = {
     {name:"Your English Language School", rating:4.9, reviews:169, morning:220, afternoon:220, evening:41.25, note:"Turmas noturnas pequenas; boa opção part-time. yourenglish.ie"},
     {name:"Atlas Language School", rating:4.7, reviews:813, morning:300, afternoon:null, evening:null, note:"Estrutura e programa social fortes; preço mais alto. atlaslanguageschool.com"},
     {name:"International House Dublin", rating:4.4, reviews:442, morning:170, afternoon:null, evening:null, note:"Boa opção para inglês profissional; peça cotação real. ihdublin.com"},
-    {name:"Emerald Cultural Institute", rating:4.3, reviews:101, morning:375, afternoon:null, evening:null, note:"Turmas menores e apoio acadêmico forte; custo alto. eci.ie"}
+    {name:"Emerald Cultural Institute", rating:4.3, reviews:101, morning:375, afternoon:null, evening:null, note:"Turmas menores e apoio acadêmico forte; custo alto. eci.ie"},
+    {name:"ISI Dublin", rating:null, reviews:null, morning:230, afternoon:195, evening:null, note:"Semi-intensivo €310/sem, intensivo €390/sem. Jobs Club e apoio de carreira, 4 prêmios StudyTravel Star. 39 Parnell Square West, Dublin 1. studyinireland.ie"},
+    {name:"ISE — International School of English", rating:null, reviews:null, morning:150, afternoon:null, evening:null, note:"Semi-intensivo 20h €200/sem, intensivo 30h €250/sem. Jobs Club e orientação de emprego. 26 Harcourt St / 66 Camden St Lower, Dublin 2. iseireland.ie"},
+    {name:"Apollo Language Centre", rating:null, reviews:null, morning:295, afternoon:null, evening:null, note:"25h (Plus) sob consulta. Turma máx. 15, lição de 60 min, sem suplemento de verão. 5 Lad Lane, Dublin 2. apollolanguagecentre.com"},
+    {name:"CES Dublin", rating:null, reviews:null, morning:355, afternoon:200, evening:null, note:"Intensivo 26 lições €425/sem. Rede CES, centro CELTA/Cambridge/IELTS. Study & Work 25+8 sem: €6.750 manhã. ces-schools.com"},
+    {name:"EC Dublin", rating:null, reviews:null, morning:380, afternoon:null, evening:null, note:"A partir de €380/sem (preço varia por data/duração). English for Work a partir de €445/sem. Rathmines, Dublin 6. ecenglish.com"},
+    {name:"ILSC Dublin", rating:null, reviews:null, morning:300, afternoon:null, evening:null, note:"Dublin Experience (30 lições) €400/sem. Study & Work 33 sem: €6.000 manhã ou €5.750 tarde. ilsc.com"}
   ],
   cork: [
     {name:"Cork English Academy", rating:null, reviews:null, morning:150, afternoon:120, evening:null, note:"Preço da faixa 2–4 semanas (cai p/ €100/€80 em 25+ sem). Matrícula €65 + material €50. 2 Drinan Street, Cork City. corkenglishacademy.com"},
     {name:"Cork English College", rating:null, reviews:null, morning:null, afternoon:null, evening:null, note:"Oferece standard, intensivo e noturno. Matrícula €75 + material €75 — consulte o site para valor semanal atualizado. corkenglishcollege.com"},
-    {name:"Cork English World", rating:null, reviews:null, morning:null, afternoon:null, evening:null, note:"Mínimo 20h/semana de prática. Crawford Business Park, Bishop St. Consulte o site para valor semanal atualizado. cew.ie"}
+    {name:"Cork English World", rating:null, reviews:null, morning:null, afternoon:null, evening:null, note:"Mínimo 20h/semana de prática. Crawford Business Park, Bishop St. Consulte o site para valor semanal atualizado. cew.ie"},
+    {name:"CES Cork (antiga ACET)", rating:null, reviews:null, morning:285, afternoon:185, evening:null, note:"Intensivo €350/sem. ACET foi adquirida pela CES em 2024. 16 St Patrick's Place, Wellington Road, Cork. ces-schools.com"},
+    {name:"UCC Language Centre", rating:null, reviews:null, morning:315, afternoon:null, evening:null, note:"16 lições ≈€250/sem. Campus universitário (UCC), programas TrustEd Ireland. O'Rahilly Building. ucc.ie/en/esol"},
+    {name:"Griffith Institute of Language — Cork", rating:null, reviews:null, morning:null, afternoon:null, evening:null, note:"Preço sob consulta (não usar tabelas antigas de 2019). General English 15h manhã, campus de faculdade. Wellington Road, Cork. griffith.ie"}
   ],
   galway: [
     {name:"Atlantic Language Galway", rating:null, reviews:null, morning:400, afternoon:null, evening:null, note:"15h/semana (20 aulas). Fairgreen House, Fairgreen Road. atlanticlanguage.com"},
-    {name:"Galway Cultural Institute (GCI)", rating:null, reviews:null, morning:290, afternoon:220, evening:null, note:"Curso estendido de 26 aulas: €360/sem. Preços caem após 12 sem. Matrícula €70 + material €75. gci.ie"}
+    {name:"Galway Cultural Institute (GCI)", rating:null, reviews:null, morning:290, afternoon:220, evening:null, note:"Curso estendido de 26 aulas: €360/sem. Preços caem após 12 sem. Matrícula €70 + material €75. gci.ie"},
+    {name:"Bridge Mills Galway (IH Galway)", rating:null, reviews:null, morning:225, afternoon:null, evening:null, note:"EG30 (sazonal, abr-set) €305/sem. Passou a integrar a rede International House em 2025. The Bridge Mills, Galway. galwaylanguage.com"},
+    {name:"Corrib English", rating:null, reviews:null, morning:null, afternoon:null, evening:null, note:"Preço sob consulta. Turmas de até 8 alunos, part-time — boa opção para residente/cidadão UE. Merchant's Road, Galway city centre. corribenglish.com"},
+    {name:"Galway English Academy", rating:null, reviews:null, morning:200, afternoon:null, evening:null, note:"Intensivo 30h a partir de €375/sem. Turma máx. 8, materiais inclusos, sem matrícula. Galway city centre. galwayenglishacademy.com"},
+    {name:"University of Galway — English Language Centre", rating:null, reviews:null, morning:null, afternoon:null, evening:null, note:"Pre-sessional acadêmico, preço sob consulta. Unidade oficial da universidade, autorizada TrustEd Ireland. Campus Newcastle. universityofgalway.ie/englishlanguage"}
   ]
 };
 function getSchools(city){
@@ -969,7 +983,7 @@ function renderSchoolAddForm(){
 }
 
 /* ---------- vagas de entrada rápida ---------- */
-var JOB_ROLES = [{id:"cleaner",l:"Cleaner (limpeza)"},{id:"barista",l:"Barista"}];
+var JOB_ROLES = [{id:"cleaner",l:"Cleaner (limpeza)"},{id:"barista",l:"Barista"},{id:"hotelaria",l:"Hotelaria"},{id:"varejo",l:"Varejo"},{id:"logistica",l:"Logística/warehouse"},{id:"atendimento",l:"Atendimento/call center"},{id:"delivery",l:"Delivery"},{id:"ti",l:"TI/suporte"}];
 var JOBS_SEED = {
   cleaner: {
     tips:"Destaque confiabilidade, atenção a detalhes e disponibilidade de horário flexível (manhã cedo ou noite). Experiência prévia com limpeza/organização ajuda, mas nem sempre é exigida — algumas vagas pedem Garda Vetting (verificação de antecedentes) se você já morou fora da Irlanda por mais de 6 meses.",
@@ -989,8 +1003,82 @@ var JOBS_SEED = {
       {name:"Coffeeangel", note:"Cafeteria independente de Dublin, conhecida por valorizar a equipe."},
       {name:"Butlers Chocolate Café", note:"Rede irlandesa de cafés, presente em várias cidades."}
     ]
+  },
+  hotelaria: {
+    tips:"Destaque flexibilidade de turnos (incluindo fins de semana e feriados), atenção a detalhes e disposição para aprender. Vagas de accommodation assistant e kitchen porter costumam pedir pouca ou nenhuma experiência prévia.",
+    companies:[
+      {name:"Dalata Hotel Group (Clayton/Maldron)", note:"Maior rede hoteleira irlandesa, com hotéis em Dublin, Cork e Galway — boa porta de entrada."},
+      {name:"MHL Hotel Collection", note:"Rede com unidades em várias cidades, incluindo o Galmont em Galway."},
+      {name:"The Doyle Collection", note:"Hotéis de padrão mais alto, principalmente em Dublin."},
+      {name:"Leonardo Hotels / Hilton / Marriott / Accor / Radisson", note:"Redes internacionais com unidades nas três cidades — procure vagas de accommodation assistant, kitchen porter, food & beverage e recepção."}
+    ]
+  },
+  varejo: {
+    tips:"Destaque disponibilidade para turnos variados (incluindo noite e fim de semana) e experiência com atendimento, mesmo que informal. Boa porta de entrada para quem ainda está pegando fluência.",
+    companies:[
+      {name:"Tesco", note:"Uma das maiores redes de supermercado — vagas frequentes de customer assistant e night pack."},
+      {name:"Dunnes Stores", note:"Rede irlandesa de varejo, com lojas em todo o país."},
+      {name:"Lidl / Aldi", note:"Redes de supermercado com vagas de sales/stock assistant, presença nas três cidades."},
+      {name:"Penneys/Primark", note:"Rede de moda com grande volume de contratação de sales assistant."},
+      {name:"SuperValu / Centra", note:"Redes de conveniência com lojas em quase todos os bairros."},
+      {name:"Boots", note:"Farmácia/perfumaria com vagas de customer assistant."}
+    ]
+  },
+  logistica: {
+    tips:"Destaque disponibilidade para turnos (incluindo madrugada/noite) e disposição física para o trabalho. CNH e experiência com forklift são diferenciais, mas não sempre exigidos para picker/packer.",
+    companies:[
+      {name:"An Post", note:"Correios nacionais — vagas de entrega e triagem em todo o país."},
+      {name:"DPD / DHL / UPS / GLS", note:"Transportadoras internacionais com centros de distribuição nas três cidades."},
+      {name:"Musgrave", note:"Grande distribuidor de alimentos (dono de SuperValu/Centra) — vagas de warehouse operative."},
+      {name:"Amazon", note:"Centros de distribuição com vagas de warehouse operative e picker/packer, principalmente na região de Dublin."}
+    ]
+  },
+  atendimento: {
+    tips:"Português e italiano nativos costumam ser diferencial forte nesse setor — muitas empresas atendem clientes de vários países da Europa a partir da Irlanda. Inglês B2+ geralmente é esperado para o trabalho interno.",
+    companies:[
+      {name:"Concentrix", note:"Uma das maiores operações de customer support multilíngue na Irlanda."},
+      {name:"TELUS Digital", note:"Contrata falantes de português/italiano para suporte e moderação de conteúdo."},
+      {name:"Accenture", note:"Grandes operações de suporte e back office em Dublin."},
+      {name:"Apple (Cork)", note:"Suporte ao cliente multilíngue com grande operação em Cork."},
+      {name:"Fidelity Investments / Genesys / Diligent (Galway)", note:"Empresas com equipes de suporte/atendimento em Galway."}
+    ]
+  },
+  delivery: {
+    tips:"Boa opção para complementar renda com horário flexível. Confirme se o veículo (bike, moto ou carro) e o seguro exigidos estão de acordo com o que a plataforma pede antes de começar.",
+    companies:[
+      {name:"Deliveroo", note:"Entrega por bike/moto/carro, cadastro pelo app."},
+      {name:"Just Eat", note:"Uma das maiores plataformas de delivery de comida na Irlanda."},
+      {name:"Uber Eats", note:"Cadastro pelo app, flexibilidade de horário."}
+    ]
+  },
+  ti: {
+    tips:"Inglês técnico e clareza para explicar problemas contam mais do que sotaque perfeito. Certificações (ex.: CompTIA, ITIL) e um portfólio/GitHub ajudam para quem vem de TI no Brasil.",
+    companies:[
+      {name:"Version 1 / NTT DATA", note:"Consultorias de TI com forte presença em Dublin, boas portas de entrada para suporte técnico."},
+      {name:"Google / Microsoft / Amazon (AWS) / Meta", note:"Grandes empresas de tecnologia com operações em Dublin — nível de entrada costuma ser concorrido."},
+      {name:"Dell Technologies / Apple / Trend Micro (Cork)", note:"Grande presença de TI e suporte técnico em Cork."},
+      {name:"HPE / Cisco / SAP / MathWorks (Galway)", note:"Empresas de tecnologia com operações em Galway, incluindo o polo do PorterShed/Galway Technology Centre."}
+    ]
   }
 };
+var AGENCIAS = [
+  {name:"Excel Recruitment", url:"https://www.excelrecruitment.com/", desc:"Hotelaria, varejo, industrial e warehouse — cobertura nas três cidades."},
+  {name:"Cpl", url:"https://www.cpl.com/ie", desc:"Customer service multilíngue, tecnologia, pharma e escritório."},
+  {name:"Hays Ireland", url:"https://www.hays.ie/", desc:"Escritório, construção, finanças e TI."},
+  {name:"Adecco Ireland", url:"https://www.adecco.ie/", desc:"Temporário, operações, atendimento e indústria."},
+  {name:"Manpower Ireland", url:"https://www.manpower.ie/", desc:"Temporário, operações, atendimento e indústria."},
+  {name:"Morgan McKinley", url:"https://www.morganmckinley.com/ie/jobs", desc:"Profissional, tecnologia, finanças e operações — forte presença em Cork."},
+  {name:"Sigmar Recruitment", url:"https://www.sigmarrecruitment.com/", desc:"Escritório, vendas, finanças, supply chain e TI."},
+  {name:"FRS Recruitment", url:"https://www.frsrecruitment.com/", desc:"Cobertura regional, boa presença fora de Dublin."},
+  {name:"Osborne", url:"https://osborne.ie/", desc:"Escritório, vendas, finanças, supply chain e TI."}
+];
+function renderAgencias(){
+  var wrap = document.getElementById("agenciasWrap");
+  if(!wrap) return;
+  wrap.innerHTML = AGENCIAS.map(function(a){
+    return '<a class="linkcard" href="'+a.url+'" target="_blank" rel="noopener"><h4>'+a.name+'</h4><p>'+a.desc+'</p><span class="linkcard-arrow">↗</span></a>';
+  }).join("");
+}
 function getJobs(role){
   var key = "jobs_"+role;
   var saved = ls(key);
@@ -2342,6 +2430,12 @@ var LINKS = [
   {group:"Trabalho & impostos", icon:"briefcase", label:"Revenue", url:"https://www.revenue.ie", desc:"Registro fiscal, myAccount e imposto emergencial"},
   {group:"Trabalho & impostos", icon:"briefcase", label:"Workplace Relations Commission", url:"https://www.workplacerelations.ie", desc:"Salário mínimo e direitos trabalhistas"},
   {group:"Trabalho & impostos", icon:"briefcase", label:"Jobs Ireland", url:"https://jobsireland.ie/", desc:"Portal oficial de vagas de emprego do governo irlandês"},
+  {group:"Trabalho & impostos", icon:"briefcase", label:"IrishJobs", url:"https://www.irishjobs.ie/", desc:"Grande volume de vagas profissionais e operacionais"},
+  {group:"Trabalho & impostos", icon:"briefcase", label:"Indeed Ireland", url:"https://ie.indeed.com/", desc:"Busca ampla de vagas — ótimo para alertas por cidade e palavra-chave"},
+  {group:"Trabalho & impostos", icon:"briefcase", label:"LinkedIn Jobs", url:"https://www.linkedin.com/jobs/", desc:"TI, suporte, finanças, vendas, multilíngue e networking"},
+  {group:"Trabalho & impostos", icon:"briefcase", label:"Jobs.ie", url:"https://www.jobs.ie/", desc:"Hotelaria, varejo, atendimento, administração e entrada"},
+  {group:"Trabalho & impostos", icon:"briefcase", label:"HotelJobs", url:"https://www.hoteljobs.ie/", desc:"Hotéis, restaurantes, cozinha, recepção e gestão"},
+  {group:"Trabalho & impostos", icon:"briefcase", label:"EURES", url:"https://eures.europa.eu/", desc:"Mobilidade dentro da UE, vagas e orientação para cidadãos europeus"},
   {group:"Transporte", icon:"bus", label:"Transporte público na Irlanda", url:"https://www.ireland.com/en-us/help-and-advice/practical-information/public-transport/", desc:"Leap Card, rotas e visão geral do transporte público"},
   {group:"Transporte", icon:"bus", label:"Irish Rail", url:"https://www.irishrail.ie", desc:"Trens intercidades — Dublin, Cork, Galway e mais"},
   {group:"Transporte", icon:"bus", label:"Bus Éireann", url:"https://www.buseireann.ie", desc:"Rotas de ônibus municipais e intermunicipais"},
@@ -2659,6 +2753,7 @@ function init(){
   renderNationalRules();
   renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm();
   renderJobRoleTabs(); renderJobRoleContent(); renderJobAddForm();
+  renderAgencias();
   renderApplicationsTable(); renderApplicationsAddForm();
   renderEnglish();
   renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences();
