@@ -202,6 +202,7 @@ document.getElementById("heroEditDate").addEventListener("click", function(){
 });
 
 /* ---------- trip date & countdown ---------- */
+function todayISO(){ return new Date().toISOString().slice(0,10); }
 var MONTHS = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
 function getTripDate(){ return ls("tripDate") || "2027-03-11"; }
 function setTripDate(v){ ls("tripDate", v); renderHero(); }
@@ -221,7 +222,7 @@ function renderHero(){
   document.getElementById("heroTopSub").textContent = "Planejamento revisado em " + LAST_UPDATED;
   document.getElementById("heroCotacaoVal").textContent = "R$ " + getCotacao().toFixed(2).replace(".", ",");
   var input = document.getElementById("heroDateInput");
-  if(input) input.value = dstr;
+  if(input){ input.min = todayISO(); input.value = dstr; }
 }
 document.getElementById("heroCotacao").addEventListener("click", function(){ location.hash = "acomodacao"; showSection("acomodacao"); });
 document.getElementById("heroDateInput").addEventListener("change", function(e){ setTripDate(e.target.value); });
@@ -466,6 +467,7 @@ function openOnboarding(){
   document.querySelectorAll("#onbCitySeg .seg-btn").forEach(function(b){ b.classList.toggle("selected", city!==null && b.dataset.city===city); });
   updateGoalOptions(profile);
   document.getElementById("onbGoal").value = getGoal() || "";
+  document.getElementById("onbTripDate").min = todayISO();
   document.getElementById("onbTripDate").value = ls("tripDate") || "";
   document.getElementById("onbFlight").checked = !!ls("hasFlight");
   document.getElementById("onbAccommodation").checked = !!ls("hasAccommodation");
