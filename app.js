@@ -419,10 +419,31 @@ function renderProfileBanner(){
 
 /* ---------- onboarding ---------- */
 function getGoal(){ return ls("goal"); }
+/* Cidadao europeu tem liberdade de movimento — pode escolher qualquer
+   objetivo isoladamente. Nao-europeu so entra pela via de visto de
+   estudante (Stamp 2), que ja inclui direito de trabalho limitado —
+   por isso "so estudar" ou "so trabalhar" ou "morar" isolados nao sao
+   caminhos legais reais pra esse perfil aqui no site. */
+var GOALS_EU = [
+  {v:"ingles", l:"Estudar inglês"}, {v:"trabalhar", l:"Trabalhar"},
+  {v:"ingles-trabalho", l:"Estudar + trabalhar"}, {v:"morar", l:"Morar na Irlanda"}, {v:"turismo", l:"Turismo"}
+];
+var GOALS_NON_EU = [
+  {v:"ingles-trabalho", l:"Estudar inglês + trabalhar (Stamp 2)"}, {v:"turismo", l:"Turismo"}
+];
+function updateGoalOptions(profile){
+  var sel = document.getElementById("onbGoal");
+  var current = sel.value;
+  var list = profile==="non-eu" ? GOALS_NON_EU : GOALS_EU;
+  sel.innerHTML = '<option value="">Selecione...</option>'+list.map(function(g){ return '<option value="'+g.v+'">'+g.l+'</option>'; }).join("");
+  sel.value = list.some(function(g){ return g.v===current; }) ? current : "";
+}
 function openOnboarding(){
-  document.querySelectorAll("#onbProfileSeg .seg-btn").forEach(function(b){ b.classList.toggle("selected", b.dataset.profile===getProfile()); });
+  var profile = getProfile();
+  document.querySelectorAll("#onbProfileSeg .seg-btn").forEach(function(b){ b.classList.toggle("selected", b.dataset.profile===profile); });
   var city = getCity();
   document.querySelectorAll("#onbCitySeg .seg-btn").forEach(function(b){ b.classList.toggle("selected", city!==null && b.dataset.city===city); });
+  updateGoalOptions(profile);
   document.getElementById("onbGoal").value = getGoal() || "";
   document.getElementById("onbTripDate").value = ls("tripDate") || "";
   document.getElementById("onbFlight").checked = !!ls("hasFlight");
@@ -437,6 +458,7 @@ function closeOnboarding(){ document.getElementById("onboardingModal").hidden = 
     b.addEventListener("click", function(){
       chosenProfile = b.dataset.profile;
       document.querySelectorAll("#onbProfileSeg .seg-btn").forEach(function(x){ x.classList.toggle("selected", x===b); });
+      updateGoalOptions(chosenProfile);
     });
   });
   document.querySelectorAll("#onbCitySeg .seg-btn").forEach(function(b){
