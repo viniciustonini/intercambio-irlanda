@@ -154,9 +154,22 @@ function updateTabbarScrollUI(){
 
 /* ---------- menu "Mais" ---------- */
 function openMoreMenu(){
-  document.getElementById("moreMenu").hidden = false;
+  var menu = document.getElementById("moreMenu");
+  var btn = document.getElementById("tabMoreBtn");
+  menu.hidden = false;
   document.getElementById("moreMenuBackdrop").hidden = false;
-  document.getElementById("tabMoreBtn").setAttribute("aria-expanded", "true");
+  btn.setAttribute("aria-expanded", "true");
+  if(window.matchMedia("(min-width:641px)").matches){
+    var r = btn.getBoundingClientRect();
+    var menuWidth = menu.offsetWidth || 220;
+    var left = Math.min(r.right - menuWidth, window.innerWidth - menuWidth - 12);
+    left = Math.max(left, 12);
+    menu.style.top = (r.bottom + 8) + "px";
+    menu.style.left = left + "px";
+    menu.style.right = "auto";
+  } else {
+    menu.style.top = ""; menu.style.left = ""; menu.style.right = "";
+  }
 }
 function closeMoreMenu(){
   document.getElementById("moreMenu").hidden = true;
@@ -173,6 +186,12 @@ document.querySelectorAll("#moreMenu .tab-btn").forEach(function(btn){
 });
 document.addEventListener("keydown", function(e){
   if(e.key==="Escape" && !document.getElementById("moreMenu").hidden) closeMoreMenu();
+});
+window.addEventListener("scroll", function(){
+  if(!document.getElementById("moreMenu").hidden) closeMoreMenu();
+}, {passive:true});
+window.addEventListener("resize", function(){
+  if(!document.getElementById("moreMenu").hidden) closeMoreMenu();
 });
 document.getElementById("heroEditDate").addEventListener("click", function(){
   var editor = document.getElementById("heroDateEditor");

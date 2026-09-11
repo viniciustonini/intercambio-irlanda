@@ -160,10 +160,10 @@ input{font-family:var(--font-body);}
 /* ---------- menu "Mais" (dropdown no desktop, sheet no mobile) ---------- */
 .more-btn{display:inline-flex;align-items:center;}
 .more-btn[aria-expanded="true"]{background:var(--surface-2);color:var(--text);}
-.more-menu-backdrop{position:fixed;inset:0;background:rgba(15,28,43,.35);z-index:39;}
+.more-menu-backdrop{position:fixed;inset:0;background:rgba(15,28,43,.35);z-index:159;}
 .more-menu-backdrop[hidden]{display:none;}
 .more-menu{
-  position:fixed;top:64px;right:5vw;z-index:40;background:var(--surface);border-radius:16px;box-shadow:var(--shadow);
+  position:fixed;top:64px;right:5vw;z-index:160;background:var(--surface);border-radius:16px;box-shadow:var(--shadow);
   display:flex;flex-direction:column;gap:2px;padding:8px;width:220px;max-height:70vh;overflow-y:auto;
   animation:moreMenuIn .15s cubic-bezier(0.23,1,0.32,1);
 }
