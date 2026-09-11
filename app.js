@@ -29,6 +29,13 @@ function sourceVerifiedNote(verifiedAt){
     (stale?"⚠ Pode estar desatualizado — ":"")+"Verificado em "+formatDateBR(verifiedAt)+(stale?". Confira a fonte oficial antes de decidir.":".")+
     "</p>";
 }
+function officialSourceHtml(url, verifiedAt){
+  if(!url) return "";
+  return '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);">'+
+    '<a href="'+url+'" target="_blank" rel="noopener" style="font-size:12px;color:var(--accent-strong);">Fonte oficial ↗</a>'+
+    sourceVerifiedNote(verifiedAt)+
+  '</div>';
+}
 function escapeHtml(str){
   return String(str==null?"":str)
     .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
@@ -809,27 +816,28 @@ function renderOverview(){
 }
 
 /* ---------- vistos / trabalho / curso ---------- */
-function fonte(url){ return ' <a href="'+url+'" target="_blank" rel="noopener" style="font-size:12px;color:var(--accent-strong);white-space:nowrap;">Fonte oficial · conferida em 08/09/2026 ↗</a>'; }
+var VISTOS_VERIFIED_AT = "2026-09-08";
 var F_FAQ = "https://www.irishimmigration.ie/coming-to-study-in-ireland/frequently-asked-questions-for-students/";
 var F_BRVISA = "https://www.ireland.ie/en/brazil/saopaulo/services/visas/visas-for-ireland/";
 var F_IRP = "https://www.irishimmigration.ie/registering-your-immigration-permission/how-to-register-your-immigration-permission-for-the-first-time/information-on-registering-your-immigration-permission-for-the-first-time/";
 var F_FIN = "https://www.irishimmigration.ie/coming-to-study-in-ireland/what-are-my-study-options/a-fee-paying-private-primary-or-secondary-school/information-on-student-finances/";
 var VISTOS = [
-  {title:"Entrada e visto de estudante — antes de embarcar", eu:false, body:"Brasileiros com passaporte brasileiro são dispensados de visto para estadias curtas (turismo/visita) — mas isso <strong>não vale</strong> para a maioria dos cursos de inglês (6–8 meses, acima de 90 dias). Nesse caso, é preciso solicitar o visto de longa duração <strong>tipo D</strong> ANTES de viajar: não dá para entrar como turista e regularizar depois. O pedido é feito online no <strong>AVATS</strong> (sistema oficial de vistos irlandês); depois você agenda horário num centro <strong>VFS Global</strong> (parceiro oficial no Brasil) para entregar biometria, documentos e pagar a taxa. Processamento de <strong>4 a 8 semanas</strong> (pode demorar mais entre maio e agosto) — comece com antecedência e só compre passagens não-reembolsáveis depois do visto aprovado. Ao chegar, apresente o propósito de estudo e os documentos exigidos; a entrada final depende da avaliação da imigração. Outras nacionalidades podem ter regras diferentes — confira os requisitos do seu passaporte antes de comprar a passagem."+fonte(F_BRVISA)},
-  {title:"Stamp 2", eu:false, body:"Permissão de estudante para cursos elegíveis, incluindo inglês (em escola credenciada no ILEP) e ensino superior. A elegibilidade do curso e as condições da permissão precisam ser verificadas antes da matrícula. Não se aplica a cidadãos europeus, que têm liberdade de movimento."+fonte(F_FAQ)},
-  {title:"IRP: primeiro registro depois da chegada", eu:false, body:"Desde <strong>13/01/2025</strong>, o primeiro registro de residência de toda a República da Irlanda (não só Dublin) é feito pelo ISD em <strong>Burgh Quay, Dublin</strong>. Agende pelo canal oficial (conta no Digital Contact Centre) assim que chegar — não há prazo garantido para vaga. Agendar é gratuito; a taxa de registro do cartão pode ser de <strong>€300</strong>, paga só com cartão. Leve passaporte, formulário de endereço, carta da escola com matrícula e mensalidade paga, comprovação financeira e seguro-saúde."+fonte(F_IRP)},
-  {title:"Seguro-saúde exigido", eu:false, body:"Estudantes não europeus devem apresentar seguro médico privado adequado às condições da permissão — normalmente cobertura mínima de <strong>€25.000 para acidente e €25.000 para doença</strong>, válida por todo o período. Confira cobertura, exclusões e documentos aceitos com o ISD antes de contratar; seguro de viagem e seguro médico não são automaticamente equivalentes."+fonte(F_FAQ)},
-  {title:"Comprovação financeira", eu:false, body:"Para estudantes dispensados de visto de entrada, o valor oficial exigido pelo ISD é de <strong>€6.665</strong> para permanências de até oito meses — esse é o total que precisa estar disponível na conta que você vai apresentar à imigração (o cálculo é €833/mês × 8, mas o que importa é ter esse saldo completo na conta, não um fluxo mensal). Acima de oito meses, o valor sobe para <strong>€10.000 por ano acadêmico</strong>. Para quem precisa de visto, a comprovação ocorre no próprio pedido do visto, conforme as regras da categoria. O extrato não deve ter mais de 90 dias, e depósitos grandes recentes sem explicação podem levantar suspeita. O mínimo migratório não substitui um orçamento pessoal e não deve depender de conseguir emprego."+fonte(F_FIN)},
-  {title:"Limite de horas de trabalho", eu:false, body:"Com Stamp 2: até <strong>20 horas semanais</strong> no período regular, e até <strong>40 horas semanais</strong> durante os períodos de férias padronizados — <strong>junho a setembro (inclusive)</strong> e de <strong>15 de dezembro a 15 de janeiro</strong>. Férias individuais da escola fora dessas datas não liberam automaticamente as 40 horas."+fonte(F_FAQ)},
+  {title:"Entrada e visto de estudante — antes de embarcar", eu:false, body:"Brasileiros com passaporte brasileiro são dispensados de visto para estadias curtas (turismo/visita) — mas isso <strong>não vale</strong> para a maioria dos cursos de inglês (6–8 meses, acima de 90 dias). Nesse caso, é preciso solicitar o visto de longa duração <strong>tipo D</strong> ANTES de viajar: não dá para entrar como turista e regularizar depois. O pedido é feito online no <strong>AVATS</strong> (sistema oficial de vistos irlandês); depois você agenda horário num centro <strong>VFS Global</strong> (parceiro oficial no Brasil) para entregar biometria, documentos e pagar a taxa. Processamento de <strong>4 a 8 semanas</strong> (pode demorar mais entre maio e agosto) — comece com antecedência e só compre passagens não-reembolsáveis depois do visto aprovado. Ao chegar, apresente o propósito de estudo e os documentos exigidos; a entrada final depende da avaliação da imigração. Outras nacionalidades podem ter regras diferentes — confira os requisitos do seu passaporte antes de comprar a passagem.", sourceUrl:F_BRVISA, verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"Stamp 2", eu:false, body:"Permissão de estudante para cursos elegíveis, incluindo inglês (em escola credenciada no ILEP) e ensino superior. A elegibilidade do curso e as condições da permissão precisam ser verificadas antes da matrícula. Não se aplica a cidadãos europeus, que têm liberdade de movimento.", sourceUrl:F_FAQ, verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"IRP: primeiro registro depois da chegada", eu:false, body:"Desde <strong>13/01/2025</strong>, o primeiro registro de residência de toda a República da Irlanda (não só Dublin) é feito pelo ISD em <strong>Burgh Quay, Dublin</strong>. Agende pelo canal oficial (conta no Digital Contact Centre) assim que chegar — não há prazo garantido para vaga. Agendar é gratuito; a taxa de registro do cartão pode ser de <strong>€300</strong>, paga só com cartão. Leve passaporte, formulário de endereço, carta da escola com matrícula e mensalidade paga, comprovação financeira e seguro-saúde.", sourceUrl:F_IRP, verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"Seguro-saúde exigido", eu:false, body:"Estudantes não europeus devem apresentar seguro médico privado adequado às condições da permissão — normalmente cobertura mínima de <strong>€25.000 para acidente e €25.000 para doença</strong>, válida por todo o período. Confira cobertura, exclusões e documentos aceitos com o ISD antes de contratar; seguro de viagem e seguro médico não são automaticamente equivalentes.", sourceUrl:F_FAQ, verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"Comprovação financeira", eu:false, body:"Para estudantes dispensados de visto de entrada, o valor oficial exigido pelo ISD é de <strong>€6.665</strong> para permanências de até oito meses — esse é o total que precisa estar disponível na conta que você vai apresentar à imigração (o cálculo é €833/mês × 8, mas o que importa é ter esse saldo completo na conta, não um fluxo mensal). Acima de oito meses, o valor sobe para <strong>€10.000 por ano acadêmico</strong>. Para quem precisa de visto, a comprovação ocorre no próprio pedido do visto, conforme as regras da categoria. O extrato não deve ter mais de 90 dias, e depósitos grandes recentes sem explicação podem levantar suspeita. O mínimo migratório não substitui um orçamento pessoal e não deve depender de conseguir emprego.", sourceUrl:F_FIN, verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"Limite de horas de trabalho", eu:false, body:"Com Stamp 2: até <strong>20 horas semanais</strong> no período regular, e até <strong>40 horas semanais</strong> durante os períodos de férias padronizados — <strong>junho a setembro (inclusive)</strong> e de <strong>15 de dezembro a 15 de janeiro</strong>. Férias individuais da escola fora dessas datas não liberam automaticamente as 40 horas.", sourceUrl:F_FAQ, verifiedAt:VISTOS_VERIFIED_AT},
   {title:"Na prática: sobreviver com 20h", eu:false, body:"20h/semana no salário mínimo dá pouco mais de €1.100–1.200/mês líquidos — apertado nas cidades mais caras, ainda mais em Dublin. É comum ver intercambista trabalhando além do limite oficial pra fechar a conta, mas isso é uma violação da permissão de estudo: o risco real é perder o Stamp 2/IRP e complicar pedidos migratórios futuros (inclusive em outros países). Se for pra fechar as contas, priorize aumentar horas nos períodos de férias liberadas (40h) e ajustar o orçamento antes de contar com horas extras informais."},
-  {title:"Renovação e continuidade dos estudos", eu:false, body:"Cursos de inglês têm teto de <strong>2 anos cumulativos</strong> (até 3 matrículas de 8 meses). Para renovar: matricule-se num curso de nível superior de pelo menos 25 semanas, comprove frequência mínima de 15h/semana no curso anterior, tenha frequentado pelo menos 85% das aulas, e apresente resultado do exame de fim de curso. Planeje a renovação antes do vencimento — não presuma que um curso noturno ou parcial mantém a mesma permissão."+fonte(F_FAQ)},
+  {title:"Renovação e continuidade dos estudos", eu:false, body:"Cursos de inglês têm teto de <strong>2 anos cumulativos</strong> (até 3 matrículas de 8 meses). Para renovar: matricule-se num curso de nível superior de pelo menos 25 semanas, comprove frequência mínima de 15h/semana no curso anterior, tenha frequentado pelo menos 85% das aulas, e apresente resultado do exame de fim de curso. Planeje a renovação antes do vencimento — não presuma que um curso noturno ou parcial mantém a mesma permissão.", sourceUrl:F_FAQ, verifiedAt:VISTOS_VERIFIED_AT},
   {title:"Para cidadãos europeus", eu:true, body:"Como cidadão da UE/EEE/Suíço, você não precisa de visto, Stamp 2, IRP nem Employment Permit, e não há limite de horas ligado ao curso. O foco vai para documentação prática, PPSN, moradia, saúde e adaptação."}
 ];
 var TRABALHO = [
-  {title:"PPS Number (PPSN)", body:"Identificação fiscal e de serviços na Irlanda. Peça depois de chegar, com uma justificativa clara (ex.: proposta de emprego). Agende pelo MyWelfare.ie e leve identidade, comprovante de endereço e a justificativa."},
-  {title:"Revenue &amp; myAccount", body:"Registre o primeiro emprego o quanto antes no Revenue (myAccount) para evitar o 'Emergency Tax' — imposto temporário mais alto cobrado até você ser regularizado."},
-  {title:"Salário mínimo nacional", body:"Referência para 2026: €14,15/hora, com previsão de reajuste para €14,94/hora a partir de janeiro de 2027. Confirme o valor vigente em workplacerelations.ie."},
-  {title:"Direitos trabalhistas básicos", body:"Contrato/termo de emprego por escrito logo no início, recibo de pagamento (payslip) a cada pagamento, pausas durante o expediente e período mínimo de férias remuneradas proporcional. Guarde contratos e comprovantes."}
+  {title:"PPS Number (PPSN)", body:"Identificação fiscal e de serviços na Irlanda. Peça depois de chegar, com uma justificativa clara (ex.: proposta de emprego). Agende pelo MyWelfare.ie e leve identidade, comprovante de endereço e a justificativa.", sourceUrl:"https://www.mywelfare.ie", verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"MyGovID", body:"Conta verificada do governo irlandês, necessária para usar o Revenue myAccount completo, o MyWelfare e boa parte dos serviços públicos online. Depois de ter o PPSN, crie uma conta básica (nível 1) em mygovid.ie; para acessar mais serviços, faça a verificação nível 2 (por vídeo-chamada ou correspondência).", sourceUrl:"https://www.mygovid.ie", verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"Revenue &amp; myAccount", body:"Registre o primeiro emprego o quanto antes no Revenue (myAccount) para evitar o 'Emergency Tax' — imposto temporário mais alto cobrado até você ser regularizado.", sourceUrl:"https://www.revenue.ie", verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"Salário mínimo nacional", body:"Referência para 2026: €14,15/hora, com previsão de reajuste para €14,94/hora a partir de janeiro de 2027. Confirme o valor vigente em workplacerelations.ie.", sourceUrl:"https://www.workplacerelations.ie", verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"Direitos trabalhistas básicos", body:"Contrato/termo de emprego por escrito logo no início, recibo de pagamento (payslip) a cada pagamento, pausas durante o expediente e período mínimo de férias remuneradas proporcional. Guarde contratos e comprovantes.", sourceUrl:"https://www.workplacerelations.ie", verifiedAt:VISTOS_VERIFIED_AT}
 ];
 var CURSO_REGRAS = [
   {title:"Se você não é da UE", eu:false, body:"A escola precisa constar na lista oficial ILEP e o curso ter no mínimo 15h semanais presenciais. Cursos mais longos podem exigir exame de proficiência (ELP) perto da renovação."},
@@ -870,12 +878,22 @@ function saveSchools(city, list){ ls("schools_"+city, list); }
 var schoolCity = ls("schoolCityView") || "dublin";
 function renderVistos(){
   var p = getProfile();
-  document.getElementById("vistosWrap").innerHTML = VISTOS.filter(function(v){
+  var shown = VISTOS.filter(function(v){
     if(v.eu===true) return p!=="non-eu"; if(v.eu===false) return p!=="eu"; return true;
-  }).map(function(v){ return '<div class="card"><h3>'+v.title+'</h3><p style="margin:0;">'+v.body+'</p></div>'; }).join("");
+  });
+  document.getElementById("vistosWrap").innerHTML = shown.map(function(v){
+    return '<div class="card"><h3>'+v.title+'</h3><p style="margin:0;">'+v.body+'</p>'+officialSourceHtml(v.sourceUrl, v.verifiedAt)+'</div>';
+  }).join("");
+  var withSource = shown.filter(function(v){ return v.verifiedAt; });
+  var staleWrap = document.getElementById("vistosStaleWrap");
+  if(staleWrap){
+    staleWrap.innerHTML = withSource.length ? '<div class="callout" style="margin-bottom:16px;">'+sourceVerifiedNote(oldestVerifiedAt(withSource))+'</div>' : "";
+  }
 }
 function renderTrabalho(){
-  document.getElementById("trabalhoWrap").innerHTML = TRABALHO.map(function(t){ return '<div class="card"><h3>'+t.title+'</h3><p style="margin:0;">'+t.body+'</p></div>'; }).join("");
+  document.getElementById("trabalhoWrap").innerHTML = TRABALHO.map(function(t){
+    return '<div class="card"><h3>'+t.title+'</h3><p style="margin:0;">'+t.body+'</p>'+officialSourceHtml(t.sourceUrl, t.verifiedAt)+'</div>';
+  }).join("");
 }
 function renderCursoRegras(){
   var p = getProfile();
