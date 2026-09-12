@@ -373,6 +373,12 @@ table td{vertical-align:middle;}
 .bestfor b{color:var(--accent-strong);}
 
 .tip-row{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border);}
+.acc-item{border-bottom:1px solid var(--border);padding:12px 0;}
+.acc-item:last-child{border-bottom:none;}
+.acc-item summary{cursor:pointer;font-weight:600;font-size:14px;list-style:none;display:flex;align-items:center;justify-content:space-between;color:var(--text);}
+.acc-item summary::-webkit-details-marker{display:none;}
+.acc-item summary::after{content:"+";font-weight:400;color:var(--muted);margin-left:10px;flex:none;}
+.acc-item[open] summary::after{content:"–";}
 .tip-row:last-child{border-bottom:none;}
 .tip-row .tip-ico{width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent-strong);flex:none;display:flex;align-items:center;justify-content:center;margin-top:1px;}
 .tip-row .tip-ico svg{width:11px;height:11px;}

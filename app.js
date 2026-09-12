@@ -72,6 +72,38 @@ function showSection(id){
   window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
   animateSectionEntrance(id);
 }
+/* navega pra outra secao e, opcionalmente, rola ate um elemento especifico dentro dela */
+function goToSection(sec, elId){
+  history.replaceState(null, "", "#"+sec);
+  showSection(sec);
+  if(elId){
+    setTimeout(function(){
+      var el = document.getElementById(elId);
+      if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+    }, isScrollMode() ? 350 : 60);
+  }
+}
+/* ---------- comece aqui ---------- */
+var COMECE_AQUI = [
+  {label:"Quero entender como funciona o intercâmbio", sec:"inicio", el:"faqStartWrap"},
+  {label:"Quero saber quanto dinheiro preciso", sec:"financas"},
+  {label:"Quero escolher uma cidade", sec:"inicio", el:"cityFacts"},
+  {label:"Quero pesquisar escolas", sec:"trabalho", el:"comoEscolherEscolaWrap"},
+  {label:"Quero entender trabalho", sec:"trabalho", el:"jobTypesWrap"},
+  {label:"Quero pesquisar moradia", sec:"acomodacao"},
+  {label:"Quero entender documentação", sec:"imigracao"},
+  {label:"Quero comparar fazer sozinho x assessoria", sec:"trabalho", el:"assessoriaWrap"}
+];
+function renderComeceAqui(){
+  var wrap = document.getElementById("comeceAquiGrid");
+  if(!wrap) return;
+  wrap.innerHTML = COMECE_AQUI.map(function(c){
+    return '<button type="button" class="tip-card scroll-to-btn" data-sec="'+c.sec+'" data-el="'+(c.el||"")+'"><h4 style="margin:0;">'+c.label+'</h4></button>';
+  }).join("");
+  wrap.querySelectorAll("button").forEach(function(btn){
+    btn.addEventListener("click", function(){ goToSection(btn.dataset.sec, btn.dataset.el || null); });
+  });
+}
 
 /* ---------- animações (GSAP, somente versão web) ---------- */
 var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -918,13 +950,18 @@ function getSchools(city){
 }
 function saveSchools(city, list){ ls("schools_"+city, list); }
 var schoolCity = ls("schoolCityView") || "dublin";
+function euBadge(eu){
+  if(eu===true) return '<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);margin-left:8px;">🇪🇺 UE/EEE</span>';
+  if(eu===false) return '<span class="pill" style="background:var(--warn-soft);color:var(--warn-strong);margin-left:8px;">🌎 Não-UE</span>';
+  return "";
+}
 function renderVistos(){
   var p = getProfile();
   var shown = VISTOS.filter(function(v){
     if(v.eu===true) return p!=="non-eu"; if(v.eu===false) return p!=="eu"; return true;
   });
   document.getElementById("vistosWrap").innerHTML = shown.map(function(v){
-    return '<div class="card"><h3>'+v.title+'</h3><p style="margin:0;">'+v.body+'</p>'+officialSourceHtml(v.sourceUrl, v.verifiedAt)+'</div>';
+    return '<div class="card"><h3>'+v.title+euBadge(v.eu)+'</h3><p style="margin:0;">'+v.body+'</p>'+officialSourceHtml(v.sourceUrl, v.verifiedAt)+'</div>';
   }).join("");
   var withSource = shown.filter(function(v){ return v.verifiedAt; });
   var staleWrap = document.getElementById("vistosStaleWrap");
@@ -941,7 +978,7 @@ function renderCursoRegras(){
   var p = getProfile();
   document.getElementById("cursoRegrasWrap").innerHTML = CURSO_REGRAS.filter(function(c){
     if(c.eu===true) return p!=="non-eu"; if(c.eu===false) return p!=="eu"; return true;
-  }).map(function(c){ return '<div class="card"><h3>'+c.title+'</h3><p style="margin:0;">'+c.body+'</p></div>'; }).join("");
+  }).map(function(c){ return '<div class="card"><h3>'+c.title+euBadge(c.eu)+'</h3><p style="margin:0;">'+c.body+'</p></div>'; }).join("");
 }
 function renderSchoolTabs(){
   document.getElementById("schoolCityTabs").innerHTML = SCHOOL_CITIES.map(function(c){
@@ -1013,6 +1050,157 @@ function renderSchoolAddForm(){
 }
 
 /* ---------- vagas de entrada rápida ---------- */
+/* ---------- como escolher uma escola ---------- */
+var COMO_ESCOLHER_ESCOLA = [
+  {t:"Tipos de curso", b:'<b>General English</b> — foco em conversação, gramática e vocabulário do dia a dia; é o mais comum e mais barato. <b>Intensive English</b> — mais horas por semana, evolução mais rápida, custo mais alto. <b>IELTS/Cambridge</b> — preparação para exames de proficiência, útil se você vai precisar de certificado (trabalho, universidade, imigração para outro país). <b>Study & Work</b> — pacote com curso + apoio voltado a intercambistas não-UE, geralmente mais longo e mais caro; confira exatamente o que está incluído antes de comparar preço.'},
+  {t:"O horário da escola influencia seu trabalho", b:"<b>Manhã</b> libera tarde e noite pra trabalhar — o mais comum entre intercambistas. <b>Tarde</b> libera manhã e noite. <b>Noite</b> (2–3x/semana) é mais leve e costuma ser usada por quem já trabalha em horário comercial. Pense no emprego que pretende buscar antes de escolher o turno."},
+  {t:"Horas semanais", b:"Cursos de 15h/semana costumam ser o mínimo aceito para o visto de estudante (não-UE). Cursos intensivos passam de 20h/semana — aceleram o aprendizado, mas custam mais e sobra menos tempo livre para trabalhar."},
+  {t:"Matrícula e material", b:"Quase toda escola cobra uma taxa de matrícula (enrollment fee) única, além do material didático — peça os dois valores separados da mensalidade antes de comparar preços entre escolas."},
+  {t:"Política de cancelamento", b:"Pergunte por escrito o que acontece se você quiser trocar de escola, adiar o início ou cancelar — prazos e valores de reembolso variam bastante entre escolas."},
+  {t:"Acreditação", b:"Para o curso valer como base do visto de estudante, a escola precisa constar na lista oficial ILEP. Fora do visto de estudante, selos como ACELS, Cambridge English ou IALC são um bom sinal de qualidade."},
+  {t:"Tamanho das turmas", b:"Turmas menores (8–12 alunos) tendem a dar mais prática de fala; turmas maiores costumam ser mais baratas. Pergunte a média de alunos por turma antes de decidir."}
+];
+function renderComoEscolherEscola(){
+  var wrap = document.getElementById("comoEscolherEscolaWrap");
+  if(!wrap) return;
+  wrap.innerHTML = '<div class="card">'+
+    COMO_ESCOLHER_ESCOLA.map(function(i,idx){
+      return '<details class="acc-item"'+(idx===0?" open":"")+'><summary>'+i.t+'</summary><p style="margin:10px 0 0;font-size:13.3px;line-height:1.6;">'+i.b+'</p></details>';
+    }).join("")+
+    '</div>';
+}
+
+/* ---------- assessoria: vale a pena? ---------- */
+var ASSESSORIA_PERGUNTAS = [
+  "Qual escola está incluída?",
+  "Há taxa da agência, separada da escola?",
+  "Seguro está incluído?",
+  "Acomodação está incluída — por quantos dias/semanas?",
+  "Transfer do aeroporto está incluído?",
+  "Quais documentos eles auxiliam a preparar?",
+  "Existe suporte depois da chegada?",
+  "O \"suporte para emprego\" significa orientação ou garantia de vaga?",
+  "Existe política de cancelamento?",
+  "Como funciona o reembolso, e em quanto tempo?"
+];
+function renderAssessoria(){
+  var wrap = document.getElementById("assessoriaWrap");
+  if(!wrap) return;
+  wrap.innerHTML =
+    '<p class="source-note" style="margin-bottom:14px;">Algumas pessoas preferem contratar uma empresa de intercâmbio para ajudar com escola, visto e chegada; outras preferem organizar tudo sozinhas. Não existe resposta certa — depende do seu tempo, orçamento e conforto com burocracia em inglês.</p>'+
+    '<div class="grid cols-2" style="margin-bottom:16px;">'+
+      '<div class="card"><h3>Fazer sozinho</h3><ul style="margin:0;padding-left:20px;font-size:13.3px;line-height:1.8;">'+
+        '<li>Maior autonomia nas escolhas.</li><li>Possibilidade de pesquisar e comparar preços diretamente.</li>'+
+        '<li>Exige mais tempo de estudo e organização.</li><li>Você mesmo cuida de escola, documentos e acomodação.</li>'+
+      '</ul></div>'+
+      '<div class="card"><h3>Com assessoria</h3><ul style="margin:0;padding-left:20px;font-size:13.3px;line-height:1.8;">'+
+        '<li>Suporte durante o processo.</li><li>Pode facilitar a contratação da escola.</li>'+
+        '<li>Pode incluir acomodação inicial.</li><li>Pode ajudar com documentação.</li>'+
+        '<li>Serviços e preços variam bastante entre empresas — vale comparar mais de uma.</li>'+
+      '</ul></div>'+
+    '</div>'+
+    '<div class="card"><h3>Pergunte antes de fechar</h3><ul style="margin:0;padding-left:20px;font-size:13.3px;line-height:1.9;">'+
+      ASSESSORIA_PERGUNTAS.map(function(p){ return "<li>"+p+"</li>"; }).join("")+
+    '</ul></div>';
+}
+
+/* ---------- trabalhos comuns para quem chega ---------- */
+var JOB_TYPE_CATS = [
+  {id:"todos", l:"Todos"},
+  {id:"hospitality", l:"Hotelaria & alimentação"},
+  {id:"varejo", l:"Varejo & logística"},
+  {id:"escritorio", l:"Escritório & atendimento"},
+  {id:"industria", l:"Indústria & tecnologia"}
+];
+var jobTypeCatView = ls("jobTypeCatView") || "todos";
+var JOB_TYPES_COMMON = [
+  {title:"Cleaner", cat:"hospitality", ingles:"Básico", desc:"Limpeza residencial, comercial ou de escritórios.", turno:"Manhã ou noite, meio período comum."},
+  {title:"Kitchen Porter", cat:"hospitality", ingles:"Básico", desc:"Apoio na cozinha — lavar louça, organizar, limpeza.", turno:"Turnos variados, inclui fins de semana."},
+  {title:"Housekeeping", cat:"hospitality", ingles:"Básico", desc:"Arrumação de quartos em hotéis.", turno:"Diurno, ritmo físico."},
+  {title:"Accommodation Assistant", cat:"hospitality", ingles:"Básico/Intermediário", desc:"Apoio na recepção e manutenção de acomodações e hotéis.", turno:"Turnos variados."},
+  {title:"Barista", cat:"hospitality", ingles:"Básico/Intermediário", desc:"Preparo de bebidas e atendimento em cafeterias.", turno:"Manhã é mais concorrida; fins de semana comuns."},
+  {title:"Waiter / Waitress", cat:"hospitality", ingles:"Intermediário", desc:"Atendimento de mesas em restaurantes.", turno:"Noites e fins de semana concentram a demanda."},
+  {title:"Bartender", cat:"hospitality", ingles:"Intermediário", desc:"Preparo de bebidas em bares e pubs.", turno:"Noturno — geralmente pede alguma experiência prévia."},
+  {title:"Catering Assistant", cat:"hospitality", ingles:"Básico", desc:"Apoio em eventos e serviços de alimentação em larga escala.", turno:"Escalas variam por evento."},
+  {title:"Deli Assistant", cat:"varejo", ingles:"Básico/Intermediário", desc:"Atendimento no balcão de frios/rotisserie em supermercados.", turno:"Diurno, inclui fins de semana."},
+  {title:"Retail Assistant", cat:"varejo", ingles:"Básico/Intermediário", desc:"Atendimento e reposição em lojas.", turno:"Turnos variados, inclui noite em algumas redes."},
+  {title:"Stock Assistant", cat:"varejo", ingles:"Básico", desc:"Reposição e organização de estoque em lojas e supermercados.", turno:"Muitas vagas de madrugada/manhã cedo."},
+  {title:"Warehouse Operative", cat:"varejo", ingles:"Básico", desc:"Separação e movimentação de mercadorias em centros de distribuição.", turno:"Turnos fixos, inclui madrugada."},
+  {title:"Picker / Packer", cat:"varejo", ingles:"Básico", desc:"Separação e embalagem de pedidos — comum em logística e e-commerce.", turno:"Turnos fixos, inclui madrugada e fim de semana."},
+  {title:"Delivery", cat:"varejo", ingles:"Básico", desc:"Entregas por bike, moto ou carro via aplicativos.", turno:"Flexível — você escolhe quando se conectar."},
+  {title:"General Operative", cat:"industria", ingles:"Básico", desc:"Função de apoio geral em fábricas e linhas de produção.", turno:"Turnos fixos (manhã/tarde/noite), inclui rotativo."},
+  {title:"Manufacturing", cat:"industria", ingles:"Básico/Intermediário", desc:"Operação em linhas de produção industrial.", turno:"Turnos fixos ou rotativos."},
+  {title:"Medical Devices", cat:"industria", ingles:"Intermediário", desc:"Produção, montagem ou controle de qualidade em fábricas de dispositivos médicos — setor forte em Galway e Cork.", turno:"Turnos fixos; alguns exigem treinamento inicial."},
+  {title:"Receptionist", cat:"escritorio", ingles:"Intermediário/Avançado", desc:"Recepção em escritórios, clínicas ou hotéis — exige boa comunicação.", turno:"Comercial, geralmente fixo."},
+  {title:"Customer Service", cat:"escritorio", ingles:"Intermediário/Avançado", desc:"Atendimento por telefone ou chat — muitas vagas multilíngues; português e italiano costumam ser diferencial.", turno:"Comercial ou escalas rotativas conforme fuso do cliente."},
+  {title:"Administration", cat:"escritorio", ingles:"Intermediário/Avançado", desc:"Apoio administrativo em escritórios.", turno:"Comercial."},
+  {title:"IT Support", cat:"industria", ingles:"Avançado", desc:"Suporte técnico e help desk — inglês técnico e clareza contam mais que sotaque perfeito.", turno:"Comercial ou plantão, conforme empresa."},
+  {title:"Tecnologia", cat:"industria", ingles:"Avançado", desc:"Desenvolvimento, dados e produto — setor mais concorrido, geralmente pede experiência prévia.", turno:"Comercial; home office comum."}
+];
+function renderJobTypeCatTabs(){
+  var wrap = document.getElementById("jobTypeCatTabs");
+  if(!wrap) return;
+  wrap.innerHTML = JOB_TYPE_CATS.map(function(c){
+    return '<button class="subtab'+(jobTypeCatView===c.id?' active':'')+'" data-cat="'+c.id+'">'+c.l+'</button>';
+  }).join("");
+  wrap.querySelectorAll(".subtab").forEach(function(b){
+    b.addEventListener("click", function(){ jobTypeCatView = b.dataset.cat; ls("jobTypeCatView", jobTypeCatView); renderJobTypeCatTabs(); renderJobTypesGrid(); });
+  });
+}
+function renderJobTypesGrid(){
+  var wrap = document.getElementById("jobTypesGrid");
+  if(!wrap) return;
+  var shown = jobTypeCatView==="todos" ? JOB_TYPES_COMMON : JOB_TYPES_COMMON.filter(function(j){ return j.cat===jobTypeCatView; });
+  wrap.innerHTML = shown.map(function(j){
+    return '<div class="exp-card"><h4>'+j.title+' <span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);font-size:10.5px;">'+j.ingles+'</span></h4>'+
+      '<p>'+j.desc+'</p><p class="source-note" style="margin-top:6px;">'+j.turno+'</p></div>';
+  }).join("");
+}
+function renderJobTypes(){
+  var wrap = document.getElementById("jobTypesWrap");
+  if(!wrap) return;
+  wrap.innerHTML = '<p class="source-note" style="margin-bottom:14px;">Panorama geral de vagas comuns pra quem está começando — não é promessa de contratação, requisitos variam por empresa. Para empresas específicas que contratam em cada área, veja "Vagas de entrada rápida" e "Agências de recrutamento" logo abaixo.</p>'+
+    '<div class="subtabs" id="jobTypeCatTabs" style="margin-bottom:12px;"></div>'+
+    '<div class="grid cols-3" id="jobTypesGrid"></div>';
+  renderJobTypeCatTabs();
+  renderJobTypesGrid();
+}
+
+/* ---------- glossario ---------- */
+var GLOSSARIO_TERMS = [
+  {t:"PPSN", d:"Personal Public Service Number — número de identificação usado para trabalho, impostos e serviços públicos na Irlanda."},
+  {t:"Revenue", d:"Órgão da receita federal irlandesa — responsável por impostos e pelo registro do seu emprego."},
+  {t:"PAYE", d:"Pay As You Earn — sistema pelo qual o imposto de renda é descontado direto do seu salário pelo empregador."},
+  {t:"USC", d:"Universal Social Charge — imposto adicional sobre a renda, descontado junto com o PAYE."},
+  {t:"PRSI", d:"Pay Related Social Insurance — contribuição para a previdência social irlandesa, também descontada do salário."},
+  {t:"IRP", d:"Irish Residence Permit — cartão de residência que comprova seu registro como imigrante na Irlanda."},
+  {t:"Stamp 1", d:"Carimbo de imigração para quem tem permissão de trabalho vinculada a um empregador (Employment Permit)."},
+  {t:"Stamp 2", d:"Carimbo de imigração para estudantes internacionais matriculados em curso elegível."},
+  {t:"Stamp 4", d:"Carimbo de imigração com direito de trabalhar sem restrições, sem precisar de Employment Permit."},
+  {t:"Employment Permit", d:"Autorização de trabalho emitida pelo governo para contratar um profissional de fora da UE/EEE para uma vaga específica."},
+  {t:"Leap Card", d:"Cartão de transporte público recarregável, aceito em ônibus, Luas e DART nas principais cidades."},
+  {t:"Luas", d:"Sistema de VLT (bonde/light rail) de Dublin, com linhas Vermelha e Verde."},
+  {t:"DART", d:"Trem suburbano que liga a costa de Dublin, de Malahide/Howth até Greystones."},
+  {t:"GP", d:"General Practitioner — médico de família/clínico geral, geralmente o primeiro contato do sistema de saúde."},
+  {t:"En-suite", d:"Quarto com banheiro privativo dentro do próprio cômodo."},
+  {t:"Bills included", d:"Anúncio de acomodação em que o aluguel já inclui contas de água, luz, gás e internet."},
+  {t:"Viewing", d:"Visita presencial (ou por vídeo) a um imóvel antes de fechar o aluguel — recomendada sempre que possível."},
+  {t:"Deposit", d:"Depósito de segurança pago no início do aluguel, devolvido ao final se o imóvel for entregue em condições."},
+  {t:"Accommodation Assistant", d:"Função de apoio na recepção e manutenção de hotéis ou acomodações estudantis."},
+  {t:"Kitchen Porter", d:"Função de apoio na cozinha de restaurantes e hotéis — lavar louça, organizar, limpeza."},
+  {t:"Warehouse Operative", d:"Função de separação e movimentação de mercadorias em centros de distribuição."}
+];
+function renderGlossario(filter){
+  var wrap = document.getElementById("glossarioWrap");
+  if(!wrap) return;
+  var f = (filter||"").trim().toLowerCase();
+  var shown = f ? GLOSSARIO_TERMS.filter(function(g){ return g.t.toLowerCase().indexOf(f)>-1 || g.d.toLowerCase().indexOf(f)>-1; }) : GLOSSARIO_TERMS;
+  wrap.innerHTML = shown.length ? shown.map(function(g){
+    return '<div class="card" style="padding:16px 18px;"><h3 style="font-size:15px;margin-bottom:4px;">'+g.t+'</h3><p style="margin:0;font-size:13.3px;">'+g.d+'</p></div>';
+  }).join("") : '<div class="empty">Nenhum termo encontrado — tente outra palavra.</div>';
+}
+document.getElementById("glossarioSearch").addEventListener("input", function(e){ renderGlossario(e.target.value); });
+
 var JOB_ROLES = [{id:"cleaner",l:"Cleaner (limpeza)"},{id:"barista",l:"Barista"},{id:"hotelaria",l:"Hotelaria"},{id:"varejo",l:"Varejo"},{id:"logistica",l:"Logística/warehouse"},{id:"atendimento",l:"Atendimento/call center"},{id:"delivery",l:"Delivery"},{id:"ti",l:"TI/suporte"}];
 var JOBS_SEED = {
   cleaner: {
@@ -3028,9 +3216,14 @@ function init(){
     else openOnboarding();
   }
   renderNationalRules();
+  renderComeceAqui();
+  renderComoEscolherEscola();
   renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm();
+  renderAssessoria();
+  renderJobTypes();
   renderJobRoleTabs(); renderJobRoleContent(); renderJobAddForm();
   renderAgencias();
+  renderGlossario();
   renderEnglish();
   renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences();
   renderNiInfo(); renderTourismCalendar(); renderTourismPasses(); renderTourismChecklist();

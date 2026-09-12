@@ -95,6 +95,7 @@
   <div class="more-menu" id="moreMenu" role="menu" aria-label="Mais seções" hidden>
     <div class="more-menu-handle" id="moreMenuHandle"></div>
     <button class="tab-btn" id="tab-links" data-sec="links" role="menuitem" aria-controls="sec-links">Links oficiais</button>
+    <button class="tab-btn" id="tab-glossario" data-sec="glossario" role="menuitem" aria-controls="sec-glossario">Glossário</button>
   </div>
 
   <main class="main" id="main-content">
@@ -102,6 +103,11 @@
     <!-- VISÃO GERAL -->
     <section class="section" id="sec-inicio" data-sec="inicio" role="tabpanel" aria-labelledby="tab-inicio">
       <div class="section-head"><h2>Preparação até o embarque</h2><p>Considera checklist, cronograma e primeiros 30 dias.</p></div>
+      <div class="card" id="comeceAquiWrap" style="margin-bottom:16px;">
+        <h3>Começando agora?</h3>
+        <p class="source-note" style="margin-bottom:14px;">Escolha o que você quer entender primeiro — cada card leva direto pro conteúdo deste guia. Sem cadastro, sem login: o link pode ser compartilhado livremente.</p>
+        <div class="grid cols-3" id="comeceAquiGrid"></div>
+      </div>
       <div id="continueWrap" hidden style="margin-bottom:14px;"></div>
       <div id="backupReminderWrap" hidden style="margin-bottom:14px;"></div>
       <div class="card overview-summary">
@@ -184,6 +190,9 @@
       <div id="trabalhoWrap"></div>
       <h3 style="margin:26px 0 4px;font-size:18px;">Regras do curso de inglês</h3>
       <div id="cursoRegrasWrap" style="margin-top:14px;"></div>
+      <h3 style="margin:26px 0 4px;font-size:18px;">Como escolher uma escola</h3>
+      <div id="comoEscolherEscolaWrap" style="margin-top:14px;"></div>
+
       <h3 style="margin:26px 0 4px;font-size:18px;">Escolas de inglês por cidade</h3>
       <p class="source-note" style="margin-bottom:14px;">Preços pesquisados em set/2026 — sempre peça cotação atualizada antes de pagar. A tabela é editável: adicione, edite ou remova escolas.</p>
       <div class="subtabs" id="schoolCityTabs"></div>
@@ -193,6 +202,12 @@
         <h3>Adicionar escola</h3>
         <div id="schoolAddForm"></div>
       </div>
+
+      <h3 style="margin:30px 0 4px;font-size:18px;">Assessoria: vale a pena?</h3>
+      <div id="assessoriaWrap" style="margin-top:14px;"></div>
+
+      <h3 style="margin:30px 0 4px;font-size:18px;">Trabalhos comuns para quem chega</h3>
+      <div id="jobTypesWrap" style="margin-top:14px;"></div>
 
       <h3 style="margin:30px 0 4px;font-size:18px;">Vagas de entrada rápida</h3>
       <p class="source-note" style="margin-bottom:14px;">Funções que costumam contratar rápido, com pouca ou nenhuma experiência. Prepare um currículo específico para cada uma.</p>
@@ -412,6 +427,13 @@
     <section class="section" id="sec-links" data-sec="links" role="tabpanel" aria-labelledby="tab-links">
       <div class="section-head"><h2>Links oficiais</h2><p>Regras de imigração mudam com frequência — confirme sempre nestas fontes antes de tomar decisões importantes.</p></div>
       <div id="linksWrap"></div>
+    </section>
+
+    <!-- GLOSSÁRIO -->
+    <section class="section" id="sec-glossario" data-sec="glossario" role="tabpanel" aria-labelledby="tab-glossario">
+      <div class="section-head"><h2>Glossário da Irlanda</h2><p>Siglas e termos que você vai ver o tempo todo — explicados em português.</p></div>
+      <input type="search" id="glossarioSearch" placeholder="Buscar termo (ex: PPSN, Stamp, Leap Card...)" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:16px;">
+      <div class="grid cols-3" id="glossarioWrap"></div>
     </section>
 
     <!-- ROTEIRO COMPLETO -->
