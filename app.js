@@ -1261,27 +1261,41 @@ function wireSaibaMais(wrap){
     btn.addEventListener("click", function(){ goToSection(btn.dataset.sec); });
   });
 }
-function vidaFilterBarHtml(idPrefix, searchPlaceholder){
-  return '<input type="search" id="'+idPrefix+'Search" placeholder="'+searchPlaceholder+'" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:12px;">'+
-    '<div class="subtabs" id="'+idPrefix+'Tags" style="margin-bottom:16px;"></div>';
+var vidaSharedFilterState = {q:"", tag:null};
+function vidaFilterBarHtml(){
+  return '<input type="search" id="vidaSearch" placeholder="Buscar dúvida ou termo (ex: PPSN, Stamp, immersion, Leap Card...)" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:12px;">'+
+    '<div class="subtabs" id="vidaTags" style="margin-bottom:10px;"></div>'+
+    '<div class="vida-toolbar-actions">'+
+      '<button type="button" class="btn-ghost" id="vidaExpandAll">Abrir tudo</button>'+
+      '<button type="button" class="btn-ghost" id="vidaCollapseAll">Fechar tudo</button>'+
+    '</div>';
 }
-function wireVidaFilterBar(idPrefix, onChange){
-  var state = {q:"", tag:null};
-  var tagsWrap = document.getElementById(idPrefix+"Tags");
+function renderVidaAllPanels(){
+  renderVidaIrlanda(); renderGlossario(); renderMitos();
+}
+function wireVidaFilterBar(){
+  var tagsWrap = document.getElementById("vidaTags");
   tagsWrap.innerHTML = VIDA_FILTER_TAGS.map(function(tag){
     return '<button class="subtab" data-tag="'+tag+'">'+tag+'</button>';
   }).join("");
   tagsWrap.querySelectorAll(".subtab").forEach(function(b){
     b.addEventListener("click", function(){
-      state.tag = state.tag===b.dataset.tag ? null : b.dataset.tag;
-      tagsWrap.querySelectorAll(".subtab").forEach(function(x){ x.classList.toggle("active", x.dataset.tag===state.tag); });
-      onChange(state);
+      vidaSharedFilterState.tag = vidaSharedFilterState.tag===b.dataset.tag ? null : b.dataset.tag;
+      tagsWrap.querySelectorAll(".subtab").forEach(function(x){ x.classList.toggle("active", x.dataset.tag===vidaSharedFilterState.tag); });
+      renderVidaAllPanels();
     });
   });
-  document.getElementById(idPrefix+"Search").addEventListener("input", function(e){
-    state.q = e.target.value;
-    onChange(state);
+  document.getElementById("vidaSearch").addEventListener("input", function(e){
+    vidaSharedFilterState.q = e.target.value;
+    renderVidaAllPanels();
   });
+  document.getElementById("vidaExpandAll").addEventListener("click", function(){ setVidaAccordionsOpen(true); });
+  document.getElementById("vidaCollapseAll").addEventListener("click", function(){ setVidaAccordionsOpen(false); });
+}
+function setVidaAccordionsOpen(open){
+  var activePanel = document.querySelector("#vidaIrlandaContent .vida-panel.active");
+  if(!activePanel) return;
+  activePanel.querySelectorAll("details").forEach(function(d){ d.open = open; });
 }
 function matchesVidaFilter(item, state){
   var q = (state.q||"").trim().toLowerCase();
@@ -1373,12 +1387,11 @@ var GLOSSARIO_TERMS = [
   {t:"Heating", cat:"cotidiano", tags:["Casa"], d:"Aquecimento central da casa, geralmente a gás, ligado por timer ou termostato."},
   {t:"County", cat:"cotidiano", tags:["Casa","Documentos"], d:"Divisão administrativa irlandesa, mais ou menos como um \"estado\" pequeno."}
 ];
-var glossarioFilterState = {q:"", tag:null};
 function renderGlossario(){
   var wrap = document.getElementById("glossarioWrap");
   if(!wrap) return;
   var html = GLOSSARIO_CATEGORIES.map(function(cat, idx){
-    var items = GLOSSARIO_TERMS.filter(function(g){ return g.cat===cat.id && matchesVidaFilter(g, glossarioFilterState); });
+    var items = GLOSSARIO_TERMS.filter(function(g){ return g.cat===cat.id && matchesVidaFilter(g, vidaSharedFilterState); });
     if(!items.length) return "";
     var cardsHtml = items.map(function(g){
       return '<div class="card" style="padding:16px 18px;"><h3 style="font-size:15px;margin-bottom:4px;">'+g.t+'</h3><p style="margin:0;font-size:13.3px;">'+g.d+'</p>'+saibaMaisHtml(g.sec)+'</div>';
@@ -1472,14 +1485,57 @@ var DUBLIN_DISTRICTS = [
   {code:"Dublin 7", side:"Norte do Liffey", d:"Inclui Smithfield, Stoneybatter e Phibsborough — exemplo claro de distrito ímpar bastante procurado."},
   {code:"Dublin 8", side:"Sul do Liffey", d:"Mistura de áreas centrais e residenciais; perfil varia bastante dentro do próprio distrito."}
 ];
-var vidaPraticaFilterState = {q:"", tag:null};
+var DUBLIN_SCHEMATIC_PINS = [
+  {code:"1", x:150, y:44, side:"n"},
+  {code:"7", x:78, y:38, side:"n"},
+  {code:"2", x:186, y:78, side:"s"},
+  {code:"4", x:246, y:82, side:"s"},
+  {code:"6", x:156, y:92, side:"s"},
+  {code:"8", x:96, y:84, side:"s"}
+];
+function dublinSchematicHtml(){
+  var pins = DUBLIN_SCHEMATIC_PINS.map(function(p){
+    return '<circle class="dublin-pin-dot" cx="'+p.x+'" cy="'+p.y+'" r="12"/>'+
+      '<text class="dublin-pin-label" x="'+p.x+'" y="'+(p.y+4)+'">'+p.code+'</text>';
+  }).join("");
+  return '<div class="dublin-schematic">'+
+    '<svg viewBox="0 0 320 120" width="100%" height="150" role="img" aria-label="Esquema simplificado dos distritos de Dublin em relação ao rio Liffey">'+
+      '<text class="dublin-schematic-side" x="14" y="24">NORTE</text>'+
+      '<text class="dublin-schematic-side" x="14" y="108">SUL</text>'+
+      '<line class="dublin-liffey" x1="10" y1="60" x2="310" y2="63"/>'+
+      pins+
+    '</svg>'+
+    '<p class="source-note" style="margin-top:6px;">Esquema simplificado da posição relativa dos distritos citados — não é um mapa preciso nem uma indicação de qualidade.</p>'+
+  '</div>';
+}
+var DUBLIN_CLIMATE = [
+  {m:"Jan", lo:3, hi:8},{m:"Fev", lo:3, hi:8},{m:"Mar", lo:4, hi:10},{m:"Abr", lo:5, hi:13},
+  {m:"Mai", lo:7, hi:15},{m:"Jun", lo:10, hi:18},{m:"Jul", lo:12, hi:20},{m:"Ago", lo:12, hi:19},
+  {m:"Set", lo:10, hi:17},{m:"Out", lo:7, hi:13},{m:"Nov", lo:4, hi:10},{m:"Dez", lo:3, hi:8}
+];
+function climateChartHtml(){
+  var scaleMax = 22, chartH = 120;
+  var bars = DUBLIN_CLIMATE.map(function(d){
+    var bottom = Math.round(d.lo/scaleMax*chartH);
+    var height = Math.max(6, Math.round((d.hi-d.lo)/scaleMax*chartH));
+    return '<div class="climate-bar-col"><div class="climate-bar-track" style="height:'+chartH+'px;">'+
+      '<div class="climate-bar-fill" style="bottom:'+bottom+'px;height:'+height+'px;"><span class="climate-bar-hi">'+d.hi+'°</span></div>'+
+      '</div><span class="climate-bar-lbl">'+d.m+'</span></div>';
+  }).join("");
+  return '<div class="card climate-chart" style="grid-column:1/-1;">'+
+    '<h4 style="font-size:14px;margin-bottom:2px;">Temperatura média por mês em Dublin</h4>'+
+    '<p class="source-note" style="margin:0 0 16px;">Faixa aproximada entre mínima e máxima médias — varia de ano a ano.</p>'+
+    '<div class="climate-chart-bars">'+bars+'</div>'+
+    officialSourceHtml("https://www.met.ie", VIDA_VERIFIED_AT)+
+  '</div>';
+}
 function renderVidaIrlanda(){
   var wrap = document.getElementById("vidaIrlandaWrap");
   if(!wrap) return;
   var html = VIDA_PRATICA_CATEGORIES.map(function(cat, idx){
     if(cat.id==="bairros"){
-      var bairrosTagOk = !vidaPraticaFilterState.tag || vidaPraticaFilterState.tag==="Casa";
-      var bairrosSearchOk = !vidaPraticaFilterState.q || (cat.label+" "+DUBLIN_DISTRICTS.map(function(d){ return d.code+" "+d.side+" "+d.d; }).join(" ")).toLowerCase().indexOf(vidaPraticaFilterState.q.trim().toLowerCase())>-1;
+      var bairrosTagOk = !vidaSharedFilterState.tag || vidaSharedFilterState.tag==="Casa";
+      var bairrosSearchOk = !vidaSharedFilterState.q || (cat.label+" "+DUBLIN_DISTRICTS.map(function(d){ return d.code+" "+d.side+" "+d.d; }).join(" ")).toLowerCase().indexOf(vidaSharedFilterState.q.trim().toLowerCase())>-1;
       if(!bairrosTagOk || !bairrosSearchOk) return "";
       var districtsHtml = DUBLIN_DISTRICTS.map(function(dist){
         return '<div class="district-card"><span class="district-side">'+dist.side+'</span><h4>'+dist.code+'</h4><p>'+dist.d+'</p></div>';
@@ -1487,13 +1543,14 @@ function renderVidaIrlanda(){
       return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">6 distritos, sem ranking</span></span></summary>'+
         '<div class="vida-cat-body">'+
         '<p class="source-note" style="margin-bottom:10px;">Números pares ficam mais concentrados ao sul do rio Liffey, ímpares ao norte — isso é fato histórico do zoneamento postal, não uma régua de qualidade. Existem ruas ótimas em distritos ímpares e ruas medianas em distritos pares.</p>'+
+        dublinSchematicHtml()+
         '<div class="district-grid">'+districtsHtml+'</div>'+
         '<div class="callout" style="margin-top:12px;">Não escolha acomodação só pelo número do distrito. Pesquise o endereço completo e a rua — o que importa é transporte, iluminação, movimento, comércio, distância até trabalho/escola, preço e segurança.</div>'+
         '</div></details>';
     }
-    var items = VIDA_PRATICA.filter(function(v){ return v.cat===cat.id && matchesVidaFilter(v, vidaPraticaFilterState); });
+    var items = VIDA_PRATICA.filter(function(v){ return v.cat===cat.id && matchesVidaFilter(v, vidaSharedFilterState); });
     if(!items.length) return "";
-    var cardsHtml = items.map(function(v){
+    var cardsHtml = (cat.id==="clima" ? climateChartHtml() : "") + items.map(function(v){
       return '<div class="exp-card"><h4>'+v.t+'</h4><p>'+v.d+'</p>'+saibaMaisHtml(v.sec)+(v.source?officialSourceHtml(v.source, v.verifiedAt):"")+'</div>';
     }).join("");
     return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
@@ -1563,11 +1620,32 @@ var MITOS_VERDADES = [
   {cat:"cotidiano", tags:["Casa"], cls:"mito", q:"A Irlanda usa 110V?", a:"Não, usa 230V."},
   {cat:"cotidiano", tags:["Cultura"], cls:"depende", q:"Posso beber na rua?", a:"Regras locais podem restringir consumo em espaço público — varia por cidade/área."}
 ];
+function mitosOverviewHtml(){
+  var filtered = MITOS_VERDADES.filter(function(m){ return matchesVidaFilter(m, vidaSharedFilterState); });
+  var total = filtered.length;
+  if(!total) return "";
+  var counts = {mito:0, verdade:0, depende:0};
+  filtered.forEach(function(m){ counts[m.cls] = (counts[m.cls]||0)+1; });
+  var pct = function(n){ return (n/total*100).toFixed(1); };
+  return '<div class="card mitos-overview">'+
+    '<h3 style="font-size:14px;margin-bottom:12px;">De relance: '+total+' pergunta'+(total!==1?"s":"")+'</h3>'+
+    '<div class="stacked-bar">'+
+      (counts.mito?'<span class="stacked-bar-seg seg-mito" style="width:'+pct(counts.mito)+'%"></span>':"")+
+      (counts.verdade?'<span class="stacked-bar-seg seg-verdade" style="width:'+pct(counts.verdade)+'%"></span>':"")+
+      (counts.depende?'<span class="stacked-bar-seg seg-depende" style="width:'+pct(counts.depende)+'%"></span>':"")+
+    '</div>'+
+    '<div class="mitos-overview-legend">'+
+      '<span class="legend-item"><i class="legend-dot dot-mito"></i>'+counts.mito+' mito'+(counts.mito!==1?"s":"")+'</span>'+
+      '<span class="legend-item"><i class="legend-dot dot-verdade"></i>'+counts.verdade+' verdade'+(counts.verdade!==1?"s":"")+'</span>'+
+      '<span class="legend-item"><i class="legend-dot dot-depende"></i>'+counts.depende+' depende'+(counts.depende!==1?"m":"")+' do caso</span>'+
+    '</div>'+
+  '</div>';
+}
 function renderMitos(){
   var wrap = document.getElementById("mitosWrap");
   if(!wrap) return;
   var html = MITOS_CATEGORIES.map(function(cat, idx){
-    var items = MITOS_VERDADES.filter(function(m){ return m.cat===cat.id && matchesVidaFilter(m, mitosFilterState); });
+    var items = MITOS_VERDADES.filter(function(m){ return m.cat===cat.id && matchesVidaFilter(m, vidaSharedFilterState); });
     if(!items.length) return "";
     var rows = items.map(function(m, i2){
       var badgeLabel = m.badgeLabel || MITO_BADGE_LABEL[m.cls];
@@ -1577,7 +1655,7 @@ function renderMitos(){
     return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
       '<div class="vida-cat-body">'+rows+'</div></details>';
   }).join("");
-  wrap.innerHTML = html.trim() ? html : '<div class="empty">Nenhuma pergunta encontrada — tente outra palavra ou filtro.</div>';
+  wrap.innerHTML = mitosOverviewHtml() + (html.trim() ? html : '<div class="empty">Nenhuma pergunta encontrada — tente outra palavra ou filtro.</div>');
   wireSaibaMais(wrap);
 }
 function injectFaqSchema(){
@@ -1604,7 +1682,6 @@ function injectFaqSchema(){
    alterna por CSS, pra Glossario e Mitos continuarem indexaveis por buscadores mesmo sem clique. */
 var VIDAIRLANDA_SUBTABS = [{id:"pratica",l:"Vida prática"},{id:"glossario",l:"Glossário"},{id:"mitos",l:"Mitos e verdades"}];
 var vidaIrlandaView = ls("vidaIrlandaView") || "pratica";
-var mitosFilterState = {q:"", tag:null};
 function renderVidaIrlandaSubtabs(){
   var wrap = document.getElementById("vidaIrlandaSubtabs");
   if(!wrap) return;
@@ -1626,26 +1703,15 @@ function updateVidaIrlandaPanelVisibility(){
 }
 function renderVidaIrlandaContent(){
   var wrap = document.getElementById("vidaIrlandaContent");
-  if(!wrap) return;
+  var filterBarWrap = document.getElementById("vidaIrlandaFilterBar");
+  if(!wrap || !filterBarWrap) return;
+  filterBarWrap.innerHTML = vidaFilterBarHtml();
+  wireVidaFilterBar();
   wrap.innerHTML =
-    '<div class="vida-panel" id="vidaPanel-pratica">'+
-      vidaFilterBarHtml("vidaPratica", "Buscar em Vida prática (ex: immersion, tomada, filas...)")+
-      '<div id="vidaIrlandaWrap"></div>'+
-    '</div>'+
-    '<div class="vida-panel" id="vidaPanel-glossario">'+
-      vidaFilterBarHtml("glossario", "Buscar termo (ex: PPSN, Stamp, Leap Card...)")+
-      '<div id="glossarioWrap"></div>'+
-    '</div>'+
-    '<div class="vida-panel" id="vidaPanel-mitos">'+
-      vidaFilterBarHtml("mitos", "Buscar pergunta (ex: 40 horas, Schengen, Leap Card...)")+
-      '<div id="mitosWrap"></div>'+
-    '</div>';
-  wireVidaFilterBar("vidaPratica", function(state){ vidaPraticaFilterState = state; renderVidaIrlanda(); });
-  wireVidaFilterBar("glossario", function(state){ glossarioFilterState = state; renderGlossario(); });
-  wireVidaFilterBar("mitos", function(state){ mitosFilterState = state; renderMitos(); });
-  renderVidaIrlanda();
-  renderGlossario();
-  renderMitos();
+    '<div class="vida-panel" id="vidaPanel-pratica"><div id="vidaIrlandaWrap"></div></div>'+
+    '<div class="vida-panel" id="vidaPanel-glossario"><div id="glossarioWrap"></div></div>'+
+    '<div class="vida-panel" id="vidaPanel-mitos"><div id="mitosWrap"></div></div>';
+  renderVidaAllPanels();
   updateVidaIrlandaPanelVisibility();
 }
 
