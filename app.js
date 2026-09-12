@@ -129,7 +129,7 @@ function animateSectionEntrance(id){
       });
     });
     requestAnimationFrame(function(){ ScrollTrigger.refresh(); });
-  } else {
+  } else if(below.length){
     gsap.set(below, {opacity:1, y:0});
   }
 }
@@ -1166,6 +1166,54 @@ function renderJobTypes(){
   renderJobTypesGrid();
 }
 
+/* ---------- qual trabalho posso pesquisar? ---------- */
+var ENGLISH_RANK = {"Básico":1,"Intermediário":2,"Avançado":3};
+var EXP_TO_CAT = {semexp:null, atendimento:"escritorio", restaurante:"hospitality", hotelaria:"hospitality", limpeza:"hospitality", logistica:"varejo", administracao:"escritorio", industria:"industria", tecnologia:"industria"};
+var JOB_FINDER_EXP_OPTIONS = [
+  {id:"semexp",l:"Sem experiência"},{id:"atendimento",l:"Atendimento"},{id:"restaurante",l:"Restaurante"},
+  {id:"hotelaria",l:"Hotelaria"},{id:"limpeza",l:"Limpeza"},{id:"logistica",l:"Logística"},
+  {id:"administracao",l:"Administração"},{id:"industria",l:"Indústria"},{id:"tecnologia",l:"Tecnologia"}
+];
+var JOB_FINDER_DISPO_OPTIONS = ["Manhã","Tarde","Noite","Madrugada","Fins de semana"];
+function renderJobFinder(){
+  var wrap = document.getElementById("jobFinderWrap");
+  if(!wrap) return;
+  wrap.innerHTML =
+    '<div class="mini-form-grid">'+
+      '<div><label>Inglês</label><select id="jfIngles"><option value="Básico">Básico</option><option value="Intermediário">Intermediário</option><option value="Avançado">Avançado</option></select></div>'+
+      '<div><label>Experiência</label><select id="jfExp">'+JOB_FINDER_EXP_OPTIONS.map(function(o){ return '<option value="'+o.id+'">'+o.l+'</option>'; }).join("")+'</select></div>'+
+    '</div>'+
+    '<label style="display:block;font-size:12.3px;font-weight:600;color:var(--muted);margin-bottom:8px;">Disponibilidade (opcional)</label>'+
+    '<div class="seg" id="jfDispo" style="flex-wrap:wrap;margin-bottom:14px;">'+JOB_FINDER_DISPO_OPTIONS.map(function(d){ return '<button type="button" class="seg-btn" data-d="'+d+'" style="flex:none;padding:8px 14px;"><h4 style="font-size:12.8px;margin:0;">'+d+'</h4></button>'; }).join("")+'</div>'+
+    '<button class="btn btn-accent" type="button" id="jfSubmit" style="width:auto;padding:10px 20px;">Ver sugestões</button>'+
+    '<div id="jfResult" style="margin-top:16px;"></div>';
+  var dispoSelected = [];
+  wrap.querySelectorAll("#jfDispo .seg-btn").forEach(function(b){
+    b.addEventListener("click", function(){
+      b.classList.toggle("selected");
+      var d = b.dataset.d, idx = dispoSelected.indexOf(d);
+      if(idx>-1) dispoSelected.splice(idx,1); else dispoSelected.push(d);
+    });
+  });
+  document.getElementById("jfSubmit").addEventListener("click", function(){
+    var ingles = document.getElementById("jfIngles").value;
+    var expId = document.getElementById("jfExp").value;
+    var userRank = ENGLISH_RANK[ingles];
+    var cat = EXP_TO_CAT[expId];
+    function fits(j){ var jobRank = ENGLISH_RANK[j.ingles.split("/")[0].trim()] || 2; return jobRank<=userRank; }
+    var matches = JOB_TYPES_COMMON.filter(function(j){ return fits(j) && (!cat || j.cat===cat); });
+    if(!matches.length) matches = JOB_TYPES_COMMON.filter(fits);
+    var shown = matches.slice(0,6);
+    var names = shown.map(function(j){ return j.title; });
+    var lastText = names.length>1 ? names.slice(0,-1).join(", ")+" e "+names[names.length-1] : (names[0]||"Cleaner, Kitchen Porter e Stock Assistant");
+    var expLabel = JOB_FINDER_EXP_OPTIONS.find(function(o){ return o.id===expId; }).l.toLowerCase();
+    var dispoText = dispoSelected.length ? " Considerando sua disponibilidade ("+dispoSelected.join(", ")+"), confirme os turnos de cada vaga antes de se candidatar." : "";
+    document.getElementById("jfResult").innerHTML =
+      '<div class="callout">Com inglês '+ingles.toLowerCase()+' e experiência em "'+expLabel+'", vale pesquisar vagas de '+lastText+'.'+dispoText+
+      '<p style="margin:10px 0 0;font-size:12.5px;">Isso não significa garantia de contratação. Requisitos variam por empresa.</p></div>';
+  });
+}
+
 /* ---------- glossario ---------- */
 var GLOSSARIO_TERMS = [
   {t:"PPSN", d:"Personal Public Service Number — número de identificação usado para trabalho, impostos e serviços públicos na Irlanda."},
@@ -1200,6 +1248,50 @@ function renderGlossario(filter){
   }).join("") : '<div class="empty">Nenhum termo encontrado — tente outra palavra.</div>';
 }
 document.getElementById("glossarioSearch").addEventListener("input", function(e){ renderGlossario(e.target.value); });
+
+/* ---------- vida na irlanda (agregador) ---------- */
+var VIDA_IRLANDA = [
+  {t:"Mercado", d:"Preços de referência e sua lista de compras.", sec:"mercado"},
+  {t:"Transporte", d:"Leap Card, ônibus, Luas, DART e apps essenciais.", sec:"transporte"},
+  {t:"Chip e internet (eSIM)", d:"Operadoras locais (Three, Vodafone, GoMo, Tesco Mobile) vendem chip pré-pago sem burocracia. Quem prefere já chegar conectado pode comprar um eSIM internacional (Holafly, Airalo) antes da viagem."},
+  {t:"Conta bancária", d:"Revolut ou N26 podem ser abertas ainda no Brasil, sem PPSN — o salário já cai nelas assim que você conseguir emprego. Banco tradicional irlandês (AIB, Bank of Ireland, PTSB) costuma vir depois, já com PPSN e comprovante de endereço.", sec:"financas"},
+  {t:"PPSN & Revenue", d:"Número de identificação fiscal — peça depois de ter uma proposta de emprego. Veja o passo a passo completo em Imigração.", sec:"imigracao"},
+  {t:"MyGovID", d:"Conta oficial do governo irlandês, necessária para Revenue myAccount, MyWelfare e outros serviços públicos. Detalhes em Imigração.", sec:"imigracao"},
+  {t:"Saúde, GP e farmácia", d:"Registre-se com um GP (médico de família) assim que se instalar — é o primeiro contato do sistema de saúde. Farmácias (pharmacy/chemist) vendem remédios sem receita e dão orientação rápida para casos simples. Cidadãos UE/EEE podem usar o Cartão Europeu de Seguro de Saúde (EHIC/GHIC); não-UE costuma precisar de seguro-saúde privado."},
+  {t:"Clima e estações", d:"Verão (jun–ago) ameno, ~15–20°C, dias com até 18h de luz. Inverno (dez–fev) frio e chuvoso, ~4–9°C, escurece já no meio da tarde. Chuva é comum o ano todo — vista em camadas e tenha uma capa impermeável."},
+  {t:"Lixo e reciclagem", d:"Geralmente 3 lixeiras: preta/geral, verde/reciclagem (papel, plástico, vidro limpo) e marrom/orgânico (restos de comida, jardim). As cores e o dia de coleta variam por município — confirme com o landlord ou prefeitura local (council)."},
+  {t:"Compras do dia a dia", d:"Penneys/Primark (roupas baratas), Dealz (utilidades e casa), Ikea e Woodie's (móveis e organização) complementam os supermercados para o básico de quem está se instalando.", sec:"mercado"},
+  {t:"Primeiros dias", d:"Checklist com o passo a passo das primeiras semanas — chegada, moradia, trabalho e documentação.", sec:"roteiro"},
+  {t:"Grupos de apoio", d:"Comunidades de brasileiros no WhatsApp e Facebook para tirar dúvidas e achar moradia.", sec:"grupos"}
+];
+function renderVidaIrlanda(){
+  var wrap = document.getElementById("vidaIrlandaWrap");
+  if(!wrap) return;
+  wrap.innerHTML = VIDA_IRLANDA.map(function(v){
+    var linkHtml = v.sec ? '<button type="button" class="ci-link" style="border:none;background:none;padding:0;font:inherit;cursor:pointer;margin-top:8px;" data-sec="'+v.sec+'">Ver mais →</button>' : "";
+    return '<div class="exp-card"><h4>'+v.t+'</h4><p>'+v.d+'</p>'+linkHtml+'</div>';
+  }).join("");
+  wrap.querySelectorAll("[data-sec]").forEach(function(btn){
+    btn.addEventListener("click", function(){ goToSection(btn.dataset.sec); });
+  });
+}
+
+/* ---------- mitos e verdades ---------- */
+var MITOS_VERDADES = [
+  {q:"Preciso obrigatoriamente contratar uma agência?", a:"Não. Dá para organizar escola, visto, moradia e chegada sozinho — exige mais tempo e pesquisa, mas é o caminho de muita gente. Veja o comparativo em \"Assessoria: vale a pena?\", em Trabalho & estudo."},
+  {q:"Todo estudante pode trabalhar 40 horas por semana?", a:"Não. O limite de horas depende da sua situação migratória (Stamp, tipo de visto e curso) — cidadãos UE/EEE não têm essa restrição, mas quem está com visto de estudante geralmente tem limite de 20h/semana durante o período letivo. Confira os detalhes em Imigração."},
+  {q:"Preciso de inglês avançado para conseguir emprego?", a:"Depende muito da vaga. Funções como Cleaner, Kitchen Porter e Stock Assistant costumam aceitar inglês básico; já vagas de atendimento, escritório ou tecnologia pedem mais fluência. Veja \"Trabalhos comuns para quem chega\" para comparar por nível de inglês."},
+  {q:"Cleaner é a única opção para quem tem inglês básico?", a:"Não. Kitchen Porter, Housekeeping, Stock Assistant, Warehouse Operative e Picker/Packer, entre outras, também costumam aceitar inglês básico — veja a lista completa em Trabalho & estudo."},
+  {q:"Com cidadania europeia eu preciso de visto de estudante?", a:"Não. Cidadãos da UE/EEE/Suíça têm liberdade de movimento na Irlanda — sem visto, Stamp 2, IRP ou limite de horas ligado ao curso. O foco nesse caso é mais em documentação prática (PPSN, moradia, saúde)."},
+  {q:"É fácil encontrar moradia na Irlanda?", a:"Não é o ponto mais fácil do processo — o mercado de aluguel é concorrido, principalmente em Dublin. Costuma exigir tempo de pesquisa, flexibilidade e, para moradia definitiva, estar no país para visitar antes de fechar. Veja \"Tipos de acomodação\" e o checklist anti-golpe, em Acomodação."}
+];
+function renderMitos(){
+  var wrap = document.getElementById("mitosWrap");
+  if(!wrap) return;
+  wrap.innerHTML = MITOS_VERDADES.map(function(m,idx){
+    return '<details class="acc-item"'+(idx===0?" open":"")+'><summary>'+m.q+'</summary><p style="margin:10px 0 0;font-size:13.3px;line-height:1.6;">'+m.a+'</p></details>';
+  }).join("");
+}
 
 var JOB_ROLES = [{id:"cleaner",l:"Cleaner (limpeza)"},{id:"barista",l:"Barista"},{id:"hotelaria",l:"Hotelaria"},{id:"varejo",l:"Varejo"},{id:"logistica",l:"Logística/warehouse"},{id:"atendimento",l:"Atendimento/call center"},{id:"delivery",l:"Delivery"},{id:"ti",l:"TI/suporte"}];
 var JOBS_SEED = {
@@ -1466,6 +1558,21 @@ var ENGLISH_MODULES = [
     "I need an ambulance / the Gardaí / the fire brigade. — Preciso de uma ambulância / da polícia / dos bombeiros.",
     "There's been an accident. — Aconteceu um acidente.",
     "My location is... — Minha localização é..."
+  ]},
+  {id:"cv", title:"Entregando o CV", phrases:[
+    "Hi, I'm looking for work — are you hiring at the moment? — Oi, estou procurando trabalho — vocês estão contratando no momento?",
+    "Can I leave my CV with you? — Posso deixar meu currículo com vocês?",
+    "I'm available to start immediately, part-time or full-time. — Estou disponível para começar imediatamente, meio período ou período integral."
+  ]},
+  {id:"firstday", title:"Primeiro dia de trabalho", phrases:[
+    "Where should I leave my things? — Onde eu deixo minhas coisas?",
+    "Could you show me how this works? — Você pode me mostrar como isso funciona?",
+    "Sorry, could you repeat that, please? — Desculpa, você pode repetir, por favor?"
+  ]},
+  {id:"phone", title:"Ao telefone", phrases:[
+    "Hello, this is [name] speaking. — Olá, aqui é o/a [nome].",
+    "Could you speak a bit slower, please? — Você pode falar um pouco mais devagar, por favor?",
+    "Can I call you back? — Posso te ligar de volta?"
   ]}
 ];
 var ENGLISH_MISTAKES = [
@@ -2033,6 +2140,41 @@ function renderStayAddForm(){
     renderStayAddForm();
   });
 }
+var TIPOS_ACOMODACAO = [
+  {t:"Single room", d:"Quarto individual, só para você."},
+  {t:"Twin room", d:"Quarto com duas camas de solteiro — dividido com outra pessoa, cada um na sua cama."},
+  {t:"Shared room", d:"Quarto compartilhado — pode significar dividir a mesma cama/beliche com outra pessoa, mais comum em hostels."},
+  {t:"En-suite", d:"Quarto com banheiro privativo dentro do próprio cômodo."},
+  {t:"Bills included", d:"O aluguel já inclui água, luz, gás e internet — sem surpresas na conta."},
+  {t:"Deposit", d:"Depósito de segurança pago no início, devolvido ao final se o imóvel for entregue em condições."},
+  {t:"Viewing", d:"Visita presencial (ou por vídeo) ao imóvel antes de fechar — recomendada sempre que possível."},
+  {t:"Landlord", d:"Proprietário do imóvel — a pessoa (ou empresa) responsável legalmente pelo aluguel."},
+  {t:"Lease", d:"Contrato de aluguel, com prazo e condições combinadas por escrito."}
+];
+function renderTiposAcomodacao(){
+  var wrap = document.getElementById("tiposAcomodacaoWrap");
+  if(!wrap) return;
+  wrap.innerHTML = '<div class="grid cols-3">'+TIPOS_ACOMODACAO.map(function(t){
+    return '<div class="exp-card"><h4>'+t.t+'</h4><p>'+t.d+'</p></div>';
+  }).join("")+'</div>';
+}
+var HOUSING_PHRASES = [
+  {en:"Hi, is the room still available?", pt:"Oi, o quarto ainda está disponível?"},
+  {en:"I'm moving to Dublin in March and I'm looking for a long-term room.", pt:"Vou me mudar para Dublin em março e estou procurando um quarto para longo prazo."},
+  {en:"Are bills included?", pt:"As contas estão incluídas?"},
+  {en:"How much is the deposit?", pt:"Quanto é o depósito?"},
+  {en:"Can I arrange a viewing?", pt:"Posso agendar uma visita?"},
+  {en:"Is it a single room or shared?", pt:"É um quarto individual ou compartilhado?"},
+  {en:"What's the minimum stay?", pt:"Qual é o tempo mínimo de estadia?"},
+  {en:"Could you send more photos, please?", pt:"Você poderia enviar mais fotos, por favor?"}
+];
+function renderHousingPhrases(){
+  var wrap = document.getElementById("housingPhrasesWrap");
+  if(!wrap) return;
+  wrap.innerHTML = '<div class="card">'+HOUSING_PHRASES.map(function(p){
+    return '<div class="tip-row"><div class="tip-text"><b>"'+p.en+'"</b><span>'+p.pt+'</span></div></div>';
+  }).join("")+'</div>';
+}
 function renderMoradia(){
   document.getElementById("moradiaWrap").innerHTML =
     '<div class="card"><h3>Faixas de aluguel (referência Dublin)</h3><div class="tablewrap"><table>'+
@@ -2521,6 +2663,7 @@ function renderMoneyTips(){
 
 /* ---------- orçamento ---------- */
 var BUDGET_DEFAULTS = {wage:14.15, hoursWeek:20, weeksMonth:4.33, rent:900, phone:20, internet:0, transport:80, groceries:200, englishCourse:0, insurance:0, gym:0, leisure:0, other:0};
+var WAGE_PRESETS = [{v:14.15,l:"Salário mínimo (€14,15)"},{v:15,l:"€15"},{v:16,l:"€16"},{v:18,l:"€18"}];
 var EXPENSE_KEYS = ["rent","phone","internet","transport","groceries","englishCourse","insurance","gym","leisure","other"];
 function getBudget(){ return Object.assign({}, BUDGET_DEFAULTS, ls("budget")||{}); }
 function sumExpenses(b){ return EXPENSE_KEYS.reduce(function(sum,k){ return sum+(b[k]||0); }, 0); }
@@ -2600,9 +2743,13 @@ function renderBudget(){
   var b = getBudget();
   var presetHtml = '<div class="subtabs" id="hoursPreset" style="margin-bottom:12px;">'+
     '<button class="subtab'+(b.hoursWeek===20?' active':'')+'" data-h="20">20h/semana (limite do Stamp 2)</button>'+
+    '<button class="subtab'+(b.hoursWeek===30?' active':'')+'" data-h="30">30h/semana</button>'+
     '<button class="subtab'+(b.hoursWeek===40?' active':'')+'" data-h="40">40h/semana (exemplo tempo integral)</button>'+
     '</div>'+
-    '<p class="source-note" style="margin:-6px 0 12px;">Na Irlanda, tempo integral não é fixo em 44h como no Brasil — contratos de 39–40h são comuns. Ajuste "Horas por semana" abaixo para o seu caso.</p>';
+    '<p class="source-note" style="margin:-6px 0 12px;">Na Irlanda, tempo integral não é fixo em 44h como no Brasil — contratos de 39–40h são comuns. Ajuste "Horas por semana" abaixo para o seu caso. <b>A quantidade de horas que você pode trabalhar depende da sua situação migratória</b> — nem todo intercambista tem o mesmo limite; confira em Imigração.</p>'+
+    '<div class="subtabs" id="wagePreset" style="margin-bottom:12px;">'+
+    WAGE_PRESETS.map(function(w){ return '<button class="subtab'+(b.wage===w.v?' active':'')+'" data-w="'+w.v+'">'+w.l+'</button>'; }).join("")+
+    '</div>';
   var incomeFields = [{k:"wage",l:"Salário por hora (€)",step:0.01},{k:"hoursWeek",l:"Horas por semana",step:1},{k:"weeksMonth",l:"Semanas por mês",step:0.01}];
   document.getElementById("budgetIncomeFields").innerHTML = presetHtml + incomeFields.map(function(f){ return '<div class="numfield"><label>'+f.l+'</label><input type="number" step="'+f.step+'" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("")+
     '<div class="numfield">'+
@@ -2618,6 +2765,9 @@ function renderBudget(){
   document.querySelectorAll("#budgetIncomeFields input, #budgetExpenseFields input").forEach(function(inp){ inp.addEventListener("input", function(){ setBudgetField(inp.dataset.k, parseFloat(inp.value)||0); }); });
   document.querySelectorAll("#hoursPreset .subtab").forEach(function(btn){
     btn.addEventListener("click", function(){ setBudgetField("hoursWeek", parseFloat(btn.dataset.h)); renderBudget(); });
+  });
+  document.querySelectorAll("#wagePreset .subtab").forEach(function(btn){
+    btn.addEventListener("click", function(){ setBudgetField("wage", parseFloat(btn.dataset.w)); renderBudget(); });
   });
   document.getElementById("taxEstToggle").addEventListener("click", function(){
     var detail = document.getElementById("taxDetailWrap");
@@ -2640,6 +2790,55 @@ function updateBudgetSummary(){
     row("Salário bruto semanal","€"+t.grossWeek.toFixed(2))+row("Salário bruto mensal","€"+grossMonth.toFixed(2))+row("Salário líquido estimado","€"+netMonth.toFixed(2))+
     row("Total de gastos mensais","€"+totalExpenses.toFixed(2))+row("Saldo livre no mês","€"+freeBalance.toFixed(2), freeBalance<0?"warn big":"big")+
     row("% da renda comprometida", pctCommitted.toFixed(1)+"%", pctCommitted>85?"warn":"")+row("Reserva possível em 12 meses","€"+yearlyReserve.toFixed(2));
+}
+/* ---------- quanto dinheiro preciso / reserva ---------- */
+var GASTOS_INICIAIS_CENARIOS = {
+  cols: ["Econômico","Intermediário","Confortável"],
+  rows: [
+    {item:"Passagem aérea (ida)", v:[600,900,1400]},
+    {item:"Escola de inglês (4 semanas)", v:[500,800,1200]},
+    {item:"Seguro-viagem/saúde (1 mês)", v:[30,50,80]},
+    {item:"Acomodação inicial (7–14 noites)", v:[300,500,800]},
+    {item:"Depósito de aluguel (1 mês)", v:[600,900,1200]},
+    {item:"Primeiro aluguel (1 mês)", v:[600,900,1200]},
+    {item:"Alimentação (1 mês)", v:[150,250,350]},
+    {item:"Transporte (1 mês)", v:[60,80,120]},
+    {item:"Celular/eSIM (1 mês)", v:[15,25,40]},
+    {item:"Documentação (IRP, fotos etc.)", v:[100,150,200]},
+    {item:"Reserva de emergência", v:[500,1000,2000]}
+  ]
+};
+function renderReservePlanner(){
+  var wrap = document.getElementById("reservePlannerWrap");
+  if(!wrap) return;
+  var g = GASTOS_INICIAIS_CENARIOS;
+  var totals = [0,0,0];
+  var rows = g.rows.map(function(r){
+    r.v.forEach(function(val,i){ totals[i]+=val; });
+    return '<tr><td data-label="Item">'+r.item+'</td>'+r.v.map(function(val,i){ return '<td class="num tabular" data-label="'+g.cols[i]+'">€'+val.toLocaleString("pt-BR")+'</td>'; }).join("")+'</tr>';
+  }).join("");
+  var totalRow = '<tr style="font-weight:700;"><td data-label="Item">Total estimado</td>'+totals.map(function(t,i){ return '<td class="num tabular" data-label="'+g.cols[i]+'">€'+t.toLocaleString("pt-BR")+'</td>'; }).join("")+'</tr>';
+  var b = getBudget();
+  var totalExpenses = sumExpenses(b);
+  var firstMonth = totalExpenses + b.rent;
+  var reserve = ls("travelReserve");
+  if(reserve==null) reserve = "";
+  var months = (reserve && totalExpenses>0) ? (parseFloat(reserve)/totalExpenses) : null;
+  wrap.innerHTML =
+    '<div class="tablewrap"><table><thead><tr><th>Item</th>'+g.cols.map(function(c){ return '<th class="num">'+c+'</th>'; }).join("")+'</tr></thead>'+
+    '<tbody>'+rows+totalRow+'</tbody></table></div>'+
+    '<div class="grid cols-2" style="margin-top:16px;">'+
+      '<div class="card"><h3>Quanto custa o primeiro mês?</h3>'+
+        '<p class="source-note" style="margin-bottom:10px;">Baseado no seu orçamento mensal (acima) + um depósito equivalente a 1 aluguel.</p>'+
+        '<div class="summary-row big"><span class="lbl">Estimativa do primeiro mês</span><span class="val">€'+firstMonth.toFixed(2)+'</span></div>'+
+      '</div>'+
+      '<div class="card"><h3>Quanto tempo minha reserva dura?</h3>'+
+        '<div class="numfield"><label>Reserva disponível (€)</label><input type="number" step="1" id="travelReserveInput" value="'+reserve+'" placeholder="Ex: 5000"></div>'+
+        (months!=null ? '<div class="summary-row big" style="margin-top:8px;"><span class="lbl">Reserva estimada</span><span class="val">'+months.toFixed(1).replace(".",",")+' meses</span></div><p class="source-note">Reserva ÷ custo mensal estimado ('+"€"+totalExpenses.toFixed(2)+'/mês).</p>' : '<p class="source-note" style="margin-top:8px;">Informe sua reserva para ver quantos meses ela cobre, com base no seu orçamento mensal.</p>')+
+      '</div>'+
+    '</div>';
+  var input = document.getElementById("travelReserveInput");
+  if(input) input.addEventListener("input", function(){ ls("travelReserve", input.value); renderReservePlanner(); });
 }
 function renderConverter(){
   var eurEl = document.getElementById("convEur"), brlEl = document.getElementById("convBrl");
@@ -3221,19 +3420,24 @@ function init(){
   renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm();
   renderAssessoria();
   renderJobTypes();
+  renderJobFinder();
   renderJobRoleTabs(); renderJobRoleContent(); renderJobAddForm();
   renderAgencias();
   renderGlossario();
+  renderVidaIrlanda();
+  renderMitos();
   renderEnglish();
   renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences();
   renderNiInfo(); renderTourismCalendar(); renderTourismPasses(); renderTourismChecklist();
   renderAttrCatTabs(); renderAttrGrid(); renderAttrProgress();
   renderItineraryTabs(); renderItinerary(); renderMyItinerary(); renderMistakes();
+  renderTiposAcomodacao();
   renderMoradia();
+  renderHousingPhrases();
   renderScamChecklist();
   renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity();
   renderTransportCityTabs(); renderTransportRoutes();
-  renderMarket(); renderBudget(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();
+  renderMarket(); renderBudget(); renderReservePlanner(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();
   renderAll();
   setInterval(renderHero, 60000);
   document.getElementById("lastUpdated").textContent = LAST_UPDATED;
