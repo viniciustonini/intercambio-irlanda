@@ -55,7 +55,6 @@ function highlightTab(id){
     if(on) activeBtn = b;
   });
   if(activeBtn) activeBtn.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
-  setTimeout(updateTabbarScrollUI, 300);
   return activeBtn;
 }
 
@@ -133,7 +132,6 @@ function enableScrollSpy(){
         var id = entry.target.dataset.sec;
         document.querySelectorAll(".tab-btn").forEach(function(b){ b.classList.toggle("active", b.dataset.sec===id); });
         history.replaceState(null, "", "#"+id);
-        updateTabbarScrollUI();
         var activeBtn = document.querySelector(".tab-btn.active");
         if(activeBtn) activeBtn.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
       }
@@ -159,29 +157,34 @@ function applyScrollMode(){
   } else {
     disableScrollSpy();
     showSection(location.hash.replace("#","") || "inicio");
+    adjustTabbarOverflow();
   }
 }
 if(SCROLL_MODE_MQ.addEventListener) SCROLL_MODE_MQ.addEventListener("change", applyScrollMode);
 else SCROLL_MODE_MQ.addListener(applyScrollMode);
 
-/* ---------- tab bar scroll affordance ---------- */
-function updateTabbarScrollUI(){
-  var tb = document.getElementById("tabbar");
-  if(!tb) return;
-  var maxScroll = tb.scrollWidth - tb.clientWidth;
-  var atStart = tb.scrollLeft <= 2;
-  var atEnd = tb.scrollLeft >= maxScroll - 2;
-  var hasOverflow = maxScroll > 4;
-  ["tabFadeLeft","tabArrowLeft"].forEach(function(id){ document.getElementById(id).classList.toggle("show", hasOverflow && !atStart); });
-  ["tabFadeRight","tabArrowRight"].forEach(function(id){ document.getElementById(id).classList.toggle("show", hasOverflow && !atEnd); });
+/* ---------- tab bar: encolhe pra "Mais" quando nao cabe, sem seta de rolagem ---------- */
+var TABBAR_FLEX_IDS = ["tab-roteiro","tab-imigracao","tab-financas","tab-trabalho","tab-ingles","tab-acomodacao","tab-mercado","tab-transporte","tab-grupos"];
+function adjustTabbarOverflow(){
+  var tabbar = document.getElementById("tabbar");
+  var moreMenu = document.getElementById("moreMenu");
+  var moreBtn = document.getElementById("tabMoreBtn");
+  var linksBtn = document.getElementById("tab-links");
+  if(!tabbar || !moreMenu || isScrollMode()) return;
+  TABBAR_FLEX_IDS.forEach(function(id){
+    var btn = document.getElementById(id);
+    if(btn) tabbar.insertBefore(btn, moreBtn);
+  });
+  for(var i=TABBAR_FLEX_IDS.length-1; i>=0 && tabbar.scrollWidth > tabbar.clientWidth; i--){
+    var demoted = document.getElementById(TABBAR_FLEX_IDS[i]);
+    if(demoted) moreMenu.insertBefore(demoted, linksBtn);
+  }
 }
-(function(){
-  var tb = document.getElementById("tabbar");
-  tb.addEventListener("scroll", updateTabbarScrollUI);
-  window.addEventListener("resize", updateTabbarScrollUI);
-  document.getElementById("tabArrowLeft").addEventListener("click", function(){ tb.scrollBy({left:-220, behavior:"smooth"}); });
-  document.getElementById("tabArrowRight").addEventListener("click", function(){ tb.scrollBy({left:220, behavior:"smooth"}); });
-})();
+var tabbarResizeTimer = null;
+window.addEventListener("resize", function(){
+  clearTimeout(tabbarResizeTimer);
+  tabbarResizeTimer = setTimeout(adjustTabbarOverflow, 150);
+});
 
 /* ---------- menu "Mais" ---------- */
 function openMoreMenu(){
@@ -1924,7 +1927,7 @@ function renderLeapCards(){
   var wrap = document.getElementById("leapCardsWrap");
   if(!wrap) return;
   wrap.innerHTML = LEAP_CARDS.map(function(c){
-    var rows = c.rows.length ? '<div class="tablewrap" style="margin-top:10px;"><table><tbody>'+c.rows.map(function(r){ return '<tr><td>'+r.l+'</td><td class="num tabular">'+r.v+'</td></tr>'; }).join("")+'</tbody></table></div>' : "";
+    var rows = c.rows.length ? '<div class="tablewrap tablewrap-narrow" style="margin-top:10px;"><table><tbody>'+c.rows.map(function(r){ return '<tr><td>'+r.l+'</td><td class="num tabular">'+r.v+'</td></tr>'; }).join("")+'</tbody></table></div>' : "";
     return '<div class="card"><h3 style="font-size:15.5px;">'+c.label+'</h3><p style="margin:0 0 4px;font-size:13.3px;">'+c.who+'</p>'+
       (c.badge?'<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);">'+c.badge+'</span>':'')+
       rows+'</div>';
