@@ -1249,75 +1249,345 @@ function renderJobFinder(){
   });
 }
 
-/* ---------- glossario ---------- */
-var GLOSSARIO_TERMS = [
-  {t:"PPSN", d:"Personal Public Service Number — número de identificação usado para trabalho, impostos e serviços públicos na Irlanda."},
-  {t:"Revenue", d:"Órgão da receita federal irlandesa — responsável por impostos e pelo registro do seu emprego."},
-  {t:"PAYE", d:"Pay As You Earn — sistema pelo qual o imposto de renda é descontado direto do seu salário pelo empregador."},
-  {t:"USC", d:"Universal Social Charge — imposto adicional sobre a renda, descontado junto com o PAYE."},
-  {t:"PRSI", d:"Pay Related Social Insurance — contribuição para a previdência social irlandesa, também descontada do salário."},
-  {t:"IRP", d:"Irish Residence Permit — cartão de residência que comprova seu registro como imigrante na Irlanda."},
-  {t:"Stamp 1", d:"Carimbo de imigração para quem tem permissão de trabalho vinculada a um empregador (Employment Permit)."},
-  {t:"Stamp 2", d:"Carimbo de imigração para estudantes internacionais matriculados em curso elegível."},
-  {t:"Stamp 4", d:"Carimbo de imigração com direito de trabalhar sem restrições, sem precisar de Employment Permit."},
-  {t:"Employment Permit", d:"Autorização de trabalho emitida pelo governo para contratar um profissional de fora da UE/EEE para uma vaga específica."},
-  {t:"Leap Card", d:"Cartão de transporte público recarregável, aceito em ônibus, Luas e DART nas principais cidades."},
-  {t:"Luas", d:"Sistema de VLT (bonde/light rail) de Dublin, com linhas Vermelha e Verde."},
-  {t:"DART", d:"Trem suburbano que liga a costa de Dublin, de Malahide/Howth até Greystones."},
-  {t:"GP", d:"General Practitioner — médico de família/clínico geral, geralmente o primeiro contato do sistema de saúde."},
-  {t:"En-suite", d:"Quarto com banheiro privativo dentro do próprio cômodo."},
-  {t:"Bills included", d:"Anúncio de acomodação em que o aluguel já inclui contas de água, luz, gás e internet."},
-  {t:"Viewing", d:"Visita presencial (ou por vídeo) a um imóvel antes de fechar o aluguel — recomendada sempre que possível."},
-  {t:"Deposit", d:"Depósito de segurança pago no início do aluguel, devolvido ao final se o imóvel for entregue em condições."},
-  {t:"Accommodation Assistant", d:"Função de apoio na recepção e manutenção de hotéis ou acomodações estudantis."},
-  {t:"Kitchen Porter", d:"Função de apoio na cozinha de restaurantes e hotéis — lavar louça, organizar, limpeza."},
-  {t:"Warehouse Operative", d:"Função de separação e movimentação de mercadorias em centros de distribuição."}
-];
-function renderGlossario(filter){
-  var wrap = document.getElementById("glossarioWrap");
-  if(!wrap) return;
-  var f = (filter||"").trim().toLowerCase();
-  var shown = f ? GLOSSARIO_TERMS.filter(function(g){ return g.t.toLowerCase().indexOf(f)>-1 || g.d.toLowerCase().indexOf(f)>-1; }) : GLOSSARIO_TERMS;
-  wrap.innerHTML = shown.length ? shown.map(function(g){
-    return '<div class="card" style="padding:16px 18px;"><h3 style="font-size:15px;margin-bottom:4px;">'+g.t+'</h3><p style="margin:0;font-size:13.3px;">'+g.d+'</p></div>';
-  }).join("") : '<div class="empty">Nenhum termo encontrado — tente outra palavra.</div>';
+/* ---------- vida na irlanda: dados compartilhados ---------- */
+var VIDA_VERIFIED_AT = "2026-09-12";
+var VIDA_FILTER_TAGS = ["Casa","Trabalho","Cultura","Transporte","Saúde","Dinheiro","Documentos","Estudo"];
+function saibaMaisHtml(sec, label){
+  if(!sec) return "";
+  return '<button type="button" class="ci-link" style="border:none;background:none;padding:0;font:inherit;cursor:pointer;margin-top:6px;font-size:12.3px;font-weight:600;display:inline-block;" data-sec="'+sec+'">'+(label||"Saiba mais")+' →</button>';
+}
+function wireSaibaMais(wrap){
+  wrap.querySelectorAll("[data-sec]").forEach(function(btn){
+    btn.addEventListener("click", function(){ goToSection(btn.dataset.sec); });
+  });
+}
+function vidaFilterBarHtml(idPrefix, searchPlaceholder){
+  return '<input type="search" id="'+idPrefix+'Search" placeholder="'+searchPlaceholder+'" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:12px;">'+
+    '<div class="subtabs" id="'+idPrefix+'Tags" style="margin-bottom:16px;"></div>';
+}
+function wireVidaFilterBar(idPrefix, onChange){
+  var state = {q:"", tag:null};
+  var tagsWrap = document.getElementById(idPrefix+"Tags");
+  tagsWrap.innerHTML = VIDA_FILTER_TAGS.map(function(tag){
+    return '<button class="subtab" data-tag="'+tag+'">'+tag+'</button>';
+  }).join("");
+  tagsWrap.querySelectorAll(".subtab").forEach(function(b){
+    b.addEventListener("click", function(){
+      state.tag = state.tag===b.dataset.tag ? null : b.dataset.tag;
+      tagsWrap.querySelectorAll(".subtab").forEach(function(x){ x.classList.toggle("active", x.dataset.tag===state.tag); });
+      onChange(state);
+    });
+  });
+  document.getElementById(idPrefix+"Search").addEventListener("input", function(e){
+    state.q = e.target.value;
+    onChange(state);
+  });
+}
+function matchesVidaFilter(item, state){
+  var q = (state.q||"").trim().toLowerCase();
+  var okTag = !state.tag || (item.tags||[]).indexOf(state.tag) > -1;
+  if(!okTag) return false;
+  if(!q) return true;
+  var haystack = ((item.t||item.q||"")+" "+(item.d||item.a||"")).toLowerCase();
+  return haystack.indexOf(q) > -1;
 }
 
-/* ---------- vida na irlanda (só o que ainda não tem casa no guia) ---------- */
-var VIDA_IRLANDA = [
-  {t:"Chip e internet (eSIM)", d:"Operadoras locais (Three, Vodafone, GoMo, Tesco Mobile) vendem chip pré-pago sem burocracia. Quem prefere já chegar conectado pode comprar um eSIM internacional (Holafly, Airalo) antes da viagem."},
-  {t:"Saúde, GP e farmácia", d:"Registre-se com um GP (médico de família) assim que se instalar — é o primeiro contato do sistema de saúde. Farmácias (pharmacy/chemist) vendem remédios sem receita e dão orientação rápida para casos simples. Cidadãos UE/EEE podem usar o Cartão Europeu de Seguro de Saúde (EHIC/GHIC); não-UE costuma precisar de seguro-saúde privado."},
-  {t:"Emergência", d:"Ligue 112 ou 999 para polícia, ambulância ou bombeiros — gratuito de qualquer telefone, mesmo sem chip ativo."},
-  {t:"Clima e estações", d:"Verão (jun–ago) ameno, ~15–20°C, dias com até 18h de luz. Inverno (dez–fev) frio e chuvoso, ~4–9°C, escurece já no meio da tarde. Chuva é comum o ano todo — vista em camadas e tenha uma capa impermeável."},
-  {t:"Lixo e reciclagem", d:"Geralmente 3 lixeiras: preta/geral, verde/reciclagem (papel, plástico, vidro limpo) e marrom/orgânico (restos de comida, jardim). As cores e o dia de coleta variam por município — confirme com o landlord ou prefeitura local (council)."},
-  {t:"Eletricidade e tomadas", d:"Tomada tipo G (três pinos, igual Reino Unido) e voltagem 230V. Leve um adaptador de viagem; aparelhos brasileiros de 110V podem precisar também de um conversor de voltagem, não só o adaptador de formato."},
-  {t:"Horário de funcionamento", d:"Supermercados grandes costumam abrir até 21h–22h (mais cedo aos domingos); farmácias e lojas pequenas fecham mais cedo. Muitos serviços reduzem horário ou fecham em feriados públicos (bank holidays)."},
-  {t:"Correios e encomendas", d:"An Post é o serviço postal nacional, com agências (post offices) nas cidades para enviar/receber encomendas, pagar contas e alguns serviços básicos."},
-  {t:"Etiqueta social", d:"Filas (queueing) são levadas a sério, e \"please\"/\"thank you\" aparecem até em interações rápidas. Gorjeta de 10–15% é comum em restaurantes (mas não obrigatória); em pubs não é costume dar gorjeta no balcão."}
+/* ---------- glossario ---------- */
+var GLOSSARIO_CATEGORIES = [
+  {id:"documentos", label:"Documentos"},
+  {id:"trabalho", label:"Trabalho"},
+  {id:"moradia", label:"Moradia"},
+  {id:"transporte", label:"Transporte"},
+  {id:"saude", label:"Saúde"},
+  {id:"cotidiano", label:"Vida cotidiana"}
 ];
+var GLOSSARIO_TERMS = [
+  {t:"PPSN", cat:"documentos", tags:["Documentos"], d:"Personal Public Service Number — número de identificação usado para trabalho, impostos e serviços públicos na Irlanda.", sec:"imigracao"},
+  {t:"Revenue", cat:"documentos", tags:["Documentos","Trabalho"], d:"Órgão da receita federal irlandesa — responsável por impostos e pelo registro do seu emprego.", sec:"trabalho"},
+  {t:"MyGovID", cat:"documentos", tags:["Documentos"], d:"Conta oficial do governo irlandês, necessária para acessar Revenue myAccount, MyWelfare e outros serviços públicos.", sec:"trabalho"},
+  {t:"IRP", cat:"documentos", tags:["Documentos"], d:"Irish Residence Permit — cartão de residência que comprova seu registro como imigrante na Irlanda.", sec:"imigracao"},
+  {t:"GNIB", cat:"documentos", tags:["Documentos"], d:"Nome antigo do órgão de registro de imigração — hoje é o ISD, mas o termo ainda aparece em documentos e conversas mais antigas."},
+  {t:"Stamp 1", cat:"documentos", tags:["Documentos"], d:"Carimbo de imigração para quem tem permissão de trabalho vinculada a um empregador (Employment Permit).", sec:"imigracao"},
+  {t:"Stamp 1G", cat:"documentos", tags:["Documentos"], d:"Permissão de permanência para quem terminou curso ou emprego e está em transição, geralmente já com direito de trabalhar."},
+  {t:"Stamp 2", cat:"documentos", tags:["Documentos","Estudo"], d:"Carimbo de imigração para estudantes internacionais matriculados em curso elegível.", sec:"imigracao"},
+  {t:"Stamp 2A", cat:"documentos", tags:["Documentos","Estudo"], d:"Variante do Stamp 2 para cursos que não constam na lista ILEP — sem os mesmos direitos de trabalho do Stamp 2."},
+  {t:"Stamp 4", cat:"documentos", tags:["Documentos"], d:"Carimbo de imigração com direito de trabalhar sem restrições, sem precisar de Employment Permit.", sec:"imigracao"},
+  {t:"Employment Permit", cat:"documentos", tags:["Documentos","Trabalho"], d:"Autorização de trabalho emitida pelo governo para contratar um profissional de fora da UE/EEE para uma vaga específica."},
+  {t:"Eircode", cat:"documentos", tags:["Documentos","Casa"], d:"Código postal único por endereço — cada casa tem o seu, diferente do sistema por região usado no Brasil."},
+  {t:"PAYE", cat:"trabalho", tags:["Trabalho","Dinheiro"], d:"Pay As You Earn — sistema pelo qual o imposto de renda é descontado direto do seu salário pelo empregador.", sec:"financas"},
+  {t:"USC", cat:"trabalho", tags:["Trabalho","Dinheiro"], d:"Universal Social Charge — imposto adicional sobre a renda, descontado junto com o PAYE.", sec:"financas"},
+  {t:"PRSI", cat:"trabalho", tags:["Trabalho","Dinheiro"], d:"Pay Related Social Insurance — contribuição para a previdência social irlandesa, também descontada do salário.", sec:"financas"},
+  {t:"Roster", cat:"trabalho", tags:["Trabalho"], d:"A escala de horários e turnos do funcionário, geralmente divulgada com alguns dias de antecedência."},
+  {t:"Shift", cat:"trabalho", tags:["Trabalho"], d:"O turno de trabalho — manhã, tarde, noite ou madrugada."},
+  {t:"Payslip", cat:"trabalho", tags:["Trabalho","Dinheiro"], d:"O holerite/contracheque — mostra salário bruto, descontos (PAYE, USC, PRSI) e o valor líquido."},
+  {t:"Gross Pay / Net Pay", cat:"trabalho", tags:["Trabalho","Dinheiro"], d:"Salário bruto (antes dos descontos) e salário líquido (o que realmente cai na conta)."},
+  {t:"Tax Credits", cat:"trabalho", tags:["Trabalho","Dinheiro"], d:"Créditos fiscais que reduzem o imposto retido do seu salário — mais um motivo para registrar o emprego direito no Revenue."},
+  {t:"Emergency Tax", cat:"trabalho", tags:["Trabalho","Dinheiro"], d:"Imposto temporário mais alto, cobrado até você se registrar corretamente no Revenue no início do emprego.", sec:"financas"},
+  {t:"Part-time / Full-time", cat:"trabalho", tags:["Trabalho"], d:"Meio período e tempo integral."},
+  {t:"Bank Holiday", cat:"trabalho", tags:["Trabalho"], d:"Feriado nacional — muitos serviços fecham ou reduzem o horário."},
+  {t:"Minimum Wage", cat:"trabalho", tags:["Trabalho","Dinheiro"], d:"Salário mínimo nacional por hora, reajustado geralmente em janeiro."},
+  {t:"CV", cat:"trabalho", tags:["Trabalho","Estudo"], d:"Currículo, seguindo o padrão irlandês (sem foto, sem estado civil, 1–2 páginas).", sec:"trabalho"},
+  {t:"Reference", cat:"trabalho", tags:["Trabalho"], d:"Carta ou contato de referência de emprego anterior, pedida com frequência em processos seletivos."},
+  {t:"Notice Period", cat:"trabalho", tags:["Trabalho"], d:"Prazo de aviso prévio combinado antes de sair de um emprego."},
+  {t:"Accommodation Assistant", cat:"trabalho", tags:["Trabalho"], d:"Função de apoio na recepção e manutenção de hotéis ou acomodações estudantis.", sec:"trabalho"},
+  {t:"Kitchen Porter", cat:"trabalho", tags:["Trabalho"], d:"Função de apoio na cozinha de restaurantes e hotéis — lavar louça, organizar, limpeza.", sec:"trabalho"},
+  {t:"Warehouse Operative", cat:"trabalho", tags:["Trabalho"], d:"Função de separação e movimentação de mercadorias em centros de distribuição.", sec:"trabalho"},
+  {t:"Landlord / Tenant", cat:"moradia", tags:["Casa"], d:"Proprietário do imóvel e inquilino."},
+  {t:"Lease", cat:"moradia", tags:["Casa"], d:"Contrato de aluguel, com prazo e condições combinadas por escrito."},
+  {t:"Rent", cat:"moradia", tags:["Casa","Dinheiro"], d:"O valor do aluguel."},
+  {t:"Deposit", cat:"moradia", tags:["Casa","Dinheiro"], d:"Depósito de segurança pago no início do aluguel, devolvido ao final se o imóvel for entregue em condições.", sec:"acomodacao"},
+  {t:"Bills included", cat:"moradia", tags:["Casa","Dinheiro"], d:"Anúncio de acomodação em que o aluguel já inclui contas de água, luz, gás e internet — é a exceção, não a regra.", sec:"acomodacao"},
+  {t:"En-suite", cat:"moradia", tags:["Casa"], d:"Quarto com banheiro privativo dentro do próprio cômodo.", sec:"acomodacao"},
+  {t:"Single / Double / Shared Room", cat:"moradia", tags:["Casa"], d:"Quarto individual, quarto com cama de casal (nem sempre para duas pessoas) ou quarto compartilhado.", sec:"acomodacao"},
+  {t:"House Share", cat:"moradia", tags:["Casa"], d:"Casa dividida entre vários moradores, cada um com seu quarto."},
+  {t:"Host Family", cat:"moradia", tags:["Casa"], d:"Morar com uma família local, com ou sem refeições incluídas."},
+  {t:"Studio", cat:"moradia", tags:["Casa"], d:"Apartamento de um cômodo só, com cozinha integrada."},
+  {t:"Student Accommodation", cat:"moradia", tags:["Casa","Estudo"], d:"Residências construídas especificamente para estudantes, geralmente perto de escolas/universidades."},
+  {t:"Viewing", cat:"moradia", tags:["Casa"], d:"Visita presencial (ou por vídeo) a um imóvel antes de fechar o aluguel — recomendada sempre que possível.", sec:"acomodacao"},
+  {t:"References (aluguel)", cat:"moradia", tags:["Casa"], d:"Cartas ou contatos que comprovam seu histórico como inquilino."},
+  {t:"Leap Card", cat:"transporte", tags:["Transporte"], d:"Cartão de transporte público recarregável, aceito em ônibus, Luas e DART nas principais cidades.", sec:"transporte"},
+  {t:"Luas", cat:"transporte", tags:["Transporte"], d:"Sistema de VLT (bonde/light rail) de Dublin, com linhas Vermelha e Verde.", sec:"transporte"},
+  {t:"DART", cat:"transporte", tags:["Transporte"], d:"Trem suburbano que liga a costa de Dublin, de Malahide/Howth até Greystones.", sec:"transporte"},
+  {t:"TFI", cat:"transporte", tags:["Transporte"], d:"Transport for Ireland — o órgão que integra ônibus, Luas, DART e trens num só sistema."},
+  {t:"Dublin Bus / Bus Éireann", cat:"transporte", tags:["Transporte"], d:"Ônibus urbano de Dublin e ônibus intermunicipal, respectivamente."},
+  {t:"Irish Rail", cat:"transporte", tags:["Transporte"], d:"A operadora nacional de trens intercidade."},
+  {t:"Tap On / Tap Off", cat:"transporte", tags:["Transporte"], d:"Encostar o Leap Card ao entrar e ao sair do veículo — esquecer o tap off pode cobrar a tarifa máxima da viagem."},
+  {t:"Fare Cap", cat:"transporte", tags:["Transporte","Dinheiro"], d:"Teto de gasto diário/semanal no transporte público — depois de bater o teto, as próximas viagens do período saem grátis."},
+  {t:"GP", cat:"saude", tags:["Saúde"], d:"General Practitioner — médico de família/clínico geral, geralmente o primeiro contato do sistema de saúde."},
+  {t:"A&E", cat:"saude", tags:["Saúde"], d:"Accident & Emergency — o pronto-socorro/emergência hospitalar."},
+  {t:"Pharmacy", cat:"saude", tags:["Saúde"], d:"Farmácia — resolve muita coisa do dia a dia sem precisar de consulta."},
+  {t:"Prescription", cat:"saude", tags:["Saúde"], d:"Receita médica, necessária para alguns medicamentos."},
+  {t:"Medical Card", cat:"saude", tags:["Saúde","Dinheiro"], d:"Cartão de acesso gratuito ou com custo reduzido ao sistema público de saúde, sujeito a critérios de renda."},
+  {t:"EHIC", cat:"saude", tags:["Saúde"], d:"Cartão europeu de seguro-saúde, disponível para cidadãos UE/EEE."},
+  {t:"Grand", cat:"cotidiano", tags:["Cultura"], d:"\"Tudo bem/ok\" — não \"grandioso\", como o cognato sugere."},
+  {t:"Cheers", cat:"cotidiano", tags:["Cultura"], d:"Além de brinde, funciona como \"valeu\" ou \"até mais\" no dia a dia."},
+  {t:"Craic", cat:"cotidiano", tags:["Cultura"], d:"\"O clima\"/\"a diversão\" de um lugar ou momento — \"what's the craic?\" equivale a \"e aí, novidade?\"."},
+  {t:"Queue", cat:"cotidiano", tags:["Cultura"], d:"Fila — levada a sério, furar é malvisto."},
+  {t:"Takeaway", cat:"cotidiano", tags:["Cultura"], d:"Comida para viagem."},
+  {t:"Off-licence", cat:"cotidiano", tags:["Cultura"], d:"Loja autorizada a vender bebida alcoólica para levar."},
+  {t:"Laundrette", cat:"cotidiano", tags:["Casa"], d:"Lavanderia self-service, paga por uso — comum para quem mora em quarto sem máquina."},
+  {t:"Top up", cat:"cotidiano", tags:["Casa","Dinheiro"], d:"Recarregar saldo — de celular pré-pago ou de Leap Card."},
+  {t:"Bins", cat:"cotidiano", tags:["Casa"], d:"As lixeiras da casa — geralmente separadas em geral, reciclagem e orgânico."},
+  {t:"Immersion", cat:"cotidiano", tags:["Casa"], d:"Resistência elétrica dentro do boiler que aquece a água sob demanda, sem depender do aquecimento central."},
+  {t:"Boiler", cat:"cotidiano", tags:["Casa"], d:"O reservatório que guarda a água já aquecida da casa."},
+  {t:"Heating", cat:"cotidiano", tags:["Casa"], d:"Aquecimento central da casa, geralmente a gás, ligado por timer ou termostato."},
+  {t:"County", cat:"cotidiano", tags:["Casa","Documentos"], d:"Divisão administrativa irlandesa, mais ou menos como um \"estado\" pequeno."}
+];
+function renderGlossarioCatTabs(){
+  var wrap = document.getElementById("glossarioCatTabs");
+  if(!wrap) return;
+  wrap.innerHTML = '<button class="subtab'+(glossarioCatView==="todos"?" active":"")+'" data-cat="todos">Todos</button>'+
+    GLOSSARIO_CATEGORIES.map(function(c){
+      return '<button class="subtab'+(glossarioCatView===c.id?" active":"")+'" data-cat="'+c.id+'">'+c.label+'</button>';
+    }).join("");
+  wrap.querySelectorAll(".subtab").forEach(function(b){
+    b.addEventListener("click", function(){ glossarioCatView = b.dataset.cat; renderGlossarioCatTabs(); renderGlossario(); });
+  });
+}
+var glossarioCatView = "todos";
+var glossarioFilterState = {q:"", tag:null};
+function renderGlossario(){
+  var wrap = document.getElementById("glossarioWrap");
+  if(!wrap) return;
+  var shown = GLOSSARIO_TERMS.filter(function(g){
+    if(glossarioCatView!=="todos" && g.cat!==glossarioCatView) return false;
+    return matchesVidaFilter(g, glossarioFilterState);
+  });
+  wrap.innerHTML = shown.length ? shown.map(function(g){
+    return '<div class="card" style="padding:16px 18px;"><h3 style="font-size:15px;margin-bottom:4px;">'+g.t+'</h3><p style="margin:0;font-size:13.3px;">'+g.d+'</p>'+saibaMaisHtml(g.sec)+'</div>';
+  }).join("") : '<div class="empty">Nenhum termo encontrado — tente outra palavra ou filtro.</div>';
+  wireSaibaMais(wrap);
+}
+
+/* ---------- vida prática ---------- */
+var VIDA_PRATICA_CATEGORIES = [
+  {id:"cultura", label:"Cultura e comportamento"},
+  {id:"casa", label:"Casa e rotina"},
+  {id:"reciclagem", label:"Reciclagem e Deposit Return Scheme"},
+  {id:"clima", label:"Clima, de verdade"},
+  {id:"enderecos", label:"Endereços, Eircode e County"},
+  {id:"bairros", label:"Bairros de Dublin"},
+  {id:"compras", label:"Compras do dia a dia"},
+  {id:"pagamentos", label:"Pagamentos"},
+  {id:"celular", label:"Celular e internet"},
+  {id:"energia", label:"Tomadas e energia"},
+  {id:"pubs", label:"Pubs e restaurantes"},
+  {id:"seguranca", label:"Segurança prática"},
+  {id:"saude", label:"Emergências e saúde"}
+];
+var VIDA_PRATICA = [
+  {cat:"cultura", tags:["Cultura"], t:"\"How are you?\" não é bem uma pergunta", d:"É uma saudação — a resposta esperada é curta (\"Grand, thanks, you?\"), não um relato do seu dia."},
+  {cat:"cultura", tags:["Cultura"], t:"\"Grand\"", d:"Quer dizer \"ok, tudo bem\" — não \"grandioso\", como o cognato sugere."},
+  {cat:"cultura", tags:["Cultura"], t:"\"Cheers\"", d:"Também funciona como \"obrigado\" ou \"valeu, até mais\" — não só como brinde."},
+  {cat:"cultura", tags:["Cultura"], t:"\"Thanks a million\"", d:"Jeito comum e informal de agradecer, sem exagero — não soa afetado."},
+  {cat:"cultura", tags:["Cultura"], t:"\"Sorry\" e \"Excuse me\"", d:"\"Sorry\" é usado o tempo todo, até quando ninguém errou — esbarrão leve, pedir passagem, chamar atenção de alguém."},
+  {cat:"cultura", tags:["Cultura"], t:"Small talk", d:"Comentar sobre o clima ou o fim de semana com desconhecidos (fila, elevador, ônibus) é normal — não é sinal de interesse maior na conversa."},
+  {cat:"cultura", tags:["Cultura"], t:"Filas", d:"Levadas a sério — furar fila é malvisto mesmo em situações informais."},
+  {cat:"cultura", tags:["Cultura"], t:"Pontualidade", d:"Atrasos curtos em encontros informais costumam ser tolerados; no trabalho, não."},
+  {cat:"cultura", tags:["Cultura","Casa"], t:"Casa compartilhada", d:"Dividir louça, avisar sobre visitas e evitar barulho à noite fazem parte da convivência esperada."},
+  {cat:"cultura", tags:["Cultura","Casa"], t:"Vizinhos", d:"Cordialidade é a norma, mas proximidade não é automática como pode ser no Brasil."},
+  {cat:"casa", tags:["Casa"], t:"Heating", d:"Aquecimento central, geralmente a gás, ligado por timer ou termostato."},
+  {cat:"casa", tags:["Casa"], t:"\"Turn off the immersion\"", d:"O immersion heater é uma resistência elétrica dentro do boiler que esquenta a água por conta própria, sem depender do aquecimento central. Como consome bastante energia se ficar ligado à toa, o pedido comum em casa compartilhada é desligar depois do banho."},
+  {cat:"casa", tags:["Casa"], t:"Boiler", d:"O reservatório que guarda a água já aquecida."},
+  {cat:"casa", tags:["Casa","Dinheiro"], t:"Electricity: pré-pago x faturado", d:"Algumas casas têm medidor pré-pago (recarrega saldo, \"top up\"); outras recebem conta mensal (bill pay)."},
+  {cat:"casa", tags:["Casa"], t:"Bins e reciclagem", d:"Resumo rápido aqui — detalhe completo no bloco de reciclagem logo abaixo."},
+  {cat:"casa", tags:["Casa"], t:"Lavanderia em casa x laundrette", d:"A maioria das casas tem máquina; quem mora em quarto sem máquina usa uma laundrette (lavanderia self-service, paga por uso)."},
+  {cat:"casa", tags:["Casa"], t:"Drying rack", d:"O estendedor de secar roupa dentro de casa — secadora elétrica não é tão comum quanto no Brasil."},
+  {cat:"reciclagem", tags:["Casa"], t:"As 3 lixeiras", d:"General waste (geral), recycling (reciclagem seca) e organic/food waste (orgânico). Cores e dia de coleta variam por município."},
+  {cat:"reciclagem", tags:["Casa"], t:"Glass recycling", d:"Vidro normalmente não vai na lixeira de reciclagem comum — tem ecoponto próprio (bottle bank)."},
+  {cat:"reciclagem", tags:["Casa","Dinheiro"], t:"Deposit Return Scheme (Re-turn)", d:"Garrafas plásticas e latas elegíveis já vêm com um valor de depósito embutido no preço. Devolvendo numa máquina de retorno, você recupera esse valor.", source:"https://www.re-turn.ie", verifiedAt:VIDA_VERIFIED_AT},
+  {cat:"reciclagem", tags:["Casa"], t:"Onde fica a máquina", d:"Geralmente na entrada de supermercados grandes — procure o símbolo Re-turn."},
+  {cat:"clima", tags:["Cultura"], t:"Por que muda tão rápido", d:"A proximidade do Atlântico Norte deixa o clima ameno, mas instável e ventoso o ano todo."},
+  {cat:"clima", tags:["Cultura"], t:"\"Pode chover e fazer sol no mesmo dia?\"", d:"Pode, e é bem comum."},
+  {cat:"clima", tags:["Cultura"], t:"\"Guarda-chuva funciona?\"", d:"Com vento forte, capa ou jaqueta impermeável costuma ser mais prática — não é regra para toda situação."},
+  {cat:"clima", tags:["Cultura"], t:"Luz do dia", d:"Quase 18h de luz em junho; escurece já no meio da tarde em dezembro.", source:"https://www.met.ie", verifiedAt:VIDA_VERIFIED_AT},
+  {cat:"enderecos", tags:["Documentos","Casa"], t:"Eircode", d:"Código postal único por endereço — cada casa tem o seu, diferente do sistema por região usado no Brasil.", source:"https://www.eircode.ie", verifiedAt:VIDA_VERIFIED_AT},
+  {cat:"enderecos", tags:["Documentos"], t:"County", d:"Divisão administrativa, mais ou menos como um \"estado\" pequeno."},
+  {cat:"enderecos", tags:["Documentos","Casa"], t:"Distritos postais de Dublin", d:"Dublin 1, 2, 4 e assim por diante — explicado em detalhe no bloco de bairros logo abaixo."},
+  {cat:"enderecos", tags:["Documentos"], t:"Diferenças de formato", d:"Endereço irlandês às vezes usa nome da casa/prédio em vez de número, e a ordem das linhas muda em relação ao padrão brasileiro."},
+  {cat:"compras", tags:["Dinheiro"], t:"Penneys", d:"Roupas baratas — é a mesma rede que no resto da Europa se chama Primark."},
+  {cat:"compras", tags:["Dinheiro","Casa"], t:"Dealz", d:"Utilidades domésticas baratas, equivalente à Poundland britânica."},
+  {cat:"compras", tags:["Dinheiro","Saúde"], t:"Boots", d:"Farmácia e perfumaria, bem popular para o dia a dia."},
+  {cat:"compras", tags:["Dinheiro"], t:"Supermercados", d:"Tesco, Lidl, Aldi e outras redes já têm página própria com preços de referência.", sec:"mercado"},
+  {cat:"pagamentos", tags:["Dinheiro"], t:"Contactless", d:"Pagamento por aproximação é muito comum — muitas vezes preferido a dinheiro, mesmo em valores pequenos."},
+  {cat:"pagamentos", tags:["Dinheiro"], t:"Debit card, Apple Pay, Google Pay", d:"Aceitos amplamente em praticamente qualquer estabelecimento."},
+  {cat:"pagamentos", tags:["Dinheiro"], t:"Cash", d:"Ainda útil em situações pontuais, mas cada vez menos essencial no dia a dia."},
+  {cat:"pagamentos", tags:["Dinheiro","Documentos"], t:"IBAN", d:"Formato de conta bancária europeu, necessário para receber salário e pagar aluguel por transferência."},
+  {cat:"pagamentos", tags:["Dinheiro"], t:"Revolut", d:"Conta digital popular entre estrangeiros por ser fácil de abrir sem PPSN — uma opção prática, não uma obrigação."},
+  {cat:"celular", tags:["Casa"], t:"SIM físico x eSIM", d:"As duas opções existem lado a lado — dá para escolher pelo aparelho e pela operadora."},
+  {cat:"celular", tags:["Casa","Dinheiro"], t:"Prepaid x bill pay", d:"Pré-pago recarrega saldo quando quiser; plano mensal (bill pay) costuma pedir conta bancária irlandesa."},
+  {cat:"celular", tags:["Casa"], t:"Top up", d:"O termo para \"recarregar\" o saldo do plano pré-pago."},
+  {cat:"celular", tags:["Casa"], t:"Por onde começar", d:"Pré-pago costuma ser mais simples logo na chegada, antes de ter conta bancária e comprovante de endereço."},
+  {cat:"energia", tags:["Casa"], t:"Tomada tipo G", d:"230V/50Hz — formato diferente do padrão brasileiro."},
+  {cat:"energia", tags:["Casa"], t:"Adaptador x conversor de voltagem", d:"Todo aparelho brasileiro precisa do adaptador físico; alguns também precisam de conversor de voltagem se não forem bivolt. Sempre cheque a etiqueta do aparelho antes de ligar."},
+  {cat:"pubs", tags:["Cultura"], t:"Counter service x table service", d:"Em pub, geralmente você pede e paga no balcão — não tem garçom vindo à mesa como em restaurante."},
+  {cat:"pubs", tags:["Cultura"], t:"Off-licence", d:"Loja autorizada a vender bebida alcoólica para levar."},
+  {cat:"pubs", tags:["Cultura"], t:"Last orders", d:"O aviso de \"últimos pedidos\" antes do bar fechar."},
+  {cat:"pubs", tags:["Cultura"], t:"Frases prontas", d:"\"Can I get...\", \"Could I have...\", \"Can we split the bill?\", \"Could we get the bill, please?\""},
+  {cat:"pubs", tags:["Cultura","Dinheiro"], t:"Gorjeta", d:"Comum em restaurante (10–15%), mas não obrigatória; no balcão de pub não é costume."},
+  {cat:"seguranca", tags:["Casa"], t:"Cuidados básicos", d:"Celular, carteira e transporte à noite: atenção comum a qualquer cidade grande, sem alarmismo."},
+  {cat:"seguranca", tags:["Casa"], t:"Golpe de moradia", d:"Nunca pague depósito sem visitar o imóvel antes.", sec:"acomodacao"},
+  {cat:"seguranca", tags:["Trabalho"], t:"Golpe de vaga de emprego", d:"Desconfie de qualquer vaga que peça pagamento adiantado.", sec:"trabalho"},
+  {cat:"saude", tags:["Saúde"], t:"112 / 999", d:"Emergência — gratuito mesmo sem chip ativo.", source:"https://www.hse.ie", verifiedAt:VIDA_VERIFIED_AT},
+  {cat:"saude", tags:["Saúde"], t:"Garda / Garda Station", d:"A polícia irlandesa e suas delegacias."},
+  {cat:"saude", tags:["Saúde"], t:"Fluxo simples", d:"Problema leve → farmácia/GP · precisa de avaliação → GP/urgent care · emergência → 112/999/hospital."},
+  {cat:"saude", tags:["Saúde"], t:"Aviso", d:"Isso é orientação de \"para quem ligar\" em cada situação — não é conselho médico."}
+];
+var DUBLIN_DISTRICTS = [
+  {code:"Dublin 1", side:"Norte do Liffey", d:"Muito central, comércio e transporte fortes, região movimentada. Perfil muda bastante de rua para rua."},
+  {code:"Dublin 2", side:"Sul do Liffey", d:"Centro, muito procurado, normalmente caro."},
+  {code:"Dublin 4", side:"Sul do Liffey", d:"Inclui Ballsbridge e Sandymount, tradicionalmente associado a áreas valorizadas."},
+  {code:"Dublin 6", side:"Sul do Liffey", d:"Várias áreas residenciais bastante procuradas."},
+  {code:"Dublin 7", side:"Norte do Liffey", d:"Inclui Smithfield, Stoneybatter e Phibsborough — exemplo claro de distrito ímpar bastante procurado."},
+  {code:"Dublin 8", side:"Sul do Liffey", d:"Mistura de áreas centrais e residenciais; perfil varia bastante dentro do próprio distrito."}
+];
+var vidaPraticaFilterState = {q:"", tag:null};
 function renderVidaIrlanda(){
   var wrap = document.getElementById("vidaIrlandaWrap");
   if(!wrap) return;
-  wrap.innerHTML = VIDA_IRLANDA.map(function(v){
-    return '<div class="exp-card"><h4>'+v.t+'</h4><p>'+v.d+'</p></div>';
+  var html = VIDA_PRATICA_CATEGORIES.map(function(cat, idx){
+    if(cat.id==="bairros"){
+      var bairrosTagOk = !vidaPraticaFilterState.tag || vidaPraticaFilterState.tag==="Casa";
+      var bairrosSearchOk = !vidaPraticaFilterState.q || (cat.label+" "+DUBLIN_DISTRICTS.map(function(d){ return d.code+" "+d.side+" "+d.d; }).join(" ")).toLowerCase().indexOf(vidaPraticaFilterState.q.trim().toLowerCase())>-1;
+      if(!bairrosTagOk || !bairrosSearchOk) return "";
+      var districtsHtml = DUBLIN_DISTRICTS.map(function(dist){
+        return '<div class="district-card"><span class="district-side">'+dist.side+'</span><h4>'+dist.code+'</h4><p>'+dist.d+'</p></div>';
+      }).join("");
+      return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary>'+cat.label+' <span class="vida-cat-count">6 distritos, sem ranking</span></summary>'+
+        '<div class="vida-cat-body">'+
+        '<p class="source-note" style="margin-bottom:10px;">Números pares ficam mais concentrados ao sul do rio Liffey, ímpares ao norte — isso é fato histórico do zoneamento postal, não uma régua de qualidade. Existem ruas ótimas em distritos ímpares e ruas medianas em distritos pares.</p>'+
+        '<div class="district-grid">'+districtsHtml+'</div>'+
+        '<div class="callout" style="margin-top:12px;">Não escolha acomodação só pelo número do distrito. Pesquise o endereço completo e a rua — o que importa é transporte, iluminação, movimento, comércio, distância até trabalho/escola, preço e segurança.</div>'+
+        '</div></details>';
+    }
+    var items = VIDA_PRATICA.filter(function(v){ return v.cat===cat.id && matchesVidaFilter(v, vidaPraticaFilterState); });
+    if(!items.length) return "";
+    var cardsHtml = items.map(function(v){
+      return '<div class="exp-card"><h4>'+v.t+'</h4><p>'+v.d+'</p>'+saibaMaisHtml(v.sec)+(v.source?officialSourceHtml(v.source, v.verifiedAt):"")+'</div>';
+    }).join("");
+    return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary>'+cat.label+' <span class="vida-cat-count">'+items.length+'</span></summary>'+
+      '<div class="vida-cat-body"><div class="grid cols-3">'+cardsHtml+'</div></div></details>';
   }).join("");
+  wrap.innerHTML = html.trim() ? html : '<div class="empty">Nenhum resultado — tente outra palavra ou filtro.</div>';
+  wireSaibaMais(wrap);
 }
 
 /* ---------- mitos e verdades ---------- */
+var MITOS_CATEGORIES = [
+  {id:"trabalho", label:"Trabalho"},
+  {id:"moradia", label:"Moradia"},
+  {id:"imigracao", label:"Cidadania e imigração"},
+  {id:"transporte", label:"Transporte"},
+  {id:"dublin", label:"Dublin e distritos"},
+  {id:"clima", label:"Clima"},
+  {id:"dinheiro", label:"Dinheiro"},
+  {id:"estudo", label:"Estudo e inglês"},
+  {id:"cotidiano", label:"Vida cotidiana"}
+];
+var MITO_BADGE_LABEL = {mito:"MITO", verdade:"VERDADE", depende:"DEPENDE"};
 var MITOS_VERDADES = [
-  {q:"Preciso obrigatoriamente contratar uma agência?", a:"Não. Dá para organizar escola, visto, moradia e chegada sozinho — exige mais tempo e pesquisa, mas é o caminho de muita gente. Veja o comparativo em \"Assessoria: vale a pena?\", em Trabalho & estudo."},
-  {q:"Todo estudante pode trabalhar 40 horas por semana?", a:"Não. O limite de horas depende da sua situação migratória (Stamp, tipo de visto e curso) — cidadãos UE/EEE não têm essa restrição, mas quem está com visto de estudante geralmente tem limite de 20h/semana durante o período letivo. Confira os detalhes em Imigração."},
-  {q:"Preciso de inglês avançado para conseguir emprego?", a:"Depende muito da vaga. Funções como Cleaner, Kitchen Porter e Stock Assistant costumam aceitar inglês básico; já vagas de atendimento, escritório ou tecnologia pedem mais fluência. Veja \"Trabalhos comuns para quem chega\" para comparar por nível de inglês."},
-  {q:"Cleaner é a única opção para quem tem inglês básico?", a:"Não. Kitchen Porter, Housekeeping, Stock Assistant, Warehouse Operative e Picker/Packer, entre outras, também costumam aceitar inglês básico — veja a lista completa em Trabalho & estudo."},
-  {q:"Com cidadania europeia eu preciso de visto de estudante?", a:"Não. Cidadãos da UE/EEE/Suíça têm liberdade de movimento na Irlanda — sem visto, Stamp 2, IRP ou limite de horas ligado ao curso. O foco nesse caso é mais em documentação prática (PPSN, moradia, saúde)."},
-  {q:"É fácil encontrar moradia na Irlanda?", a:"Não é o ponto mais fácil do processo — o mercado de aluguel é concorrido, principalmente em Dublin. Costuma exigir tempo de pesquisa, flexibilidade e, para moradia definitiva, estar no país para visitar antes de fechar. Veja \"Cuidados com moradia\", em Acomodação."}
+  {cat:"trabalho", tags:["Trabalho"], cls:"mito", q:"Todo estudante pode trabalhar 40 horas por semana?", a:"Só nos períodos de férias liberadas — no período letivo, o limite do Stamp 2 costuma ser 20h.", sec:"imigracao"},
+  {cat:"trabalho", tags:["Trabalho"], cls:"mito", q:"Quem tem cidadania europeia está limitado a 20 horas de trabalho?", a:"Não — cidadãos UE/EEE/Suíço não têm limite de horas ligado a curso."},
+  {cat:"trabalho", tags:["Trabalho","Estudo"], cls:"mito", q:"Preciso de inglês avançado para conseguir qualquer emprego?", a:"Depende muito da vaga — várias funções de entrada aceitam inglês básico."},
+  {cat:"trabalho", tags:["Trabalho"], cls:"mito", q:"Cleaner é a única opção para quem tem inglês básico?", a:"Não, tem várias outras (Kitchen Porter, Housekeeping, Stock Assistant...).", sec:"trabalho"},
+  {cat:"trabalho", tags:["Trabalho"], cls:"mito", q:"Brasileiro só consegue emprego operacional?", a:"Depende de experiência e inglês, mas não é uma regra."},
+  {cat:"trabalho", tags:["Trabalho","Dinheiro"], cls:"mito", q:"Todo trabalho na Irlanda paga muito?", a:"O salário costuma ser maior em euro, mas o custo de vida também é.", sec:"financas"},
+  {cat:"trabalho", tags:["Trabalho","Dinheiro"], cls:"verdade", q:"Meu primeiro salário pode vir com muito imposto?", a:"Sim — é o Emergency Tax, corrigido depois que você se registra direito no Revenue."},
+  {cat:"trabalho", tags:["Trabalho","Documentos"], cls:"depende", q:"Preciso de PPS Number para começar a procurar emprego?", a:"Não para mandar currículo, mas sim assim que for começar a trabalhar de fato."},
+  {cat:"moradia", tags:["Casa"], cls:"mito", q:"É fácil encontrar moradia na Irlanda?", a:"Não, o mercado é concorrido, principalmente em Dublin.", sec:"acomodacao"},
+  {cat:"moradia", tags:["Casa","Dinheiro"], cls:"mito", q:"Preciso pagar vários meses de aluguel adiantados?", a:"As regras da RTB limitam isso — vale conferir antes de aceitar pedidos fora do padrão."},
+  {cat:"moradia", tags:["Casa"], cls:"mito", q:"Todo anúncio no Facebook é seguro?", a:"Não — anúncios copiados e golpes são comuns nos grupos."},
+  {cat:"moradia", tags:["Casa"], cls:"mito", badgeLabel:"MITO / PERIGOSO", q:"Preciso mandar depósito antes de visitar, senão vou perder o quarto?", a:"Não pague nada sem visitar (ou alguém de confiança visitar) antes.", sec:"acomodacao"},
+  {cat:"moradia", tags:["Casa","Dinheiro"], cls:"mito", q:"Bills sempre estão incluídas no aluguel?", a:"Não, precisa confirmar no anúncio — \"bills included\" é a exceção, não a regra."},
+  {cat:"moradia", tags:["Casa"], cls:"mito", q:"Double room sempre significa quarto para duas pessoas?", a:"Não necessariamente — às vezes é só uma cama de casal para uma pessoa só."},
+  {cat:"imigracao", tags:["Documentos"], cls:"mito", q:"Com cidadania europeia eu preciso de visto de estudante?", a:"Não — cidadãos UE/EEE/Suíço têm liberdade de movimento na Irlanda."},
+  {cat:"imigracao", tags:["Documentos"], cls:"mito", q:"Com cidadania europeia não preciso fazer nenhum documento na Irlanda?", a:"Precisa sim — PPS, Revenue, conta bancária continuam necessários."},
+  {cat:"imigracao", tags:["Documentos","Trabalho"], cls:"verdade", q:"Quem tem cidadania europeia pode trabalhar legalmente na Irlanda?", a:"Sim, sem necessidade de permissão de trabalho."},
+  {cat:"imigracao", tags:["Documentos"], cls:"mito", q:"A Irlanda faz parte do Espaço Schengen?", a:"Não — é da União Europeia, mas fora do Espaço Schengen."},
+  {cat:"transporte", tags:["Transporte"], cls:"mito", q:"Preciso ter carro para morar em Dublin?", a:"Depende da rotina, mas o transporte público costuma resolver bem.", sec:"transporte"},
+  {cat:"transporte", tags:["Transporte"], cls:"mito", q:"Leap Card funciona só em ônibus?", a:"Não, funciona em ônibus, Luas e DART."},
+  {cat:"transporte", tags:["Transporte"], cls:"mito", q:"Ônibus sempre para automaticamente no ponto?", a:"Não, muitas vezes é preciso sinalizar."},
+  {cat:"transporte", tags:["Transporte"], cls:"verdade", q:"No Luas preciso validar antes de entrar?", a:"Sim — tap on ao entrar, tap off ao sair."},
+  {cat:"transporte", tags:["Transporte"], cls:"depende", q:"Google Maps resolve todo transporte?", a:"Ajuda bastante, mas o app TFI Live costuma ser mais preciso em tempo real."},
+  {cat:"dublin", tags:["Casa"], cls:"depende", badgeLabel:"DEPENDE / MITO COMO REGRA", q:"Os números pares de Dublin são melhores para morar?", a:"Existe uma percepção histórica de valorização em algumas áreas ao sul (números pares), mas não é regra — tem rua ótima em distrito ímpar e rua mediana em distrito par."},
+  {cat:"clima", tags:["Cultura"], cls:"mito", q:"Na Irlanda chove o dia inteiro todos os dias?", a:"Não, mas chove com frequência e sem muito aviso."},
+  {cat:"clima", tags:["Cultura"], cls:"verdade", q:"Pode chover e fazer sol no mesmo dia?", a:"Sim, e é bem comum."},
+  {cat:"clima", tags:["Cultura"], cls:"mito", q:"A Irlanda tem inverno extremo como o Canadá?", a:"Não, o inverno é frio e chuvoso, mas moderado."},
+  {cat:"clima", tags:["Cultura"], cls:"depende", q:"Guarda-chuva sempre resolve?", a:"Com vento forte, pode virar do avesso — jaqueta impermeável ajuda nesses dias."},
+  {cat:"dinheiro", tags:["Dinheiro"], cls:"mito", q:"Se eu ganhar €14,15/h vou receber €14,15 líquidos?", a:"Não, tem desconto de imposto e PRSI.", sec:"financas"},
+  {cat:"dinheiro", tags:["Dinheiro"], cls:"mito", q:"Preciso andar com muito dinheiro em espécie?", a:"Não, cartão e aproximação resolvem a maioria das situações."},
+  {cat:"dinheiro", tags:["Dinheiro"], cls:"mito", q:"Cartão e pagamento por aproximação são pouco usados?", a:"Pelo contrário, são o padrão no dia a dia."},
+  {cat:"dinheiro", tags:["Dinheiro"], cls:"mito", q:"Revolut é obrigatório para morar na Irlanda?", a:"Não, é só uma opção prática — não uma exigência."},
+  {cat:"estudo", tags:["Estudo"], cls:"mito", q:"Preciso obrigatoriamente contratar uma agência?", a:"Não, dá para organizar sozinho.", sec:"trabalho"},
+  {cat:"estudo", tags:["Estudo","Dinheiro"], cls:"mito", q:"Escola mais cara significa escola melhor?", a:"Não necessariamente — depende do que você precisa do curso."},
+  {cat:"estudo", tags:["Estudo"], cls:"mito", q:"Vou sair fluente depois de alguns meses?", a:"Fluência leva tempo e prática constante, não só matrícula."},
+  {cat:"estudo", tags:["Estudo","Cultura"], cls:"depende", q:"Ter amigos brasileiros impede aprender inglês?", a:"O problema real é passar o dia inteiro sem praticar inglês, não a amizade em si."},
+  {cat:"cotidiano", tags:["Cultura"], cls:"mito", q:"Todo irlandês fala com o mesmo sotaque?", a:"Não, varia bastante de região para região."},
+  {cat:"cotidiano", tags:["Cultura"], cls:"mito", q:"Dublin representa toda a Irlanda?", a:"Não, o interior e outras cidades têm ritmo bem diferente."},
+  {cat:"cotidiano", tags:["Cultura"], cls:"mito", q:"Preciso comprar tudo no Brasil antes de viajar?", a:"Não, a maior parte dá para resolver depois de chegar."},
+  {cat:"cotidiano", tags:["Dinheiro"], cls:"verdade", q:"É comum pagar quase tudo por aproximação?", a:"Sim, bem comum mesmo em valores pequenos."},
+  {cat:"cotidiano", tags:["Dinheiro"], cls:"verdade", q:"Penneys é a Primark?", a:"Sim, mesma rede com nome diferente na Irlanda."},
+  {cat:"cotidiano", tags:["Cultura"], cls:"depende", q:"Posso usar euro na Irlanda do Norte?", a:"A moeda oficial lá é a libra esterlina — alguns lugares aceitam euro, mas não é garantido."},
+  {cat:"cotidiano", tags:["Casa"], cls:"mito", q:"A tomada é igual à brasileira?", a:"Não, é tipo G — precisa de adaptador."},
+  {cat:"cotidiano", tags:["Casa"], cls:"mito", q:"A Irlanda usa 110V?", a:"Não, usa 230V."},
+  {cat:"cotidiano", tags:["Cultura"], cls:"depende", q:"Posso beber na rua?", a:"Regras locais podem restringir consumo em espaço público — varia por cidade/área."}
 ];
 function renderMitos(){
   var wrap = document.getElementById("mitosWrap");
   if(!wrap) return;
-  wrap.innerHTML = MITOS_VERDADES.map(function(m,idx){
-    return '<details class="acc-item"'+(idx===0?" open":"")+'><summary>'+m.q+'</summary><p style="margin:10px 0 0;font-size:13.3px;line-height:1.6;">'+m.a+'</p></details>';
+  var html = MITOS_CATEGORIES.map(function(cat, idx){
+    var items = MITOS_VERDADES.filter(function(m){ return m.cat===cat.id && matchesVidaFilter(m, mitosFilterState); });
+    if(!items.length) return "";
+    var rows = items.map(function(m, i2){
+      var badgeLabel = m.badgeLabel || MITO_BADGE_LABEL[m.cls];
+      return '<details class="acc-item"'+(idx===0 && i2===0?" open":"")+'><summary><span class="pill'+(m.cls==="mito"?" noneu":m.cls==="verdade"?" eu":"")+'" style="'+(m.cls==="depende"?"background:var(--gold-soft, rgba(185,134,46,.14));color:var(--gold-text,#7A5A12);":"")+'flex:none;margin-right:10px;">'+badgeLabel+'</span><span style="flex:1;">'+m.q+'</span></summary>'+
+        '<p style="margin:10px 0 0;font-size:13.3px;line-height:1.6;">'+m.a+'</p>'+saibaMaisHtml(m.sec)+'</details>';
+    }).join("");
+    return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary>'+cat.label+' <span class="vida-cat-count">'+items.length+'</span></summary>'+
+      '<div class="vida-cat-body">'+rows+'</div></details>';
   }).join("");
+  wrap.innerHTML = html.trim() ? html : '<div class="empty">Nenhuma pergunta encontrada — tente outra palavra ou filtro.</div>';
+  wireSaibaMais(wrap);
 }
 function injectFaqSchema(){
   var faq = {
@@ -1339,8 +1609,11 @@ function injectFaqSchema(){
 }
 
 /* ---------- vida na irlanda: aba unificada (vida pratica / glossario / mitos) ---------- */
+/* as tres sub-abas ficam sempre no DOM (renderizadas uma vez no init) - so a visibilidade
+   alterna por CSS, pra Glossario e Mitos continuarem indexaveis por buscadores mesmo sem clique. */
 var VIDAIRLANDA_SUBTABS = [{id:"pratica",l:"Vida prática"},{id:"glossario",l:"Glossário"},{id:"mitos",l:"Mitos e verdades"}];
 var vidaIrlandaView = ls("vidaIrlandaView") || "pratica";
+var mitosFilterState = {q:"", tag:null};
 function renderVidaIrlandaSubtabs(){
   var wrap = document.getElementById("vidaIrlandaSubtabs");
   if(!wrap) return;
@@ -1350,25 +1623,41 @@ function renderVidaIrlandaSubtabs(){
   wrap.querySelectorAll(".subtab").forEach(function(b){
     b.addEventListener("click", function(){
       vidaIrlandaView = b.dataset.v; ls("vidaIrlandaView", vidaIrlandaView);
-      renderVidaIrlandaSubtabs(); renderVidaIrlandaContent();
+      renderVidaIrlandaSubtabs(); updateVidaIrlandaPanelVisibility();
     });
+  });
+}
+function updateVidaIrlandaPanelVisibility(){
+  ["pratica","glossario","mitos"].forEach(function(id){
+    var panel = document.getElementById("vidaPanel-"+id);
+    if(panel) panel.classList.toggle("active", vidaIrlandaView===id);
   });
 }
 function renderVidaIrlandaContent(){
   var wrap = document.getElementById("vidaIrlandaContent");
   if(!wrap) return;
-  if(vidaIrlandaView==="glossario"){
-    wrap.innerHTML = '<input type="search" id="glossarioSearch" placeholder="Buscar termo (ex: PPSN, Stamp, Leap Card...)" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:16px;">'+
-      '<div class="grid cols-3" id="glossarioWrap"></div>';
-    document.getElementById("glossarioSearch").addEventListener("input", function(e){ renderGlossario(e.target.value); });
-    renderGlossario();
-  } else if(vidaIrlandaView==="mitos"){
-    wrap.innerHTML = '<div class="card" id="mitosWrap"></div>';
-    renderMitos();
-  } else {
-    wrap.innerHTML = '<div class="grid cols-3" id="vidaIrlandaWrap"></div>';
-    renderVidaIrlanda();
-  }
+  wrap.innerHTML =
+    '<div class="vida-panel" id="vidaPanel-pratica">'+
+      vidaFilterBarHtml("vidaPratica", "Buscar em Vida prática (ex: immersion, tomada, filas...)")+
+      '<div id="vidaIrlandaWrap"></div>'+
+    '</div>'+
+    '<div class="vida-panel" id="vidaPanel-glossario">'+
+      vidaFilterBarHtml("glossario", "Buscar termo (ex: PPSN, Stamp, Leap Card...)")+
+      '<div class="subtabs" id="glossarioCatTabs" style="margin-bottom:16px;"></div>'+
+      '<div class="grid cols-3" id="glossarioWrap"></div>'+
+    '</div>'+
+    '<div class="vida-panel" id="vidaPanel-mitos">'+
+      vidaFilterBarHtml("mitos", "Buscar pergunta (ex: 40 horas, Schengen, Leap Card...)")+
+      '<div id="mitosWrap"></div>'+
+    '</div>';
+  wireVidaFilterBar("vidaPratica", function(state){ vidaPraticaFilterState = state; renderVidaIrlanda(); });
+  wireVidaFilterBar("glossario", function(state){ glossarioFilterState = state; renderGlossario(); });
+  wireVidaFilterBar("mitos", function(state){ mitosFilterState = state; renderMitos(); });
+  renderGlossarioCatTabs();
+  renderVidaIrlanda();
+  renderGlossario();
+  renderMitos();
+  updateVidaIrlandaPanelVisibility();
 }
 
 var JOB_ROLES = [{id:"cleaner",l:"Cleaner (limpeza)"},{id:"barista",l:"Barista"},{id:"hotelaria",l:"Hotelaria"},{id:"varejo",l:"Varejo"},{id:"logistica",l:"Logística/warehouse"},{id:"atendimento",l:"Atendimento/call center"},{id:"delivery",l:"Delivery"},{id:"ti",l:"TI/suporte"}];
