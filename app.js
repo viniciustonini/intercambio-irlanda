@@ -1280,6 +1280,11 @@ function abrirTermoGlossario(term){
   if(filterBar) filterBar.scrollIntoView({behavior:"smooth", block:"start"});
 }
 var vidaSharedFilterState = {q:"", tag:null};
+var TAG_COLORS = {
+  "Casa":"#5C7A99", "Trabalho":"var(--accent)", "Cultura":"#6B5CA5", "Transporte":"#2F8F8A",
+  "Saúde":"var(--warn)", "Dinheiro":"var(--gold)", "Documentos":"var(--navy)", "Estudo":"#B5566B"
+};
+function tagColor(tag){ return TAG_COLORS[tag] || "var(--muted)"; }
 function vidaFilterBarHtml(){
   return '<input type="search" id="vidaSearch" placeholder="Buscar dúvida ou termo (ex: PPSN, Stamp, immersion, Leap Card...)" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:12px;">'+
     '<div class="subtabs" id="vidaTags" style="margin-bottom:10px;"></div>'+
@@ -1294,7 +1299,7 @@ function renderVidaAllPanels(){
 function wireVidaFilterBar(){
   var tagsWrap = document.getElementById("vidaTags");
   tagsWrap.innerHTML = VIDA_FILTER_TAGS.map(function(tag){
-    return '<button class="subtab" data-tag="'+tag+'">'+tag+'</button>';
+    return '<button class="subtab" data-tag="'+tag+'"><i class="tag-dot" style="background:'+tagColor(tag)+'"></i>'+tag+'</button>';
   }).join("");
   tagsWrap.querySelectorAll(".subtab").forEach(function(b){
     b.addEventListener("click", function(){
@@ -1408,17 +1413,17 @@ var GLOSSARIO_TERMS = [
 function renderGlossario(){
   var wrap = document.getElementById("glossarioWrap");
   if(!wrap) return;
-  var html = GLOSSARIO_CATEGORIES.map(function(cat, idx){
-    var items = GLOSSARIO_TERMS.filter(function(g){ return g.cat===cat.id && matchesVidaFilter(g, vidaSharedFilterState); })
-      .slice().sort(function(a,b){ return a.t.localeCompare(b.t, "pt-BR"); });
-    if(!items.length) return "";
-    var rowsHtml = items.map(function(g){
-      return '<div class="gloss-row"><div class="gloss-term">'+g.t+'</div><div class="gloss-def">'+g.d+saibaMaisHtml(g.sec)+'</div></div>';
-    }).join("");
-    return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
-      '<div class="vida-cat-body"><div class="gloss-list">'+rowsHtml+'</div></div></details>';
+  var items = GLOSSARIO_TERMS.filter(function(g){ return matchesVidaFilter(g, vidaSharedFilterState); })
+    .slice().sort(function(a,b){ return a.t.localeCompare(b.t, "pt-BR"); });
+  if(!items.length){
+    wrap.innerHTML = '<div class="empty">Nenhum termo encontrado — tente outra palavra ou filtro.</div>';
+    return;
+  }
+  var rowsHtml = items.map(function(g){
+    var dotColor = tagColor((g.tags||[])[0]);
+    return '<div class="gloss-row"><div class="gloss-term"><i class="tag-dot" style="background:'+dotColor+'"></i>'+g.t+'</div><div class="gloss-def">'+g.d+saibaMaisHtml(g.sec)+'</div></div>';
   }).join("");
-  wrap.innerHTML = html.trim() ? html : '<div class="empty">Nenhum termo encontrado — tente outra palavra ou filtro.</div>';
+  wrap.innerHTML = '<div class="gloss-list">'+rowsHtml+'</div>';
   wireSaibaMais(wrap);
 }
 
@@ -1562,7 +1567,7 @@ function renderVidaIrlanda(){
       var districtsHtml = DUBLIN_DISTRICTS.map(function(dist){
         return '<div class="district-card"><span class="district-side">'+dist.side+'</span><h4>'+dist.code+'</h4><p>'+dist.d+'</p></div>';
       }).join("");
-      return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">6 distritos, sem ranking</span></span></summary>'+
+      return '<details class="acc-item vida-cat" open><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">6 distritos, sem ranking</span></span></summary>'+
         '<div class="vida-cat-body">'+
         '<p class="source-note" style="margin-bottom:10px;">Números pares ficam mais concentrados ao sul do rio Liffey, ímpares ao norte — isso é fato histórico do zoneamento postal, não uma régua de qualidade. Existem ruas ótimas em distritos ímpares e ruas medianas em distritos pares.</p>'+
         dublinSchematicHtml()+
@@ -1573,9 +1578,9 @@ function renderVidaIrlanda(){
     var items = VIDA_PRATICA.filter(function(v){ return v.cat===cat.id && matchesVidaFilter(v, vidaSharedFilterState); });
     if(!items.length) return "";
     var cardsHtml = (cat.id==="clima" ? climateChartHtml() : "") + items.map(function(v){
-      return '<div class="exp-card"><h4>'+v.t+'</h4><p>'+v.d+'</p>'+saibaMaisHtml(v.sec)+(v.source?officialSourceHtml(v.source, v.verifiedAt):"")+'</div>';
+      return '<div class="vida-card" style="--vida-accent:'+tagColor((v.tags||[])[0])+';"><h4>'+v.t+'</h4><p>'+v.d+'</p>'+saibaMaisHtml(v.sec)+(v.source?officialSourceHtml(v.source, v.verifiedAt):"")+'</div>';
     }).join("");
-    return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
+    return '<details class="acc-item vida-cat" open><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
       '<div class="vida-cat-body"><div class="grid cols-3">'+cardsHtml+'</div></div></details>';
   }).join("");
   wrap.innerHTML = html.trim() ? html : '<div class="empty">Nenhum resultado — tente outra palavra ou filtro.</div>';
@@ -1671,7 +1676,7 @@ function renderMitos(){
     if(!items.length) return "";
     var rows = items.map(function(m, i2){
       var badgeLabel = m.badgeLabel || MITO_BADGE_LABEL[m.cls];
-      return '<details class="acc-item"'+(idx===0 && i2===0?" open":"")+'><summary><span class="pill'+(m.cls==="mito"?" noneu":m.cls==="verdade"?" eu":"")+'" style="'+(m.cls==="depende"?"background:var(--gold-soft, rgba(185,134,46,.14));color:var(--gold-text,#7A5A12);":"")+'flex:none;margin-right:10px;">'+badgeLabel+'</span><span style="flex:1;">'+m.q+'</span></summary>'+
+      return '<details class="acc-item"'+(idx===0 && i2===0?" open":"")+'><summary><span class="mito-dot mito-dot-'+m.cls+'" title="'+badgeLabel+'"></span><span style="flex:1;">'+m.q+'</span></summary>'+
         '<p style="margin:10px 0 0;font-size:13.3px;line-height:1.6;">'+m.a+'</p>'+saibaMaisHtml(m.sec)+'</details>';
     }).join("");
     return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
@@ -1722,6 +1727,8 @@ function updateVidaIrlandaPanelVisibility(){
     var panel = document.getElementById("vidaPanel-"+id);
     if(panel) panel.classList.toggle("active", vidaIrlandaView===id);
   });
+  var actions = document.getElementById("vidaExpandAll");
+  if(actions) actions.closest(".vida-toolbar-actions").hidden = vidaIrlandaView==="glossario";
 }
 function renderVidaIrlandaContent(){
   var wrap = document.getElementById("vidaIrlandaContent");
