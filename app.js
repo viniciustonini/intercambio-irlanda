@@ -1046,7 +1046,8 @@ function renderAddDisclosure(containerId, state, label, buildForm){
     });
     return;
   }
-  buildForm(el, function closeAndReset(){
+  el.innerHTML = '<div class="inline-add-panel"></div>';
+  buildForm(el.firstElementChild, function closeAndReset(){
     state.open = false;
     renderAddDisclosure(containerId, state, label, buildForm);
   });
