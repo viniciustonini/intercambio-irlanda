@@ -1891,18 +1891,18 @@ function updateScamChecklistProgress(){
   if(el) el.textContent = done+"/"+SCAM_CHECKLIST.length+" verificados";
 }
 var TRANSPORT_APPS = [
-  {name:"TFI Live", desc:"App oficial nacional com horários em tempo real de ônibus, Luas, DART e trens — rotas, partidas e paradas próximas. Baixe pela loja de apps do seu celular (o site oficial tem bloqueado o acesso por navegador em alguns casos)."},
-  {name:"TFI Go", desc:"Usado principalmente para comprar bilhetes em determinados serviços de Bus Éireann, Local Link e operadoras comerciais participantes — não é o app principal para pagar Dublin Bus/Luas/DART no dia a dia (isso é feito com o Leap Card)."},
-  {name:"Leap Card App (TFI Leap Top-Up)", desc:"Consulta de saldo, recarga do Leap Card e histórico de transações pelo celular. Baixe pela loja de apps — o site leapcard.ie tem bloqueado o acesso por navegador em alguns casos."},
+  {name:"TFI Live", iconUrl:"https://www.transportforireland.ie/", desc:"App oficial nacional com horários em tempo real de ônibus, Luas, DART e trens — rotas, partidas e paradas próximas. Baixe pela loja de apps do seu celular (o site oficial tem bloqueado o acesso por navegador em alguns casos)."},
+  {name:"TFI Go", iconUrl:"https://www.transportforireland.ie/", desc:"Usado principalmente para comprar bilhetes em determinados serviços de Bus Éireann, Local Link e operadoras comerciais participantes — não é o app principal para pagar Dublin Bus/Luas/DART no dia a dia (isso é feito com o Leap Card)."},
+  {name:"Leap Card App (TFI Leap Top-Up)", iconUrl:"https://www.leapcard.ie/", desc:"Consulta de saldo, recarga do Leap Card e histórico de transações pelo celular. Baixe pela loja de apps — o site leapcard.ie tem bloqueado o acesso por navegador em alguns casos."},
   {name:"Google Maps", url:"https://maps.google.com/", desc:"Boa cobertura de rotas de transporte público nas três cidades e integração a pé até a parada."},
-  {name:"FreeNow", desc:"Aplicativo de táxi mais usado na Irlanda — bom para madrugada ou com muita bagagem. Baixe pela loja de apps do seu celular."},
-  {name:"TFI Driver Check", desc:"Verifica se o motorista, veículo e licença do táxi são os cadastrados oficialmente antes de embarcar. Baixe pela loja de apps do seu celular."},
+  {name:"FreeNow", iconUrl:"https://free-now.com/ie/", desc:"Aplicativo de táxi mais usado na Irlanda — bom para madrugada ou com muita bagagem. Baixe pela loja de apps do seu celular."},
+  {name:"TFI Driver Check", iconUrl:"https://www.transportforireland.ie/", desc:"Verifica se o motorista, veículo e licença do táxi são os cadastrados oficialmente antes de embarcar. Baixe pela loja de apps do seu celular."},
   {name:"Irish Rail (app)", url:"https://www.irishrail.ie/", desc:"Horários e bilhetes de trens intercidades (Dublin ↔ Cork ↔ Galway) e do DART."}
 ];
 function renderTransportApps(){
   document.getElementById("transportAppsWrap").innerHTML = TRANSPORT_APPS.map(function(a){
     var hasLink = !!a.url;
-    var fav = hasLink ? faviconUrl(a.url) : null;
+    var fav = faviconUrl(a.url || a.iconUrl);
     var tag = hasLink ? "a" : "div";
     return "<"+tag+' class="linkcard"'+(hasLink?' href="'+a.url+'" target="_blank" rel="noopener"':'')+'><div class="linkcard-icon">'+LINK_ICONS.phone+(fav?'<img class="linkcard-favicon" src="'+fav+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div><h4>'+a.name+'</h4><p>'+a.desc+'</p>'+(hasLink?'<span class="linkcard-arrow">↗</span>':'')+'</'+tag+'>';
   }).join("");
