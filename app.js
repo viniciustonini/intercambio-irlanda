@@ -1799,17 +1799,28 @@ function renderStayComparator(){
   if(!options.length){ wrap.innerHTML = '<div class="empty">Adicione opções na tabela abaixo para comparar.</div>'; return; }
   var shown = options.slice(0,4);
   var max = Math.max.apply(null, shown.map(function(s){ return s.perNight; }));
-  var cheapestId = shown[0].id;
-  wrap.innerHTML = shown.map(function(s){
-    var pct = max>0 ? Math.max(6, Math.round(s.perNight/max*100)) : 0;
+  var cheapest = shown[0];
+  var RANK_COLORS = ["#0F7A51","#2E9E6F","#6BAF8F","#9FB8AC"];
+  wrap.innerHTML = '<div class="card" style="padding:18px 20px;">'+shown.map(function(s, i){
+    var pct = max>0 ? Math.max(8, Math.round(s.perNight/max*100)) : 0;
+    var isCheapest = s.id===cheapest.id;
+    var isSelected = s.id===selectedId;
+    var savings = (!isCheapest && cheapest.perNight>0) ? Math.round((1 - cheapest.perNight/s.perNight)*100) : null;
     var badges = "";
-    if(s.id===cheapestId) badges += '<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);margin-left:6px;">Mais barata</span>';
-    if(s.id===selectedId) badges += '<span class="pill step" style="margin-left:6px;">Selecionada</span>';
-    return '<div style="margin-bottom:10px;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:4px;"><span><b>'+escapeHtml(s.nome)+'</b>'+badges+'</span><span class="tabular">€'+s.perNight.toFixed(2)+'/noite</span></div>'+
-      '<div style="background:var(--border);border-radius:6px;height:8px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:var(--accent-strong);border-radius:6px;"></div></div>'+
+    if(isCheapest) badges += '<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);margin-left:6px;">🏆 Melhor preço</span>';
+    if(isSelected) badges += '<span class="pill step" style="margin-left:6px;">✓ Selecionada</span>';
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;'+(i>0?'border-top:1px solid var(--border);':'')+'">'+
+      '<div style="flex:none;width:26px;height:26px;border-radius:50%;background:'+RANK_COLORS[i]+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">'+(i+1)+'</div>'+
+      '<div style="flex:1;min-width:0;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;">'+
+          '<span style="font-size:13.5px;"><b>'+escapeHtml(s.nome)+'</b>'+badges+'</span>'+
+          '<span class="tabular" style="font-size:15px;font-weight:700;color:'+(isCheapest?"var(--accent-strong)":"var(--text)")+';">€'+s.perNight.toFixed(2)+'<span style="font-size:11px;font-weight:400;color:var(--muted);">/noite</span></span>'+
+        '</div>'+
+        '<div style="background:var(--bg);border-radius:8px;height:10px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+RANK_COLORS[i]+';border-radius:8px;transition:width .3s ease;"></div></div>'+
+        (savings!=null ? '<div style="font-size:11.5px;color:var(--muted);margin-top:4px;">'+savings+'% mais cara que a opção mais barata</div>' : '')+
+      '</div>'+
     '</div>';
-  }).join("");
+  }).join("")+'</div>';
 }
 function renderStayAddForm(){
   document.getElementById("stayAddForm").innerHTML =
@@ -1880,18 +1891,20 @@ function updateScamChecklistProgress(){
   if(el) el.textContent = done+"/"+SCAM_CHECKLIST.length+" verificados";
 }
 var TRANSPORT_APPS = [
-  {name:"TFI Live", url:"https://www.transportforireland.ie/", desc:"App oficial nacional com horários em tempo real de ônibus, Luas, DART e trens — rotas, partidas e paradas próximas."},
-  {name:"TFI Go", url:"https://www.transportforireland.ie/", desc:"Usado principalmente para comprar bilhetes em determinados serviços de Bus Éireann, Local Link e operadoras comerciais participantes — não é o app principal para pagar Dublin Bus/Luas/DART no dia a dia (isso é feito com o Leap Card)."},
-  {name:"Leap Card App (TFI Leap Top-Up)", url:"https://www.leapcard.ie/", desc:"Consulta de saldo, recarga do Leap Card e histórico de transações pelo celular."},
+  {name:"TFI Live", desc:"App oficial nacional com horários em tempo real de ônibus, Luas, DART e trens — rotas, partidas e paradas próximas. Baixe pela loja de apps do seu celular (o site oficial tem bloqueado o acesso por navegador em alguns casos)."},
+  {name:"TFI Go", desc:"Usado principalmente para comprar bilhetes em determinados serviços de Bus Éireann, Local Link e operadoras comerciais participantes — não é o app principal para pagar Dublin Bus/Luas/DART no dia a dia (isso é feito com o Leap Card)."},
+  {name:"Leap Card App (TFI Leap Top-Up)", desc:"Consulta de saldo, recarga do Leap Card e histórico de transações pelo celular. Baixe pela loja de apps — o site leapcard.ie tem bloqueado o acesso por navegador em alguns casos."},
   {name:"Google Maps", url:"https://maps.google.com/", desc:"Boa cobertura de rotas de transporte público nas três cidades e integração a pé até a parada."},
-  {name:"FreeNow", url:"https://free-now.com/ie/", desc:"Aplicativo de táxi mais usado na Irlanda — bom para madrugada ou com muita bagagem."},
-  {name:"TFI Driver Check", url:"https://www.transportforireland.ie/", desc:"Verifica se o motorista, veículo e licença do táxi são os cadastrados oficialmente antes de embarcar."},
+  {name:"FreeNow", desc:"Aplicativo de táxi mais usado na Irlanda — bom para madrugada ou com muita bagagem. Baixe pela loja de apps do seu celular."},
+  {name:"TFI Driver Check", desc:"Verifica se o motorista, veículo e licença do táxi são os cadastrados oficialmente antes de embarcar. Baixe pela loja de apps do seu celular."},
   {name:"Irish Rail (app)", url:"https://www.irishrail.ie/", desc:"Horários e bilhetes de trens intercidades (Dublin ↔ Cork ↔ Galway) e do DART."}
 ];
 function renderTransportApps(){
   document.getElementById("transportAppsWrap").innerHTML = TRANSPORT_APPS.map(function(a){
-    var fav = faviconUrl(a.url);
-    return '<a class="linkcard" href="'+a.url+'" target="_blank" rel="noopener"><div class="linkcard-icon">'+LINK_ICONS.phone+(fav?'<img class="linkcard-favicon" src="'+fav+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div><h4>'+a.name+'</h4><p>'+a.desc+'</p><span class="linkcard-arrow">↗</span></a>';
+    var hasLink = !!a.url;
+    var fav = hasLink ? faviconUrl(a.url) : null;
+    var tag = hasLink ? "a" : "div";
+    return "<"+tag+' class="linkcard"'+(hasLink?' href="'+a.url+'" target="_blank" rel="noopener"':'')+'><div class="linkcard-icon">'+LINK_ICONS.phone+(fav?'<img class="linkcard-favicon" src="'+fav+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div><h4>'+a.name+'</h4><p>'+a.desc+'</p>'+(hasLink?'<span class="linkcard-arrow">↗</span>':'')+'</'+tag+'>';
   }).join("");
 }
 var TRANSPORT_VERIFIED_AT = "2026-09-11";
@@ -1914,7 +1927,7 @@ function renderLeapCards(){
       (c.badge?'<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);">'+c.badge+'</span>':'')+
       rows+'</div>';
   }).join("")+
-  '<div class="callout" style="grid-column:1/-1;">Valores de referência para Dublin (Zona 1) — confirme sempre o valor vigente em <a href="https://www.leapcard.ie/" target="_blank" rel="noopener">leapcard.ie</a> antes de comprar.'+sourceVerifiedNote(TRANSPORT_VERIFIED_AT)+'</div>';
+  '<div class="callout" style="grid-column:1/-1;">Valores de referência para Dublin (Zona 1) — confirme sempre o valor vigente no aplicativo <b>Leap Card</b> (baixe na loja de apps do seu celular) antes de comprar; o site leapcard.ie tem bloqueado o acesso por navegador em alguns casos.'+sourceVerifiedNote(TRANSPORT_VERIFIED_AT)+'</div>';
 }
 var TRANSPORT_ROUTES = {
   dublin: {
@@ -1924,7 +1937,7 @@ var TRANSPORT_ROUTES = {
     network:"Ônibus (Dublin Bus), Luas (VLT) e DART/trens suburbanos — Dublin não tem metrô em operação.",
     card:"Leap Card — para estadia de meses, o cartão comum costuma valer mais que o Visitor Leap Card. Custa €10 (com algum crédito já incluso) e é vendido em lojas Spar, Centra, SuperValu e nas estações DART.",
     airport:[
-      {name:"Dublin Bus 16, 41, 102, 33A (mais baratos)", detail:"Linhas locais que também atendem o aeroporto: <b>16</b> (rumo a Ballinteer), <b>41</b> (Abbey St. → Swords Manor), <b>102</b> (até a estação Sutton do DART) e <b>33A</b> (Balbriggan). Mais baratos que os expressos, mas podem ser mais lentos. Aceitam Leap Card — compre no ônibus ou use o <a href=\"https://www.leapcard.ie/\" target=\"_blank\" rel=\"noopener\">Leap Card</a>, mais barato e fácil."},
+      {name:"Dublin Bus 16, 41, 102, 33A (mais baratos)", detail:"Linhas locais que também atendem o aeroporto: <b>16</b> (rumo a Ballinteer), <b>41</b> (Abbey St. → Swords Manor), <b>102</b> (até a estação Sutton do DART) e <b>33A</b> (Balbriggan). Mais baratos que os expressos, mas podem ser mais lentos. Aceitam Leap Card — compre no ônibus ou use o app <b>Leap Card</b>, mais barato e fácil."},
       {name:"Aircoach 700 (expresso)", detail:"Liga o aeroporto ao centro com conexões para o Luas — passa a cada ~30 min. Ônibus de piso baixo, acomoda 1 cadeira de rodas por vez (avise a empresa com 24h de antecedência). <b>Não aceita Leap Card</b> — bilhete pelo site <a href=\"https://www.aircoach.ie/\" target=\"_blank\" rel=\"noopener\">aircoach.ie</a> ou com o motorista."},
       {name:"Dublin Express 782 (expresso)", detail:"Melhor opção se o destino for a Heuston Station; passa a cada 15–20 min. Também atende Terenure e Charlotte Way. <b>Não aceita Leap Card</b> — bilhete pelo site <a href=\"https://www.dublinexpress.ie/dublin-city\" target=\"_blank\" rel=\"noopener\">dublinexpress.ie</a>."},
       {name:"Bus Éireann (regionais, direto do aeroporto)", detail:"Se o destino final não é o centro de Dublin, várias linhas saem direto do aeroporto: 100X/101 (Drogheda/Dundalk/Balbriggan), 133/2 (Wicklow/Arklow/Gorey/Wexford), 4 (Carlow/Waterford), 22/23 (Mullingar/Longford/Sligo/Ballina), 30/32 (Cavan/Monaghan/Donegal). Horários e bilhetes em <a href=\"https://www.buseireann.ie/\" target=\"_blank\" rel=\"noopener\">buseireann.ie</a>."},
@@ -1933,8 +1946,8 @@ var TRANSPORT_ROUTES = {
       {name:"Acessibilidade (cadeira de rodas)", detail:"Aircoach e Dublin Bus têm veículos de piso baixo. Dublin Bus oferece assistência gratuita de viagem (seg-sex, 8h-18h, tel (01) 703 3204, e-mail customercomment@dublinbus.ie). Bus Éireann exige reserva prévia para embarque acessível."}
     ],
     fares:[
-      {name:"Leap Card comum (recarregável)", detail:"A opção certa pra quem vai morar em Dublin — recarrega crédito conforme precisa. Custa €10 (com algum crédito já incluso). Compre em lojas Spar/Centra/SuperValu, nas máquinas de bilhete das estações, ou <a href=\"https://www.leapcard.ie/\" target=\"_blank\" rel=\"noopener\">peça online</a> — nesse caso chega pelo correio, então peça com antecedência."},
-      {name:"Leap Visitor Card (só estadias curtas)", detail:"Viagens ilimitadas por período fixo em Dublin Bus, Go-Ahead, Luas e DART (Zona Curta): <b>24h €8,00 · 72h €18,00 · 7 dias €24,00</b>. <b>Não vale</b> nos ônibus Aircoach nem Dublin Express do aeroporto. Vendido no Aeroporto de Dublin (loja Wrights no T1, Spar no T2) e em pontos no centro como Trinity College, Estação Connolly e O'Connell Street — <a href=\"https://www.leapcard.ie/\" target=\"_blank\" rel=\"noopener\">ou compre pelo site</a> antes da viagem (não é digital, chega pelo correio)."},
+      {name:"Leap Card comum (recarregável)", detail:"A opção certa pra quem vai morar em Dublin — recarrega crédito conforme precisa. Custa €10 (com algum crédito já incluso). Compre em lojas Spar/Centra/SuperValu, nas máquinas de bilhete das estações, ou peça pelo aplicativo Leap Card — nesse caso chega pelo correio, então peça com antecedência."},
+      {name:"Leap Visitor Card (só estadias curtas)", detail:"Viagens ilimitadas por período fixo em Dublin Bus, Go-Ahead, Luas e DART (Zona Curta): <b>24h €8,00 · 72h €18,00 · 7 dias €24,00</b>. <b>Não vale</b> nos ônibus Aircoach nem Dublin Express do aeroporto. Vendido no Aeroporto de Dublin (loja Wrights no T1, Spar no T2) e em pontos no centro como Trinity College, Estação Connolly e O'Connell Street — ou peça pelo aplicativo Leap Card antes da viagem (não é digital, chega pelo correio)."},
       {name:"Tarifa Leap 90 minutos (Zona 1)", detail:"€2,00 adulto · €1,00 Young Adult/Student · €0,65 criança — na janela de 90 min você troca de ônibus/Luas/DART sem pagar de novo. É a tarifa que vale pra quase todo mundo morando e estudando dentro de Dublin."},
       {name:"Ônibus suburbano / Nitelink / Xpresso (Zona 1)", detail:"€2,40 adulto · €1,20 Young Adult/Student."},
       {name:"Viajando para fora da Zona 1", detail:"Só importa se você sair da área central de Dublin para outra zona (ex: Naas, Maynooth, Wicklow). Trem: Zona 1↔2 €3,90 · ↔3 €6,00 · ↔4 €7,50 (metade do valor para criança/jovem). Ônibus: Zona 1↔2 €3,70 · ↔3 €5,30 · ↔4 €6,30 (metade do valor para criança/jovem). A grande maioria dos intercambistas mora e estuda dentro da Zona 1, sem precisar dessas tarifas."},
@@ -1952,7 +1965,6 @@ var TRANSPORT_ROUTES = {
       green:"Broombridge, Cabra, Phibsborough, Grangegorman, Broadstone - DIT, Dominick, Parnell, Marlborough, Trinity, O'Connell–Upper, O'Connell–GPO, Westmoreland, Dawson, St. Stephen's Green, Harcourt, Charlemont, Ranelagh, Beechwood, Cowper, Milltown, Windy Arbour, Dundrum, Balally, Kilmacud, Stillorgan, Sandyford, Central Park, Glencairn, The Gallops, Leopardstown Valley, Ballyogan Wood, Carrickmines, Laughanstown, Cherrywood, Brides Glen."
     },
     officialLinks:[
-      {name:"Leap Card", url:"https://www.leapcard.ie/"},
       {name:"Dublin Bus", url:"https://www.dublinbus.ie/"},
       {name:"Luas", url:"https://www.luas.ie/"},
       {name:"Irish Rail (DART/intercidades)", url:"https://www.irishrail.ie/"},
@@ -1982,8 +1994,7 @@ var TRANSPORT_ROUTES = {
     officialLinks:[
       {name:"Bus Éireann", url:"https://www.buseireann.ie/"},
       {name:"Cork Airport", url:"https://www.corkairport.com/"},
-      {name:"Irish Rail (Kent Station)", url:"https://www.irishrail.ie/"},
-      {name:"Leap Card", url:"https://www.leapcard.ie/"}
+      {name:"Irish Rail (Kent Station)", url:"https://www.irishrail.ie/"}
     ]
   },
   galway: {
@@ -2004,8 +2015,7 @@ var TRANSPORT_ROUTES = {
     officialLinks:[
       {name:"Bus Éireann", url:"https://www.buseireann.ie/"},
       {name:"City Direct", url:"https://citydirect.ie/"},
-      {name:"Irish Rail (Ceannt Station)", url:"https://www.irishrail.ie/"},
-      {name:"Leap Card", url:"https://www.leapcard.ie/"}
+      {name:"Irish Rail (Ceannt Station)", url:"https://www.irishrail.ie/"}
     ]
   }
 };
