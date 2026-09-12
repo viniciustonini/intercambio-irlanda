@@ -135,8 +135,8 @@ input{font-family:var(--font-body);}
 }
 .tabbar::-webkit-scrollbar{display:none;}
 .tab-btn{
-  flex:none;border:none;background:transparent;color:var(--muted);font-size:13.3px;font-weight:600;
-  padding:10px 15px;border-radius:999px;white-space:nowrap;transition:background .15s ease,color .15s ease,transform .1s cubic-bezier(0.23,1,0.32,1);
+  flex:none;border:none;background:transparent;color:var(--muted);font-size:13.6px;font-weight:600;
+  padding:11px 16.5px;border-radius:999px;white-space:nowrap;transition:background .15s ease,color .15s ease,transform .1s cubic-bezier(0.23,1,0.32,1);
 }
 .tab-btn:hover{color:var(--text);}
 .tab-btn.active{background:var(--navy);color:#fff;}
