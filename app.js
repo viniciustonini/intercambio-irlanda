@@ -1319,6 +1319,24 @@ function renderMitos(){
     return '<details class="acc-item"'+(idx===0?" open":"")+'><summary>'+m.q+'</summary><p style="margin:10px 0 0;font-size:13.3px;line-height:1.6;">'+m.a+'</p></details>';
   }).join("");
 }
+function injectFaqSchema(){
+  var faq = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": MITOS_VERDADES.map(function(m){
+      return {
+        "@type": "Question",
+        "name": m.q,
+        "acceptedAnswer": {"@type": "Answer", "text": m.a.replace(/<[^>]+>/g, "")}
+      };
+    })
+  };
+  var script = document.createElement("script");
+  script.type = "application/ld+json";
+  script.id = "faqSchema";
+  script.textContent = JSON.stringify(faq);
+  document.head.appendChild(script);
+}
 
 /* ---------- vida na irlanda: aba unificada (vida pratica / glossario / mitos) ---------- */
 var VIDAIRLANDA_SUBTABS = [{id:"pratica",l:"Vida prática"},{id:"glossario",l:"Glossário"},{id:"mitos",l:"Mitos e verdades"}];
@@ -2086,6 +2104,7 @@ function renderStayFields(){
     ls("cotacao", parseFloat(e.target.value)||1);
     updateStayComputed();
     document.getElementById("heroCotacaoVal").textContent = "R$ " + getCotacao().toFixed(2).replace(".", ",");
+    if(typeof updateCostCompareTotals==="function") updateCostCompareTotals();
   });
   renderStayTable();
   renderStayComparator();
@@ -2727,7 +2746,7 @@ var WAGE_PRESETS = [{v:14.15,l:"Salário mínimo (€14,15)"},{v:15,l:"€15"},{
 var EXPENSE_KEYS = ["rent","phone","internet","transport","groceries","englishCourse","insurance","gym","leisure","other"];
 function getBudget(){ return Object.assign({}, BUDGET_DEFAULTS, ls("budget")||{}); }
 function sumExpenses(b){ return EXPENSE_KEYS.reduce(function(sum,k){ return sum+(b[k]||0); }, 0); }
-function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderTaxLine(); renderOverview(); }
+function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderTaxLine(); renderOverview(); if(typeof updateCostCompareTotals==="function") updateCostCompareTotals(); }
 /* Regras fiscais irlandesas usadas na estimativa de PAYE + USC + PRSI.
    Estrutura pensada pra ser facil de atualizar ano a ano sem mexer na
    formula de calculo — so trocar os valores/fontes/datas aqui. */
@@ -2850,6 +2869,80 @@ function updateBudgetSummary(){
     row("Salário bruto semanal","€"+t.grossWeek.toFixed(2))+row("Salário bruto mensal","€"+grossMonth.toFixed(2))+row("Salário líquido estimado","€"+netMonth.toFixed(2))+
     row("Total de gastos mensais","€"+totalExpenses.toFixed(2))+row("Saldo livre no mês","€"+freeBalance.toFixed(2), freeBalance<0?"warn big":"big")+
     row("% da renda comprometida", pctCommitted.toFixed(1)+"%", pctCommitted>85?"warn":"")+row("Reserva possível em 12 meses","€"+yearlyReserve.toFixed(2));
+}
+/* ---------- quanto custa morar aqui vs. la ---------- */
+var COST_COMPARE_FIELDS = [
+  {key:"rent", label:"Aluguel/quarto", ieKey:"rent"},
+  {key:"groceries", label:"Mercado", ieKey:"groceries"},
+  {key:"transport", label:"Transporte", ieKey:"transport"}
+];
+function getBrCosts(){ return ls("brCostCompare") || {rent:0, groceries:0, transport:0}; }
+function saveBrCosts(c){ ls("brCostCompare", c); }
+function costCompareTotals(){
+  var br = getBrCosts();
+  var b = getBudget();
+  var cot = getCotacao();
+  var brTotal = 0, ieTotalBrl = 0, filledCount = 0;
+  COST_COMPARE_FIELDS.forEach(function(f){
+    var brVal = br[f.key]||0;
+    brTotal += brVal;
+    // só entra na comparação da Irlanda o item que a pessoa também preencheu do lado do Brasil -
+    // senão o total da Irlanda (com todos os 3 itens) fica maior só por ter mais itens somados.
+    if(brVal>0){ ieTotalBrl += (b[f.ieKey]||0)*cot; filledCount++; }
+  });
+  return {brTotal:brTotal, ieTotalBrl:ieTotalBrl, filledCount:filledCount};
+}
+function costCompareSummaryHtml(){
+  var t = costCompareTotals();
+  if(t.brTotal===0) return "Preencha seus gastos atuais no Brasil pra ver a comparação.";
+  var diff = t.ieTotalBrl - t.brTotal;
+  var pct = Math.abs(diff/t.brTotal*100).toFixed(0);
+  var partialNote = t.filledCount<COST_COMPARE_FIELDS.length ? " (comparando só os itens preenchidos — preencha os 3 pra ver o total geral)" : "";
+  return (diff>=0
+    ? "Pelo orçamento da Irlanda preenchido acima, esse conjunto de gastos sairia <strong>"+pct+"% mais caro</strong> que hoje no Brasil (R$"+diff.toFixed(2)+" a mais por mês)."
+    : "Pelo orçamento da Irlanda preenchido acima, esse conjunto de gastos sairia <strong>"+pct+"% mais barato</strong> que hoje no Brasil (R$"+Math.abs(diff).toFixed(2)+" a menos por mês).")+partialNote;
+}
+function updateCostCompareTotals(){
+  var t = costCompareTotals();
+  var brEl = document.getElementById("costCompareBrTotal");
+  var ieEl = document.getElementById("costCompareIeTotal");
+  var sumEl = document.getElementById("costCompareSummary");
+  if(brEl) brEl.textContent = "R$"+t.brTotal.toFixed(2);
+  if(ieEl) ieEl.textContent = "R$"+t.ieTotalBrl.toFixed(2);
+  if(sumEl) sumEl.innerHTML = costCompareSummaryHtml();
+}
+function renderCostCompare(){
+  var wrap = document.getElementById("costCompareWrap");
+  if(!wrap) return;
+  var br = getBrCosts();
+  var b = getBudget();
+  var cot = getCotacao();
+  var rows = COST_COMPARE_FIELDS.map(function(f){
+    var brVal = br[f.key]||0;
+    var ieValBrl = (b[f.ieKey]||0)*cot;
+    return '<tr>'+
+      '<td data-label="Item">'+f.label+'</td>'+
+      '<td class="num" data-label="Brasil (R$)"><input type="number" step="1" style="width:90px;text-align:right;" value="'+(brVal||"")+'" data-key="'+f.key+'" placeholder="0"></td>'+
+      '<td class="num tabular" data-label="Irlanda (R$ equiv.)">R$'+ieValBrl.toFixed(2)+'</td>'+
+      '</tr>';
+  }).join("");
+  wrap.innerHTML =
+    '<div class="card">'+
+    '<div class="tablewrap"><table><thead><tr><th>Item</th><th class="num">Brasil (R$)</th><th class="num">Irlanda (R$ equiv.)</th></tr></thead><tbody>'+
+    rows+
+    '<tr style="font-weight:700;"><td data-label="Item">Total</td><td class="num tabular" data-label="Brasil (R$)" id="costCompareBrTotal"></td><td class="num tabular" data-label="Irlanda (R$ equiv.)" id="costCompareIeTotal"></td></tr>'+
+    '</tbody></table></div>'+
+    '<div class="callout" style="margin-top:14px;margin-bottom:0;" id="costCompareSummary"></div>'+
+    '</div>';
+  updateCostCompareTotals();
+  wrap.querySelectorAll("input[data-key]").forEach(function(inp){
+    inp.addEventListener("input", function(){
+      var c = getBrCosts();
+      c[inp.dataset.key] = parseFloat(inp.value)||0;
+      saveBrCosts(c);
+      updateCostCompareTotals();
+    });
+  });
 }
 /* ---------- quanto dinheiro preciso / reserva ---------- */
 var GASTOS_INICIAIS_CENARIOS = {
@@ -3517,6 +3610,7 @@ function init(){
   renderJobAddForm();
   renderAgencias();
   renderVidaIrlandaSubtabs(); renderVidaIrlandaContent();
+  injectFaqSchema();
   renderEnglish();
   renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences();
   renderNiInfo(); renderTourismCalendar(); renderTourismPasses(); renderTourismChecklist();
@@ -3527,7 +3621,7 @@ function init(){
   renderHousingPhrases();
   renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity();
   renderTransportCityTabs(); renderTransportRoutes();
-  renderMarket(); renderBudget(); renderReservePlanner(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();
+  renderMarket(); renderBudget(); renderCostCompare(); renderReservePlanner(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();
   renderAll();
   setInterval(renderHero, 60000);
   document.getElementById("lastUpdated").textContent = LAST_UPDATED;
