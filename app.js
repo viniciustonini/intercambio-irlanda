@@ -998,13 +998,14 @@ function renderSchoolsTable(){
     wrap.innerHTML = '<div class="empty">Nenhuma escola cadastrada — adicione abaixo.</div>';
     return;
   }
-  wrap.innerHTML = list.map(function(s){
+  wrap.innerHTML = '<div class="grid cols-2">'+list.map(function(s){
     var ratingHtml = s.rating ? '<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);flex:none;">'+s.rating+' '+STAR_ICON+(s.reviews?' · '+s.reviews+' aval.':"")+'</span>' : "";
     return '<div class="card school-card">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">'+
         '<input type="text" class="school-name-input" value="'+escapeHtml(s.name)+'" data-id="'+s.id+'" data-f="name">'+
-        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+ratingHtml+'<button class="btn-ghost btn" style="width:auto;padding:5px 10px;font-size:12px;" data-remove="'+s.id+'">Remover</button></div>'+
+        '<button class="btn-ghost btn" style="width:auto;padding:5px 10px;font-size:12px;flex:none;" data-remove="'+s.id+'">Remover</button>'+
       '</div>'+
+      (ratingHtml ? '<div style="margin-top:4px;">'+ratingHtml+'</div>' : "")+
       '<div class="school-prices">'+
         '<div class="school-price-field"><label>Manhã €/sem</label><input type="number" step="1" value="'+(s.morning!=null?s.morning:"")+'" data-id="'+s.id+'" data-f="morning" placeholder="—"></div>'+
         '<div class="school-price-field"><label>Tarde €/sem</label><input type="number" step="1" value="'+(s.afternoon!=null?s.afternoon:"")+'" data-id="'+s.id+'" data-f="afternoon" placeholder="—"></div>'+
@@ -1014,7 +1015,7 @@ function renderSchoolsTable(){
         '<textarea style="width:100%;min-height:70px;resize:vertical;font:inherit;line-height:1.4;margin-top:8px;" data-id="'+s.id+'" data-f="note" placeholder="Endereço, site, condições...">'+escapeHtml(s.note||"")+'</textarea>'+
       '</details>'+
     '</div>';
-  }).join("");
+  }).join("")+'</div>';
   wrap.querySelectorAll("input, textarea").forEach(function(inp){
     inp.addEventListener("input", function(){
       var list2 = getSchools(schoolCity);
@@ -1459,22 +1460,35 @@ function getJobs(role){
 }
 function saveJobs(role, data){ ls("jobs_"+role, data); }
 var ROLE_TO_CAT = {cleaner:"hospitality", barista:"hospitality", hotelaria:"hospitality", varejo:"varejo", logistica:"varejo", delivery:"varejo", atendimento:"escritorio", ti:"industria"};
+var jobRoleSubView = ls("jobRoleSubView") || null;
 function renderJobCompanies(){
   var wrap = document.getElementById("jobCompaniesWrap");
   if(!wrap) return;
   var roles = jobTypeCatView==="todos" ? JOB_ROLES : JOB_ROLES.filter(function(r){ return ROLE_TO_CAT[r.id]===jobTypeCatView; });
-  wrap.innerHTML = roles.map(function(r){
-    var data = getJobs(r.id);
+  if(!roles.some(function(r){ return r.id===jobRoleSubView; })){
+    jobRoleSubView = roles.length ? roles[0].id : null;
+  }
+  var tabsHtml = '<div class="subtabs" style="margin-bottom:14px;">'+roles.map(function(r){
+    return '<button class="subtab'+(jobRoleSubView===r.id?' active':'')+'" data-role="'+r.id+'">'+r.l+'</button>';
+  }).join("")+'</div>';
+  var active = roles.find(function(r){ return r.id===jobRoleSubView; });
+  var cardHtml = "";
+  if(active){
+    var data = getJobs(active.id);
     var rows = data.companies.map(function(c){
       return '<div class="checkitem" style="cursor:default;"><span class="box" style="background:var(--accent-soft);border-color:var(--accent-soft);"></span>'+
         '<div style="flex:1;"><div class="ci-label">'+c.name+'</div>'+(c.note?'<div class="ci-note">'+c.note+'</div>':"")+'</div>'+
-        '<button class="btn-ghost btn" style="width:auto;padding:5px 10px;font-size:12px;flex:none;" data-remove="'+c.id+'" data-role="'+r.id+'">Remover</button></div>';
+        '<button class="btn-ghost btn" style="width:auto;padding:5px 10px;font-size:12px;flex:none;" data-remove="'+c.id+'" data-role="'+active.id+'">Remover</button></div>';
     }).join("");
-    return '<div class="card"><h4 style="font-size:14.5px;margin-bottom:8px;">'+r.l+'</h4>'+
+    cardHtml = '<div class="card"><h4 style="font-size:14.5px;margin-bottom:8px;">'+active.l+'</h4>'+
       '<div class="callout" style="margin-bottom:10px;">'+data.tips+'</div>'+
       (rows || '<div class="empty">Nenhuma empresa cadastrada ainda.</div>')+
       '</div>';
-  }).join("");
+  }
+  wrap.innerHTML = tabsHtml + cardHtml;
+  wrap.querySelectorAll("[data-role]").forEach(function(b){
+    b.addEventListener("click", function(){ jobRoleSubView = b.dataset.role; ls("jobRoleSubView", jobRoleSubView); renderJobCompanies(); });
+  });
   wrap.querySelectorAll("[data-remove]").forEach(function(btn){
     btn.addEventListener("click", function(){
       var d = getJobs(btn.dataset.role);
@@ -2608,9 +2622,10 @@ function renderMarketFilters(){
   var cart = getMarketCart();
   var cats = Array.from(new Set(cart.map(function(i){ return i.cat; }))).sort();
   document.getElementById("marketFiltersWrap").innerHTML =
-    '<div class="mini-form-grid" style="margin-bottom:0;">'+
-    '<div><label>Buscar item</label><input type="text" id="marketSearch" placeholder="Ex.: frango, arroz, limpeza..."></div>'+
-    '<div><label>Categoria</label><select id="marketCatFilter"><option value="">Todas as categorias</option>'+cats.map(function(c){ return '<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>'; }).join("")+'</select></div>'+
+    '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">'+
+    '<div style="flex:2;min-width:180px;"><label style="display:block;font-size:12.3px;font-weight:600;color:var(--muted);margin-bottom:5px;">Buscar item</label><input type="text" id="marketSearch" placeholder="Ex.: frango, arroz, limpeza..." style="width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13.5px;"></div>'+
+    '<div style="flex:1;min-width:160px;"><label style="display:block;font-size:12.3px;font-weight:600;color:var(--muted);margin-bottom:5px;">Categoria</label><select id="marketCatFilter" style="width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13.5px;"><option value="">Todas as categorias</option>'+cats.map(function(c){ return '<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>'; }).join("")+'</select></div>'+
+    '<div id="marketAddForm"></div>'+
     '</div>';
   document.getElementById("marketSearch").addEventListener("input", function(e){ marketFilter.q = e.target.value.toLowerCase(); applyMarketFilter(); });
   document.getElementById("marketCatFilter").addEventListener("change", function(e){ marketFilter.cat = e.target.value; applyMarketFilter(); });
