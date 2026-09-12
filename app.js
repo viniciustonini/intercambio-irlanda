@@ -993,21 +993,29 @@ function renderSchoolTabs(){
 }
 function renderSchoolsTable(){
   var list = getSchools(schoolCity);
-  var rows = list.map(function(s){
-    return '<tr>'+
-      '<td data-label="Escola"><input type="text" style="width:190px;" value="'+escapeHtml(s.name)+'" data-id="'+s.id+'" data-f="name"></td>'+
-      '<td class="num" data-label="Nota">'+(s.rating?s.rating+' '+STAR_ICON+(s.reviews?'<div class="source-note">'+s.reviews+' aval.</div>':""):'<span class="source-note">—</span>')+'</td>'+
-      '<td data-label="Manhã €/sem"><input type="number" step="1" style="width:62px;" value="'+(s.morning!=null?s.morning:"")+'" data-id="'+s.id+'" data-f="morning" placeholder="—"></td>'+
-      '<td data-label="Tarde €/sem"><input type="number" step="1" style="width:62px;" value="'+(s.afternoon!=null?s.afternoon:"")+'" data-id="'+s.id+'" data-f="afternoon" placeholder="—"></td>'+
-      '<td data-label="Noite €/sem"><input type="number" step="1" style="width:62px;" value="'+(s.evening!=null?s.evening:"")+'" data-id="'+s.id+'" data-f="evening" placeholder="—"></td>'+
-      '<td data-label="Observação" style="min-width:220px;"><textarea style="width:100%;min-height:80px;resize:vertical;font:inherit;line-height:1.4;" data-id="'+s.id+'" data-f="note">'+escapeHtml(s.note||"")+'</textarea></td>'+
-      '<td data-label=""><button class="btn-ghost btn" style="width:auto;padding:5px 10px;font-size:12px;" data-remove="'+s.id+'">Remover</button></td>'+
-      '</tr>';
+  var wrap = document.getElementById("schoolsTable");
+  if(!list.length){
+    wrap.innerHTML = '<div class="empty">Nenhuma escola cadastrada — adicione abaixo.</div>';
+    return;
+  }
+  wrap.innerHTML = list.map(function(s){
+    var ratingHtml = s.rating ? '<span class="pill" style="background:var(--accent-soft);color:var(--accent-strong);flex:none;">'+s.rating+' '+STAR_ICON+(s.reviews?' · '+s.reviews+' aval.':"")+'</span>' : "";
+    return '<div class="card school-card">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">'+
+        '<input type="text" class="school-name-input" value="'+escapeHtml(s.name)+'" data-id="'+s.id+'" data-f="name">'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+ratingHtml+'<button class="btn-ghost btn" style="width:auto;padding:5px 10px;font-size:12px;" data-remove="'+s.id+'">Remover</button></div>'+
+      '</div>'+
+      '<div class="school-prices">'+
+        '<div class="school-price-field"><label>Manhã €/sem</label><input type="number" step="1" value="'+(s.morning!=null?s.morning:"")+'" data-id="'+s.id+'" data-f="morning" placeholder="—"></div>'+
+        '<div class="school-price-field"><label>Tarde €/sem</label><input type="number" step="1" value="'+(s.afternoon!=null?s.afternoon:"")+'" data-id="'+s.id+'" data-f="afternoon" placeholder="—"></div>'+
+        '<div class="school-price-field"><label>Noite €/sem</label><input type="number" step="1" value="'+(s.evening!=null?s.evening:"")+'" data-id="'+s.id+'" data-f="evening" placeholder="—"></div>'+
+      '</div>'+
+      '<details class="acc-item school-note-toggle"><summary>Observação'+(s.note?"":" (adicionar)")+'</summary>'+
+        '<textarea style="width:100%;min-height:70px;resize:vertical;font:inherit;line-height:1.4;margin-top:8px;" data-id="'+s.id+'" data-f="note" placeholder="Endereço, site, condições...">'+escapeHtml(s.note||"")+'</textarea>'+
+      '</details>'+
+    '</div>';
   }).join("");
-  document.getElementById("schoolsTable").innerHTML =
-    '<thead><tr><th>Escola</th><th class="num">Nota</th><th class="num">Manhã €/sem</th><th class="num">Tarde €/sem</th><th class="num">Noite €/sem</th><th>Observação</th><th></th></tr></thead>'+
-    '<tbody>'+(rows || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:22px;">Nenhuma escola cadastrada — adicione abaixo.</td></tr>')+'</tbody>';
-  document.querySelectorAll("#schoolsTable input, #schoolsTable textarea").forEach(function(inp){
+  wrap.querySelectorAll("input, textarea").forEach(function(inp){
     inp.addEventListener("input", function(){
       var list2 = getSchools(schoolCity);
       var row = list2.find(function(r){ return r.id===inp.dataset.id; });
@@ -1015,37 +1023,60 @@ function renderSchoolsTable(){
       var f = inp.dataset.f;
       row[f] = (f==="morning"||f==="afternoon"||f==="evening") ? (inp.value===""?null:parseFloat(inp.value)) : inp.value;
       saveSchools(schoolCity, list2);
-      if(inp.tagName==="TEXTAREA"){ inp.style.height = "auto"; inp.style.height = Math.max(inp.scrollHeight, 80) + "px"; }
+      if(inp.tagName==="TEXTAREA"){ inp.style.height = "auto"; inp.style.height = Math.max(inp.scrollHeight, 70) + "px"; }
     });
   });
-  document.querySelectorAll("#schoolsTable [data-remove]").forEach(function(btn){
+  wrap.querySelectorAll("[data-remove]").forEach(function(btn){
     btn.addEventListener("click", function(){
       saveSchools(schoolCity, getSchools(schoolCity).filter(function(r){ return r.id!==btn.dataset.remove; }));
       renderSchoolsTable();
     });
   });
 }
+/* ---------- padrao "clique para adicionar": some o formulario ate o usuario pedir ---------- */
+function renderAddDisclosure(containerId, state, label, buildForm){
+  var el = document.getElementById(containerId);
+  if(!el) return;
+  if(!state.open){
+    el.innerHTML = '<button type="button" class="btn btn-ghost add-toggle-btn">+ '+label+'</button>';
+    el.querySelector("button").addEventListener("click", function(){
+      state.open = true;
+      renderAddDisclosure(containerId, state, label, buildForm);
+    });
+    return;
+  }
+  buildForm(el, function closeAndReset(){
+    state.open = false;
+    renderAddDisclosure(containerId, state, label, buildForm);
+  });
+}
+var schoolAddState = {open:false};
 function renderSchoolAddForm(){
-  document.getElementById("schoolAddForm").innerHTML =
-    '<div class="mini-form-grid">'+
-    '<div><label>Nome da escola</label><input id="newSchoolName" type="text"></div>'+
-    '<div><label>Manhã €/semana</label><input id="newSchoolMorning" type="number" step="1"></div>'+
-    '<div><label>Tarde €/semana</label><input id="newSchoolAfternoon" type="number" step="1"></div>'+
-    '<div><label>Noite €/semana</label><input id="newSchoolEvening" type="number" step="1"></div>'+
-    '<div style="grid-column:1/-1;"><label>Observação</label><input id="newSchoolNote" type="text" placeholder="Endereço, site, condições..."></div>'+
-    '</div>'+
-    '<button class="btn btn-accent" style="width:auto;padding:10px 18px;" id="addSchoolBtn" type="button">Adicionar escola</button>';
-  document.getElementById("addSchoolBtn").addEventListener("click", function(){
-    var name = document.getElementById("newSchoolName").value.trim();
-    if(!name) return;
-    var list = getSchools(schoolCity);
-    list.push({id:schoolCity+Date.now(), name:name, rating:null, reviews:null,
-      morning:parseFloat(document.getElementById("newSchoolMorning").value)||null,
-      afternoon:parseFloat(document.getElementById("newSchoolAfternoon").value)||null,
-      evening:parseFloat(document.getElementById("newSchoolEvening").value)||null,
-      note:document.getElementById("newSchoolNote").value.trim()});
-    saveSchools(schoolCity, list);
-    renderSchoolsTable();
+  renderAddDisclosure("schoolAddForm", schoolAddState, "Adicionar escola", function(el, close){
+    el.innerHTML =
+      '<div class="mini-form-grid">'+
+      '<div><label>Nome da escola</label><input id="newSchoolName" type="text"></div>'+
+      '<div><label>Manhã €/semana</label><input id="newSchoolMorning" type="number" step="1"></div>'+
+      '<div><label>Tarde €/semana</label><input id="newSchoolAfternoon" type="number" step="1"></div>'+
+      '<div><label>Noite €/semana</label><input id="newSchoolEvening" type="number" step="1"></div>'+
+      '<div style="grid-column:1/-1;"><label>Observação</label><input id="newSchoolNote" type="text" placeholder="Endereço, site, condições..."></div>'+
+      '</div>'+
+      '<button class="btn btn-accent" style="width:auto;padding:10px 18px;" id="addSchoolBtn" type="button">Adicionar escola</button>'+
+      '<button class="btn-ghost btn" style="width:auto;padding:10px 14px;margin-left:8px;" id="cancelSchoolBtn" type="button">Cancelar</button>';
+    document.getElementById("addSchoolBtn").addEventListener("click", function(){
+      var name = document.getElementById("newSchoolName").value.trim();
+      if(!name) return;
+      var list = getSchools(schoolCity);
+      list.push({id:schoolCity+Date.now(), name:name, rating:null, reviews:null,
+        morning:parseFloat(document.getElementById("newSchoolMorning").value)||null,
+        afternoon:parseFloat(document.getElementById("newSchoolAfternoon").value)||null,
+        evening:parseFloat(document.getElementById("newSchoolEvening").value)||null,
+        note:document.getElementById("newSchoolNote").value.trim()});
+      saveSchools(schoolCity, list);
+      renderSchoolsTable();
+      close();
+    });
+    document.getElementById("cancelSchoolBtn").addEventListener("click", close);
   });
 }
 
@@ -1144,7 +1175,7 @@ function renderJobTypeCatTabs(){
     return '<button class="subtab'+(jobTypeCatView===c.id?' active':'')+'" data-cat="'+c.id+'">'+c.l+'</button>';
   }).join("");
   wrap.querySelectorAll(".subtab").forEach(function(b){
-    b.addEventListener("click", function(){ jobTypeCatView = b.dataset.cat; ls("jobTypeCatView", jobTypeCatView); renderJobTypeCatTabs(); renderJobTypesGrid(); });
+    b.addEventListener("click", function(){ jobTypeCatView = b.dataset.cat; ls("jobTypeCatView", jobTypeCatView); renderJobTypeCatTabs(); renderJobTypesGrid(); renderJobCompanies(); });
   });
 }
 function renderJobTypesGrid(){
@@ -1159,11 +1190,13 @@ function renderJobTypesGrid(){
 function renderJobTypes(){
   var wrap = document.getElementById("jobTypesWrap");
   if(!wrap) return;
-  wrap.innerHTML = '<p class="source-note" style="margin-bottom:14px;">Panorama geral de vagas comuns pra quem está começando — não é promessa de contratação, requisitos variam por empresa. Para empresas específicas que contratam em cada área, veja "Vagas de entrada rápida" e "Agências de recrutamento" logo abaixo.</p>'+
+  wrap.innerHTML = '<p class="source-note" style="margin-bottom:14px;">Panorama geral de vagas comuns pra quem está começando, com empresas/agências que costumam contratar em cada área — não é promessa de contratação, requisitos variam por empresa.</p>'+
     '<div class="subtabs" id="jobTypeCatTabs" style="margin-bottom:12px;"></div>'+
-    '<div class="grid cols-3" id="jobTypesGrid"></div>';
+    '<div class="grid cols-3" id="jobTypesGrid" style="margin-bottom:20px;"></div>'+
+    '<div id="jobCompaniesWrap"></div>';
   renderJobTypeCatTabs();
   renderJobTypesGrid();
+  renderJobCompanies();
 }
 
 /* ---------- qual trabalho posso pesquisar? ---------- */
@@ -1247,33 +1280,25 @@ function renderGlossario(filter){
     return '<div class="card" style="padding:16px 18px;"><h3 style="font-size:15px;margin-bottom:4px;">'+g.t+'</h3><p style="margin:0;font-size:13.3px;">'+g.d+'</p></div>';
   }).join("") : '<div class="empty">Nenhum termo encontrado — tente outra palavra.</div>';
 }
-document.getElementById("glossarioSearch").addEventListener("input", function(e){ renderGlossario(e.target.value); });
 
-/* ---------- vida na irlanda (agregador) ---------- */
+/* ---------- vida na irlanda (só o que ainda não tem casa no guia) ---------- */
 var VIDA_IRLANDA = [
-  {t:"Mercado", d:"Preços de referência e sua lista de compras.", sec:"mercado"},
-  {t:"Transporte", d:"Leap Card, ônibus, Luas, DART e apps essenciais.", sec:"transporte"},
   {t:"Chip e internet (eSIM)", d:"Operadoras locais (Three, Vodafone, GoMo, Tesco Mobile) vendem chip pré-pago sem burocracia. Quem prefere já chegar conectado pode comprar um eSIM internacional (Holafly, Airalo) antes da viagem."},
-  {t:"Conta bancária", d:"Revolut ou N26 podem ser abertas ainda no Brasil, sem PPSN — o salário já cai nelas assim que você conseguir emprego. Banco tradicional irlandês (AIB, Bank of Ireland, PTSB) costuma vir depois, já com PPSN e comprovante de endereço.", sec:"financas"},
-  {t:"PPSN & Revenue", d:"Número de identificação fiscal — peça depois de ter uma proposta de emprego. Veja o passo a passo completo em Imigração.", sec:"imigracao"},
-  {t:"MyGovID", d:"Conta oficial do governo irlandês, necessária para Revenue myAccount, MyWelfare e outros serviços públicos. Detalhes em Imigração.", sec:"imigracao"},
   {t:"Saúde, GP e farmácia", d:"Registre-se com um GP (médico de família) assim que se instalar — é o primeiro contato do sistema de saúde. Farmácias (pharmacy/chemist) vendem remédios sem receita e dão orientação rápida para casos simples. Cidadãos UE/EEE podem usar o Cartão Europeu de Seguro de Saúde (EHIC/GHIC); não-UE costuma precisar de seguro-saúde privado."},
+  {t:"Emergência", d:"Ligue 112 ou 999 para polícia, ambulância ou bombeiros — gratuito de qualquer telefone, mesmo sem chip ativo."},
   {t:"Clima e estações", d:"Verão (jun–ago) ameno, ~15–20°C, dias com até 18h de luz. Inverno (dez–fev) frio e chuvoso, ~4–9°C, escurece já no meio da tarde. Chuva é comum o ano todo — vista em camadas e tenha uma capa impermeável."},
   {t:"Lixo e reciclagem", d:"Geralmente 3 lixeiras: preta/geral, verde/reciclagem (papel, plástico, vidro limpo) e marrom/orgânico (restos de comida, jardim). As cores e o dia de coleta variam por município — confirme com o landlord ou prefeitura local (council)."},
-  {t:"Compras do dia a dia", d:"Penneys/Primark (roupas baratas), Dealz (utilidades e casa), Ikea e Woodie's (móveis e organização) complementam os supermercados para o básico de quem está se instalando.", sec:"mercado"},
-  {t:"Primeiros dias", d:"Checklist com o passo a passo das primeiras semanas — chegada, moradia, trabalho e documentação.", sec:"roteiro"},
-  {t:"Grupos de apoio", d:"Comunidades de brasileiros no WhatsApp e Facebook para tirar dúvidas e achar moradia.", sec:"grupos"}
+  {t:"Eletricidade e tomadas", d:"Tomada tipo G (três pinos, igual Reino Unido) e voltagem 230V. Leve um adaptador de viagem; aparelhos brasileiros de 110V podem precisar também de um conversor de voltagem, não só o adaptador de formato."},
+  {t:"Horário de funcionamento", d:"Supermercados grandes costumam abrir até 21h–22h (mais cedo aos domingos); farmácias e lojas pequenas fecham mais cedo. Muitos serviços reduzem horário ou fecham em feriados públicos (bank holidays)."},
+  {t:"Correios e encomendas", d:"An Post é o serviço postal nacional, com agências (post offices) nas cidades para enviar/receber encomendas, pagar contas e alguns serviços básicos."},
+  {t:"Etiqueta social", d:"Filas (queueing) são levadas a sério, e \"please\"/\"thank you\" aparecem até em interações rápidas. Gorjeta de 10–15% é comum em restaurantes (mas não obrigatória); em pubs não é costume dar gorjeta no balcão."}
 ];
 function renderVidaIrlanda(){
   var wrap = document.getElementById("vidaIrlandaWrap");
   if(!wrap) return;
   wrap.innerHTML = VIDA_IRLANDA.map(function(v){
-    var linkHtml = v.sec ? '<button type="button" class="ci-link" style="border:none;background:none;padding:0;font:inherit;cursor:pointer;margin-top:8px;" data-sec="'+v.sec+'">Ver mais →</button>' : "";
-    return '<div class="exp-card"><h4>'+v.t+'</h4><p>'+v.d+'</p>'+linkHtml+'</div>';
+    return '<div class="exp-card"><h4>'+v.t+'</h4><p>'+v.d+'</p></div>';
   }).join("");
-  wrap.querySelectorAll("[data-sec]").forEach(function(btn){
-    btn.addEventListener("click", function(){ goToSection(btn.dataset.sec); });
-  });
 }
 
 /* ---------- mitos e verdades ---------- */
@@ -1283,7 +1308,7 @@ var MITOS_VERDADES = [
   {q:"Preciso de inglês avançado para conseguir emprego?", a:"Depende muito da vaga. Funções como Cleaner, Kitchen Porter e Stock Assistant costumam aceitar inglês básico; já vagas de atendimento, escritório ou tecnologia pedem mais fluência. Veja \"Trabalhos comuns para quem chega\" para comparar por nível de inglês."},
   {q:"Cleaner é a única opção para quem tem inglês básico?", a:"Não. Kitchen Porter, Housekeeping, Stock Assistant, Warehouse Operative e Picker/Packer, entre outras, também costumam aceitar inglês básico — veja a lista completa em Trabalho & estudo."},
   {q:"Com cidadania europeia eu preciso de visto de estudante?", a:"Não. Cidadãos da UE/EEE/Suíça têm liberdade de movimento na Irlanda — sem visto, Stamp 2, IRP ou limite de horas ligado ao curso. O foco nesse caso é mais em documentação prática (PPSN, moradia, saúde)."},
-  {q:"É fácil encontrar moradia na Irlanda?", a:"Não é o ponto mais fácil do processo — o mercado de aluguel é concorrido, principalmente em Dublin. Costuma exigir tempo de pesquisa, flexibilidade e, para moradia definitiva, estar no país para visitar antes de fechar. Veja \"Tipos de acomodação\" e o checklist anti-golpe, em Acomodação."}
+  {q:"É fácil encontrar moradia na Irlanda?", a:"Não é o ponto mais fácil do processo — o mercado de aluguel é concorrido, principalmente em Dublin. Costuma exigir tempo de pesquisa, flexibilidade e, para moradia definitiva, estar no país para visitar antes de fechar. Veja \"Cuidados com moradia\", em Acomodação."}
 ];
 function renderMitos(){
   var wrap = document.getElementById("mitosWrap");
@@ -1291,6 +1316,39 @@ function renderMitos(){
   wrap.innerHTML = MITOS_VERDADES.map(function(m,idx){
     return '<details class="acc-item"'+(idx===0?" open":"")+'><summary>'+m.q+'</summary><p style="margin:10px 0 0;font-size:13.3px;line-height:1.6;">'+m.a+'</p></details>';
   }).join("");
+}
+
+/* ---------- vida na irlanda: aba unificada (vida pratica / glossario / mitos) ---------- */
+var VIDAIRLANDA_SUBTABS = [{id:"pratica",l:"Vida prática"},{id:"glossario",l:"Glossário"},{id:"mitos",l:"Mitos e verdades"}];
+var vidaIrlandaView = ls("vidaIrlandaView") || "pratica";
+function renderVidaIrlandaSubtabs(){
+  var wrap = document.getElementById("vidaIrlandaSubtabs");
+  if(!wrap) return;
+  wrap.innerHTML = VIDAIRLANDA_SUBTABS.map(function(t){
+    return '<button class="subtab'+(vidaIrlandaView===t.id?' active':'')+'" data-v="'+t.id+'">'+t.l+'</button>';
+  }).join("");
+  wrap.querySelectorAll(".subtab").forEach(function(b){
+    b.addEventListener("click", function(){
+      vidaIrlandaView = b.dataset.v; ls("vidaIrlandaView", vidaIrlandaView);
+      renderVidaIrlandaSubtabs(); renderVidaIrlandaContent();
+    });
+  });
+}
+function renderVidaIrlandaContent(){
+  var wrap = document.getElementById("vidaIrlandaContent");
+  if(!wrap) return;
+  if(vidaIrlandaView==="glossario"){
+    wrap.innerHTML = '<input type="search" id="glossarioSearch" placeholder="Buscar termo (ex: PPSN, Stamp, Leap Card...)" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:16px;">'+
+      '<div class="grid cols-3" id="glossarioWrap"></div>';
+    document.getElementById("glossarioSearch").addEventListener("input", function(e){ renderGlossario(e.target.value); });
+    renderGlossario();
+  } else if(vidaIrlandaView==="mitos"){
+    wrap.innerHTML = '<div class="card" id="mitosWrap"></div>';
+    renderMitos();
+  } else {
+    wrap.innerHTML = '<div class="grid cols-3" id="vidaIrlandaWrap"></div>';
+    renderVidaIrlanda();
+  }
 }
 
 var JOB_ROLES = [{id:"cleaner",l:"Cleaner (limpeza)"},{id:"barista",l:"Barista"},{id:"hotelaria",l:"Hotelaria"},{id:"varejo",l:"Varejo"},{id:"logistica",l:"Logística/warehouse"},{id:"atendimento",l:"Atendimento/call center"},{id:"delivery",l:"Delivery"},{id:"ti",l:"TI/suporte"}];
@@ -1400,50 +1458,54 @@ function getJobs(role){
   return data;
 }
 function saveJobs(role, data){ ls("jobs_"+role, data); }
-var jobRole = ls("jobRoleView") || "cleaner";
-function renderJobRoleTabs(){
-  document.getElementById("jobRoleTabs").innerHTML = JOB_ROLES.map(function(r){
-    return '<button class="subtab'+(jobRole===r.id?' active':'')+'" data-role="'+r.id+'">'+r.l+'</button>';
+var ROLE_TO_CAT = {cleaner:"hospitality", barista:"hospitality", hotelaria:"hospitality", varejo:"varejo", logistica:"varejo", delivery:"varejo", atendimento:"escritorio", ti:"industria"};
+function renderJobCompanies(){
+  var wrap = document.getElementById("jobCompaniesWrap");
+  if(!wrap) return;
+  var roles = jobTypeCatView==="todos" ? JOB_ROLES : JOB_ROLES.filter(function(r){ return ROLE_TO_CAT[r.id]===jobTypeCatView; });
+  wrap.innerHTML = roles.map(function(r){
+    var data = getJobs(r.id);
+    var rows = data.companies.map(function(c){
+      return '<div class="checkitem" style="cursor:default;"><span class="box" style="background:var(--accent-soft);border-color:var(--accent-soft);"></span>'+
+        '<div style="flex:1;"><div class="ci-label">'+c.name+'</div>'+(c.note?'<div class="ci-note">'+c.note+'</div>':"")+'</div>'+
+        '<button class="btn-ghost btn" style="width:auto;padding:5px 10px;font-size:12px;flex:none;" data-remove="'+c.id+'" data-role="'+r.id+'">Remover</button></div>';
+    }).join("");
+    return '<div class="card"><h4 style="font-size:14.5px;margin-bottom:8px;">'+r.l+'</h4>'+
+      '<div class="callout" style="margin-bottom:10px;">'+data.tips+'</div>'+
+      (rows || '<div class="empty">Nenhuma empresa cadastrada ainda.</div>')+
+      '</div>';
   }).join("");
-  document.querySelectorAll("#jobRoleTabs .subtab").forEach(function(b){
-    b.addEventListener("click", function(){ jobRole = b.dataset.role; ls("jobRoleView", jobRole); renderJobRoleTabs(); renderJobRoleContent(); renderJobAddForm(); });
-  });
-}
-function renderJobRoleContent(){
-  var data = getJobs(jobRole);
-  var rows = data.companies.map(function(c){
-    return '<div class="checkitem" style="cursor:default;"><span class="box" style="background:var(--accent-soft);border-color:var(--accent-soft);"></span>'+
-      '<div style="flex:1;"><div class="ci-label">'+c.name+'</div><div class="ci-note">'+c.note+'</div></div>'+
-      '<button class="btn-ghost btn" style="width:auto;padding:5px 10px;font-size:12px;flex:none;" data-remove="'+c.id+'">Remover</button></div>';
-  }).join("");
-  document.getElementById("jobRoleWrap").innerHTML =
-    '<div class="callout">'+data.tips+'</div>'+
-    '<h4 style="font-size:14.5px;font-weight:700;margin:16px 0 8px;color:var(--text);">Empresas/agências que costumam contratar</h4>'+
-    (rows || '<div class="empty">Nenhuma empresa cadastrada ainda.</div>');
-  document.querySelectorAll("#jobRoleWrap [data-remove]").forEach(function(btn){
+  wrap.querySelectorAll("[data-remove]").forEach(function(btn){
     btn.addEventListener("click", function(){
-      var d = getJobs(jobRole);
+      var d = getJobs(btn.dataset.role);
       d.companies = d.companies.filter(function(c){ return c.id!==btn.dataset.remove; });
-      saveJobs(jobRole, d);
-      renderJobRoleContent();
+      saveJobs(btn.dataset.role, d);
+      renderJobCompanies();
     });
   });
 }
+var jobAddState = {open:false};
 function renderJobAddForm(){
-  document.getElementById("jobAddForm").innerHTML =
-    '<div class="mini-form-grid">'+
-    '<div><label>Nome da empresa/agência</label><input id="newJobName" type="text"></div>'+
-    '<div><label>Observação</label><input id="newJobNote" type="text" placeholder="O que oferecem, onde fica..."></div>'+
-    '</div>'+
-    '<button class="btn btn-accent" style="width:auto;padding:10px 18px;" id="addJobBtn" type="button">Adicionar empresa</button>';
-  document.getElementById("addJobBtn").addEventListener("click", function(){
-    var name = document.getElementById("newJobName").value.trim();
-    if(!name) return;
-    var d = getJobs(jobRole);
-    d.companies.push({id:jobRole+Date.now(), name:name, note:document.getElementById("newJobNote").value.trim()});
-    saveJobs(jobRole, d);
-    renderJobRoleContent();
-    document.getElementById("newJobName").value=""; document.getElementById("newJobNote").value="";
+  renderAddDisclosure("jobAddForm", jobAddState, "Adicionar empresa/agência", function(el, close){
+    el.innerHTML =
+      '<div class="mini-form-grid">'+
+      '<div><label>Área</label><select id="newJobRole">'+JOB_ROLES.map(function(r){ return '<option value="'+r.id+'">'+r.l+'</option>'; }).join("")+'</select></div>'+
+      '<div><label>Nome da empresa/agência</label><input id="newJobName" type="text"></div>'+
+      '<div style="grid-column:1/-1;"><label>Observação</label><input id="newJobNote" type="text" placeholder="O que oferecem, onde fica..."></div>'+
+      '</div>'+
+      '<button class="btn btn-accent" style="width:auto;padding:10px 18px;" id="addJobBtn" type="button">Adicionar empresa</button>'+
+      '<button class="btn-ghost btn" style="width:auto;padding:10px 14px;margin-left:8px;" id="cancelJobBtn" type="button">Cancelar</button>';
+    document.getElementById("addJobBtn").addEventListener("click", function(){
+      var name = document.getElementById("newJobName").value.trim();
+      if(!name) return;
+      var role = document.getElementById("newJobRole").value;
+      var d = getJobs(role);
+      d.companies.push({id:role+Date.now(), name:name, note:document.getElementById("newJobNote").value.trim()});
+      saveJobs(role, d);
+      renderJobCompanies();
+      close();
+    });
+    document.getElementById("cancelJobBtn").addEventListener("click", close);
   });
 }
 
@@ -2013,11 +2075,6 @@ function renderStayFields(){
   renderStayTable();
   renderStayComparator();
   renderStayAddForm();
-  document.getElementById("stayTipsWrap").innerHTML =
-    tipRow("A hospedagem inicial costuma ser confiável","Um hostel ou Airbnb bem avaliado pode ser reservado com confiança antes de chegar — não precisa visitar antes.")+
-    tipRow("Já a moradia definitiva, sim: visite antes","Só depois de estar na Irlanda e for fechar um contrato fixo, visite o imóvel pessoalmente antes de pagar qualquer valor.")+
-    tipRow("Compare transporte, curso e trabalho","Pense no deslocamento diário antes de decidir onde morar em definitivo.")+
-    tipRow("Guarde mensagens, recibos e acordos","Sempre por escrito, nunca só combinado verbalmente.");
 }
 var TIP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3 11.2c.6.4 1 1.1 1 1.8h4c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3Z"/></svg>';
 function tipRow(title, note){
@@ -2120,24 +2177,29 @@ function renderStayComparator(){
     '</div>';
   }).join("")+'</div>';
 }
+var stayAddState = {open:false};
 function renderStayAddForm(){
-  document.getElementById("stayAddForm").innerHTML =
-    '<div class="mini-form-grid">'+
-    '<div><label>Nome</label><input id="newStayNome" type="text" placeholder="Ex.: Hostel Dublin 1"></div>'+
-    '<div><label>Noites</label><input id="newStayNoites" type="number" value="10"></div>'+
-    '<div><label>Preço por noite (R$)</label><input id="newStayPreco" type="number" step="0.01"></div>'+
-    '<div><label>Observação</label><input id="newStayObs" type="text" placeholder="Quarto, café, localização..."></div>'+
-    '</div>'+
-    '<button class="btn btn-accent" style="width:auto;padding:10px 18px;" id="addStayBtn" type="button">Adicionar opção</button>';
-  document.getElementById("addStayBtn").addEventListener("click", function(){
-    var nome = document.getElementById("newStayNome").value.trim();
-    if(!nome) return;
-    var opts = getStayOptions();
-    opts.push({id:"s"+Date.now(), nome:nome, noites:parseInt(document.getElementById("newStayNoites").value)||1, preco:parseFloat(document.getElementById("newStayPreco").value)||0, obs:document.getElementById("newStayObs").value.trim()});
-    saveStayOptions(opts);
-    renderStayTable();
-    renderStayComparator();
-    renderStayAddForm();
+  renderAddDisclosure("stayAddForm", stayAddState, "Adicionar acomodação", function(el, close){
+    el.innerHTML =
+      '<div class="mini-form-grid">'+
+      '<div><label>Nome</label><input id="newStayNome" type="text" placeholder="Ex.: Hostel Dublin 1"></div>'+
+      '<div><label>Noites</label><input id="newStayNoites" type="number" value="10"></div>'+
+      '<div><label>Preço por noite (R$)</label><input id="newStayPreco" type="number" step="0.01"></div>'+
+      '<div><label>Observação</label><input id="newStayObs" type="text" placeholder="Quarto, café, localização..."></div>'+
+      '</div>'+
+      '<button class="btn btn-accent" style="width:auto;padding:10px 18px;" id="addStayBtn" type="button">Adicionar opção</button>'+
+      '<button class="btn-ghost btn" style="width:auto;padding:10px 14px;margin-left:8px;" id="cancelStayBtn" type="button">Cancelar</button>';
+    document.getElementById("addStayBtn").addEventListener("click", function(){
+      var nome = document.getElementById("newStayNome").value.trim();
+      if(!nome) return;
+      var opts = getStayOptions();
+      opts.push({id:"s"+Date.now(), nome:nome, noites:parseInt(document.getElementById("newStayNoites").value)||1, preco:parseFloat(document.getElementById("newStayPreco").value)||0, obs:document.getElementById("newStayObs").value.trim()});
+      saveStayOptions(opts);
+      renderStayTable();
+      renderStayComparator();
+      close();
+    });
+    document.getElementById("cancelStayBtn").addEventListener("click", close);
   });
 }
 var TIPOS_ACOMODACAO = [
@@ -2171,57 +2233,33 @@ var HOUSING_PHRASES = [
 function renderHousingPhrases(){
   var wrap = document.getElementById("housingPhrasesWrap");
   if(!wrap) return;
-  wrap.innerHTML = '<div class="card">'+HOUSING_PHRASES.map(function(p){
+  wrap.innerHTML = HOUSING_PHRASES.map(function(p){
     return '<div class="tip-row"><div class="tip-text"><b>"'+p.en+'"</b><span>'+p.pt+'</span></div></div>';
-  }).join("")+'</div>';
+  }).join("");
 }
+var MORADIA_CUIDADOS = [
+  {t:"A hospedagem inicial pode reservar com confiança", d:"Hostels e Airbnbs bem avaliados (7–14 noites) costumam ser seguros de reservar à distância, sem precisar visitar antes."},
+  {t:"Já a moradia definitiva é diferente: visite antes de pagar", d:"Nunca feche um contrato fixo à distância. Visite o quarto ou apartamento pessoalmente — ou peça para alguém de confiança visitar — antes de transferir qualquer depósito."},
+  {t:"Confirme quem está do outro lado", d:"Nome completo, telefone e um perfil verificável em site oficial (Daft, MyHome, Rent.ie) antes de combinar qualquer pagamento."},
+  {t:"Nunca transfira dinheiro para o exterior sem ver o imóvel", d:"Nem transferência internacional, nem PIX para terceiros. Pedido de pagamento adiantado, história de \"dono está viajando\" e preço bom demais para ser verdade são os golpes mais comuns."},
+  {t:"Desconfie de preço muito abaixo da média", d:"Compare com o que outros anúncios da mesma região e tipo de quarto estão pedindo antes de se animar com um valor muito baixo."},
+  {t:"Pesquise antes de fechar", d:"O nome do anunciante ou do imóvel em grupos de brasileiros costuma revelar rápido se alguém já teve problema com aquele anúncio."},
+  {t:"Tudo combinado, por escrito", d:"Mensagens, e-mail, contrato ou recibo — guarde uma cópia digital e impressa de tudo. Nunca só combinado verbalmente."},
+  {t:"Entenda \"digs\"/rent-a-room", d:"Quando o dono mora no imóvel, as proteções legais podem ser diferentes — consulte o RTB antes de assinar."},
+  {t:"Pense no dia a dia, não só no preço", d:"Compare o tempo de deslocamento até curso e trabalho antes de decidir onde morar em definitivo."}
+];
 function renderMoradia(){
   document.getElementById("moradiaWrap").innerHTML =
+    '<div class="card"><h3>Cuidados com moradia</h3>'+
+    '<p class="source-note" style="margin:-4px 0 14px;">O que vale saber antes de fechar qualquer moradia — da hospedagem inicial ao contrato definitivo.</p>'+
+    MORADIA_CUIDADOS.map(function(c){ return tipRow(c.t, c.d); }).join("")+
+    '</div>'+
     '<div class="card"><h3>Faixas de aluguel (referência Dublin)</h3><div class="tablewrap"><table>'+
     '<thead><tr><th>Faixa mensal</th><th>Interpretação</th></tr></thead><tbody>'+
     '<tr><td class="num" data-label="Faixa mensal">€600–750</td><td data-label="Interpretação">Pode aparecer, mas exige mais flexibilidade.</td></tr>'+
     '<tr><td class="num" data-label="Faixa mensal">€800–1.100</td><td data-label="Interpretação">Faixa de planejamento mais realista.</td></tr>'+
     '<tr><td class="num" data-label="Faixa mensal">€1.100–1.200+</td><td data-label="Interpretação">Mais opções e margem de segurança.</td></tr>'+
-    '</tbody></table></div></div>'+
-    '<div class="card"><h3>Passo a passo seguro</h3>'+
-    tipRow("Hospedagem inicial: pode reservar com confiança","Hostels e Airbnbs bem avaliados (7–14 dias) geralmente são seguros de reservar à distância, sem precisar visitar antes.")+
-    tipRow("Moradia definitiva: só depois de chegar","Nunca feche um contrato fixo à distância — visite o quarto ou apartamento pessoalmente antes de pagar qualquer depósito.")+
-    tipRow("Valide antes de transferir qualquer depósito","Confirme identidade do responsável e condições por escrito.")+
-    tipRow("Guarde todos os registros","Mensagens, recibos e acordos — sempre por escrito.")+
-    tipRow("Entenda \"digs\"/rent-a-room","Quando o dono mora no imóvel, as proteções legais podem ser diferentes — consulte o RTB.")+
-    '</div>'+
-    '<div class="callout warn"><strong>Golpes comuns:</strong> pedido de transferência internacional antes de qualquer visita, história de "dono está viajando" e preços bons demais para serem verdade.</div>';
-}
-var SCAM_CHECKLIST = [
-  {id:"visitou", label:"Visitou o imóvel (ou pediu para alguém de confiança visitar) antes de pagar qualquer depósito"},
-  {id:"identidade", label:"Confirmou a identidade de quem está alugando", note:"Nome completo, telefone, perfil verificável em site oficial (Daft, MyHome, Rent.ie)."},
-  {id:"semtransferencia", label:"Não fez nenhuma transferência internacional ou PIX para terceiros antes de ver o imóvel"},
-  {id:"porescrito", label:"Tudo combinado está registrado por escrito", note:"Mensagens, e-mail ou contrato — nunca só combinado verbalmente."},
-  {id:"preco", label:"Desconfiou de preço muito abaixo da média da região/tipo de quarto"},
-  {id:"pesquisou", label:"Pesquisou o nome do anunciante/imóvel em grupos de brasileiros antes de fechar"},
-  {id:"contrato", label:"Recebeu contrato ou recibo formal do pagamento", note:"Guarde uma cópia digital e impressa."}
-];
-function renderScamChecklist(){
-  var state = ls("scamChecklist") || {};
-  document.getElementById("scamChecklistWrap").innerHTML = SCAM_CHECKLIST.map(function(it){
-    return checkItemHtml(it.id, it.label, it.note, !!state[it.id]);
-  }).join("");
-  document.querySelectorAll("#scamChecklistWrap .checkitem").forEach(function(el){
-    el.querySelector(".checkitem-input").addEventListener("change", function(){
-      var st = ls("scamChecklist") || {};
-      st[el.dataset.id] = !st[el.dataset.id];
-      ls("scamChecklist", st);
-      el.classList.toggle("checked", st[el.dataset.id]);
-      updateScamChecklistProgress();
-    });
-  });
-  updateScamChecklistProgress();
-}
-function updateScamChecklistProgress(){
-  var state = ls("scamChecklist") || {};
-  var done = SCAM_CHECKLIST.filter(function(it){ return state[it.id]; }).length;
-  var el = document.getElementById("scamChecklistProgress");
-  if(el) el.textContent = done+"/"+SCAM_CHECKLIST.length+" verificados";
+    '</tbody></table></div></div>';
 }
 var TRANSPORT_APPS = [
   {name:"TFI Live", iconUrl:"https://www.transportforireland.ie/", desc:"App oficial nacional com horários em tempo real de ônibus, Luas, DART e trens — rotas, partidas e paradas próximas. Baixe pela loja de apps do seu celular (o site oficial tem bloqueado o acesso por navegador em alguns casos)."},
@@ -2629,23 +2667,29 @@ function updateMarketTotal(){
   var el = document.getElementById("marketTotal");
   if(el) el.textContent = "€"+total.toFixed(2);
 }
+var marketAddState = {open:false};
 function renderMarketAddForm(){
-  document.getElementById("marketAddForm").innerHTML =
-    '<div class="mini-form-grid">'+
-    '<div><label>Categoria</label><input id="newCat" type="text" placeholder="Ex.: Bebidas"></div>'+
-    '<div><label>Item</label><input id="newItem" type="text"></div>'+
-    '<div><label>Embalagem</label><input id="newPkg" type="text" placeholder="Ex.: 1 kg"></div>'+
-    '<div><label>Quantidade</label><input id="newQty" type="number" value="1"></div>'+
-    '<div><label>Preço unitário (€)</label><input id="newPrice" type="number" step="0.01"></div>'+
-    '</div>'+
-    '<button class="btn btn-accent" style="width:auto;padding:10px 18px;" id="addItemBtn" type="button">Adicionar item</button>';
-  document.getElementById("addItemBtn").addEventListener("click", function(){
-    var item = document.getElementById("newItem").value.trim();
-    if(!item) return;
-    var cart = getMarketCart();
-    cart.push({id:"m"+Date.now(), cat:document.getElementById("newCat").value.trim()||"Outros", item:item, pkg:document.getElementById("newPkg").value.trim(), qty:parseInt(document.getElementById("newQty").value)||1, price:parseFloat(document.getElementById("newPrice").value)||0});
-    saveMarketCart(cart);
-    renderMarket();
+  renderAddDisclosure("marketAddForm", marketAddState, "Adicionar à cesta", function(el, close){
+    el.innerHTML =
+      '<div class="mini-form-grid">'+
+      '<div><label>Categoria</label><input id="newCat" type="text" placeholder="Ex.: Bebidas"></div>'+
+      '<div><label>Item</label><input id="newItem" type="text"></div>'+
+      '<div><label>Embalagem</label><input id="newPkg" type="text" placeholder="Ex.: 1 kg"></div>'+
+      '<div><label>Quantidade</label><input id="newQty" type="number" value="1"></div>'+
+      '<div><label>Preço unitário (€)</label><input id="newPrice" type="number" step="0.01"></div>'+
+      '</div>'+
+      '<button class="btn btn-accent" style="width:auto;padding:10px 18px;" id="addItemBtn" type="button">Adicionar item</button>'+
+      '<button class="btn-ghost btn" style="width:auto;padding:10px 14px;margin-left:8px;" id="cancelItemBtn" type="button">Cancelar</button>';
+    document.getElementById("addItemBtn").addEventListener("click", function(){
+      var item = document.getElementById("newItem").value.trim();
+      if(!item) return;
+      var cart = getMarketCart();
+      cart.push({id:"m"+Date.now(), cat:document.getElementById("newCat").value.trim()||"Outros", item:item, pkg:document.getElementById("newPkg").value.trim(), qty:parseInt(document.getElementById("newQty").value)||1, price:parseFloat(document.getElementById("newPrice").value)||0});
+      saveMarketCart(cart);
+      renderMarketFilters(); renderMarketTable();
+      close();
+    });
+    document.getElementById("cancelItemBtn").addEventListener("click", close);
   });
 }
 
@@ -2796,7 +2840,7 @@ var GASTOS_INICIAIS_CENARIOS = {
   cols: ["Econômico","Intermediário","Confortável"],
   rows: [
     {item:"Passagem aérea (ida)", v:[600,900,1400]},
-    {item:"Escola de inglês (4 semanas)", v:[500,800,1200]},
+    {item:"Escola de inglês (4 semanas)", v:[580,800,1500]},
     {item:"Seguro-viagem/saúde (1 mês)", v:[30,50,80]},
     {item:"Acomodação inicial (7–14 noites)", v:[300,500,800]},
     {item:"Depósito de aluguel (1 mês)", v:[600,900,1200]},
@@ -2804,29 +2848,45 @@ var GASTOS_INICIAIS_CENARIOS = {
     {item:"Alimentação (1 mês)", v:[150,250,350]},
     {item:"Transporte (1 mês)", v:[60,80,120]},
     {item:"Celular/eSIM (1 mês)", v:[15,25,40]},
-    {item:"Documentação (IRP, fotos etc.)", v:[100,150,200]},
+    {item:"Documentação (IRP €300 + fotos/cópias)", v:[320,350,400]},
     {item:"Reserva de emergência", v:[500,1000,2000]}
   ]
 };
+function getGastosOverrides(){ return ls("gastosIniciaisOverrides") || {}; }
+function saveGastosOverrides(o){ ls("gastosIniciaisOverrides", o); }
+var gastosEditOpen = false;
 function renderReservePlanner(){
   var wrap = document.getElementById("reservePlannerWrap");
   if(!wrap) return;
   var g = GASTOS_INICIAIS_CENARIOS;
+  var overrides = getGastosOverrides();
+  function valAt(ri, ci){ var key = ri+"_"+ci; return overrides[key]!=null ? overrides[key] : g.rows[ri].v[ci]; }
   var totals = [0,0,0];
-  var rows = g.rows.map(function(r){
-    r.v.forEach(function(val,i){ totals[i]+=val; });
-    return '<tr><td data-label="Item">'+r.item+'</td>'+r.v.map(function(val,i){ return '<td class="num tabular" data-label="'+g.cols[i]+'">€'+val.toLocaleString("pt-BR")+'</td>'; }).join("")+'</tr>';
+  var rows = g.rows.map(function(r, ri){
+    var tds = r.v.map(function(_, ci){
+      var v = valAt(ri, ci);
+      totals[ci] += v;
+      return gastosEditOpen
+        ? '<td class="num" data-label="'+g.cols[ci]+'"><input type="number" step="1" style="width:68px;text-align:right;" value="'+v+'" data-ri="'+ri+'" data-ci="'+ci+'"></td>'
+        : '<td class="num tabular" data-label="'+g.cols[ci]+'">€'+v.toLocaleString("pt-BR")+'</td>';
+    }).join("");
+    return '<tr><td data-label="Item">'+r.item+'</td>'+tds+'</tr>';
   }).join("");
-  var totalRow = '<tr style="font-weight:700;"><td data-label="Item">Total estimado</td>'+totals.map(function(t,i){ return '<td class="num tabular" data-label="'+g.cols[i]+'">€'+t.toLocaleString("pt-BR")+'</td>'; }).join("")+'</tr>';
+  var totalRow = '<tr style="font-weight:700;"><td data-label="Item">Total estimado</td>'+totals.map(function(t,ci){ return '<td class="num tabular" data-label="'+g.cols[ci]+'" id="gastosTotal-'+ci+'">€'+t.toLocaleString("pt-BR")+'</td>'; }).join("")+'</tr>';
   var b = getBudget();
   var totalExpenses = sumExpenses(b);
   var firstMonth = totalExpenses + b.rent;
   var reserve = ls("travelReserve");
   if(reserve==null) reserve = "";
   var months = (reserve && totalExpenses>0) ? (parseFloat(reserve)/totalExpenses) : null;
+  var editControlsHtml = gastosEditOpen
+    ? '<button type="button" class="btn-ghost btn" id="gastosDoneBtn" style="width:auto;padding:8px 14px;margin-top:10px;">Concluir edição</button>'+
+      '<button type="button" class="btn-ghost btn" id="gastosResetBtn" style="width:auto;padding:8px 14px;margin-top:10px;margin-left:8px;">Restaurar padrão</button>'
+    : '<button type="button" class="btn-ghost btn" id="gastosEditBtn" style="width:auto;padding:8px 14px;margin-top:10px;">✎ Personalizar valores</button>';
   wrap.innerHTML =
     '<div class="tablewrap"><table><thead><tr><th>Item</th>'+g.cols.map(function(c){ return '<th class="num">'+c+'</th>'; }).join("")+'</tr></thead>'+
     '<tbody>'+rows+totalRow+'</tbody></table></div>'+
+    editControlsHtml+
     '<div class="grid cols-2" style="margin-top:16px;">'+
       '<div class="card"><h3>Quanto custa o primeiro mês?</h3>'+
         '<p class="source-note" style="margin-bottom:10px;">Baseado no seu orçamento mensal (acima) + um depósito equivalente a 1 aluguel.</p>'+
@@ -2837,6 +2897,22 @@ function renderReservePlanner(){
         (months!=null ? '<div class="summary-row big" style="margin-top:8px;"><span class="lbl">Reserva estimada</span><span class="val">'+months.toFixed(1).replace(".",",")+' meses</span></div><p class="source-note">Reserva ÷ custo mensal estimado ('+"€"+totalExpenses.toFixed(2)+'/mês).</p>' : '<p class="source-note" style="margin-top:8px;">Informe sua reserva para ver quantos meses ela cobre, com base no seu orçamento mensal.</p>')+
       '</div>'+
     '</div>';
+  if(gastosEditOpen){
+    wrap.querySelectorAll("input[data-ri]").forEach(function(inp){
+      inp.addEventListener("input", function(){
+        var ov = getGastosOverrides();
+        ov[inp.dataset.ri+"_"+inp.dataset.ci] = parseFloat(inp.value)||0;
+        saveGastosOverrides(ov);
+        var ci = inp.dataset.ci, sum = 0;
+        wrap.querySelectorAll('input[data-ci="'+ci+'"]').forEach(function(i2){ sum += parseFloat(i2.value)||0; });
+        document.getElementById("gastosTotal-"+ci).textContent = "€"+sum.toLocaleString("pt-BR");
+      });
+    });
+    document.getElementById("gastosDoneBtn").addEventListener("click", function(){ gastosEditOpen=false; renderReservePlanner(); });
+    document.getElementById("gastosResetBtn").addEventListener("click", function(){ saveGastosOverrides({}); renderReservePlanner(); });
+  } else {
+    document.getElementById("gastosEditBtn").addEventListener("click", function(){ gastosEditOpen=true; renderReservePlanner(); });
+  }
   var input = document.getElementById("travelReserveInput");
   if(input) input.addEventListener("input", function(){ ls("travelReserve", input.value); renderReservePlanner(); });
 }
@@ -3326,6 +3402,7 @@ function renderTourismPasses(){
     '<tr><td>Família</td><td class="num tabular">€'+HERITAGE_CARD.familia+'</td></tr>'+
     '</tbody></table></div>'+
     '<h4 style="font-size:14px;margin:0 0 8px;">Vale a pena para o meu roteiro?</h4>'+
+    '<p class="source-note" style="margin:0 0 10px;">Sem o cartão, cada sítio cobra entrada avulsa — geralmente entre €5 e €13 por adulto. Alguns exemplos: Rock of Cashel e Kilkenny Castle custam €8 cada. É esse tipo de valor que entra no campo "preço médio do ingresso avulso" abaixo — por isso ele já vem preenchido com €8 como referência.</p>'+
     '<div class="mini-form-grid" style="margin-bottom:10px;">'+
     '<div><label>Quantos sítios OPW você vai visitar?</label><input type="number" id="heritageSites" value="3" min="0"></div>'+
     '<div><label>Preço médio do ingresso avulso (€)</label><input type="number" id="heritagePrice" value="8" step="0.5" min="0"></div>'+
@@ -3421,11 +3498,9 @@ function init(){
   renderAssessoria();
   renderJobTypes();
   renderJobFinder();
-  renderJobRoleTabs(); renderJobRoleContent(); renderJobAddForm();
+  renderJobAddForm();
   renderAgencias();
-  renderGlossario();
-  renderVidaIrlanda();
-  renderMitos();
+  renderVidaIrlandaSubtabs(); renderVidaIrlandaContent();
   renderEnglish();
   renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences();
   renderNiInfo(); renderTourismCalendar(); renderTourismPasses(); renderTourismChecklist();
@@ -3434,7 +3509,6 @@ function init(){
   renderTiposAcomodacao();
   renderMoradia();
   renderHousingPhrases();
-  renderScamChecklist();
   renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity();
   renderTransportCityTabs(); renderTransportRoutes();
   renderMarket(); renderBudget(); renderReservePlanner(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();

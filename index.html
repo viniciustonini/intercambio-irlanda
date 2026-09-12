@@ -95,9 +95,7 @@
   <div class="more-menu" id="moreMenu" role="menu" aria-label="Mais seções" hidden>
     <div class="more-menu-handle" id="moreMenuHandle"></div>
     <button class="tab-btn" id="tab-links" data-sec="links" role="menuitem" aria-controls="sec-links">Links oficiais</button>
-    <button class="tab-btn" id="tab-glossario" data-sec="glossario" role="menuitem" aria-controls="sec-glossario">Glossário</button>
     <button class="tab-btn" id="tab-vidairlanda" data-sec="vidairlanda" role="menuitem" aria-controls="sec-vidairlanda">Vida na Irlanda</button>
-    <button class="tab-btn" id="tab-mitos" data-sec="mitos" role="menuitem" aria-controls="sec-mitos">Mitos e verdades</button>
   </div>
 
   <main class="main" id="main-content">
@@ -198,7 +196,7 @@
       <h3 style="margin:26px 0 4px;font-size:18px;">Escolas de inglês por cidade</h3>
       <p class="source-note" style="margin-bottom:14px;">Preços pesquisados em set/2026 — sempre peça cotação atualizada antes de pagar. A tabela é editável: adicione, edite ou remova escolas.</p>
       <div class="subtabs" id="schoolCityTabs"></div>
-      <div class="tablewrap"><table id="schoolsTable"></table></div>
+      <div id="schoolsTable"></div>
       <div class="card" style="margin-top:16px;">
         <div class="eyebrow" style="margin-bottom:6px;">Nova escola</div>
         <h3>Adicionar escola</h3>
@@ -210,20 +208,15 @@
 
       <h3 style="margin:30px 0 4px;font-size:18px;">Trabalhos comuns para quem chega</h3>
       <div id="jobTypesWrap" style="margin-top:14px;"></div>
-
-      <h3 style="margin:30px 0 4px;font-size:18px;">Qual trabalho posso pesquisar?</h3>
-      <p class="source-note" style="margin-bottom:14px;">Responda rapidinho para ver uma orientação — não é uma garantia de vaga.</p>
-      <div class="card" id="jobFinderWrap"></div>
-
-      <h3 style="margin:30px 0 4px;font-size:18px;">Vagas de entrada rápida</h3>
-      <p class="source-note" style="margin-bottom:14px;">Funções que costumam contratar rápido, com pouca ou nenhuma experiência. Prepare um currículo específico para cada uma.</p>
-      <div class="subtabs" id="jobRoleTabs"></div>
-      <div id="jobRoleWrap"></div>
       <div class="card" style="margin-top:16px;">
         <div class="eyebrow" style="margin-bottom:6px;">Nova empresa</div>
         <h3>Adicionar empresa/agência</h3>
         <div id="jobAddForm"></div>
       </div>
+
+      <h3 style="margin:30px 0 4px;font-size:18px;">Qual trabalho posso pesquisar?</h3>
+      <p class="source-note" style="margin-bottom:14px;">Responda rapidinho para ver uma orientação — não é uma garantia de vaga.</p>
+      <div class="card" id="jobFinderWrap"></div>
 
       <h3 style="margin:30px 0 4px;font-size:18px;">Agências de recrutamento</h3>
       <p class="source-note" style="margin-bottom:14px;">Atuam nas três cidades com vagas temporárias e permanentes em várias áreas.</p>
@@ -345,8 +338,6 @@
     <!-- ACOMODAÇÃO -->
     <section class="section" id="sec-acomodacao" data-sec="acomodacao" role="tabpanel" aria-labelledby="tab-acomodacao">
       <div class="section-head"><h2>Acomodação &amp; prevenção contra golpes</h2><p>Como pesquisar, reservar e evitar golpes comuns antes de chegar.</p></div>
-      <h3 style="margin:0 0 4px;font-size:18px;">Tipos de acomodação — o que os anúncios significam</h3>
-      <div id="tiposAcomodacaoWrap" style="margin-bottom:24px;"></div>
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
           <h3 style="margin-bottom:0;">Hospedagem inicial</h3>
@@ -357,31 +348,22 @@
         <div id="stayComparatorWrap"></div>
         <div class="tablewrap" style="margin-top:10px;"><table id="stayTable"></table></div>
       </div>
-      <div class="grid cols-2">
-        <div class="card">
-          <div class="eyebrow" style="margin-bottom:6px;">Nova pesquisa</div>
-          <h3>Adicionar acomodação</h3>
-          <div id="stayAddForm"></div>
-        </div>
-        <div class="card">
-          <div class="eyebrow" style="margin-bottom:6px;">Antes de pagar</div>
-          <h3>Cuidados com moradia</h3>
-          <div id="stayTipsWrap"></div>
-        </div>
-      </div>
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
-          <h3 style="margin-bottom:0;">Checklist anti-golpe</h3>
-          <span class="source-note" id="scamChecklistProgress"></span>
-        </div>
-        <p class="source-note" style="margin:4px 0 12px;">Marque cada item antes de pagar qualquer valor por uma moradia definitiva.</p>
-        <div id="scamChecklistWrap"></div>
+        <div class="eyebrow" style="margin-bottom:6px;">Nova pesquisa</div>
+        <h3>Adicionar acomodação</h3>
+        <div id="stayAddForm"></div>
       </div>
       <div id="moradiaWrap"></div>
 
-      <h3 style="margin:28px 0 4px;font-size:18px;">Mensagens em inglês para moradia</h3>
-      <p class="source-note" style="margin-bottom:14px;">Exemplos prontos para copiar ao conversar com anunciantes.</p>
-      <div id="housingPhrasesWrap"></div>
+      <h3 style="margin:28px 0 4px;font-size:18px;">Tipos de acomodação — o que os anúncios significam</h3>
+      <div id="tiposAcomodacaoWrap" style="margin-bottom:24px;"></div>
+
+      <div class="card">
+        <details class="acc-item" id="housingPhrasesToggle"><summary>Mensagens em inglês para moradia</summary>
+          <p class="source-note" style="margin:10px 0 12px;">Exemplos prontos para copiar ao conversar com anunciantes.</p>
+          <div id="housingPhrasesWrap"></div>
+        </details>
+      </div>
     </section>
 
     <!-- MERCADO -->
@@ -445,23 +427,11 @@
       <div id="linksWrap"></div>
     </section>
 
-    <!-- GLOSSÁRIO -->
-    <section class="section" id="sec-glossario" data-sec="glossario" role="tabpanel" aria-labelledby="tab-glossario">
-      <div class="section-head"><h2>Glossário da Irlanda</h2><p>Siglas e termos que você vai ver o tempo todo — explicados em português.</p></div>
-      <input type="search" id="glossarioSearch" placeholder="Buscar termo (ex: PPSN, Stamp, Leap Card...)" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:16px;">
-      <div class="grid cols-3" id="glossarioWrap"></div>
-    </section>
-
-    <!-- VIDA NA IRLANDA -->
+    <!-- VIDA NA IRLANDA (vida pratica / glossario / mitos, unificado) -->
     <section class="section" id="sec-vidairlanda" data-sec="vidairlanda" role="tabpanel" aria-labelledby="tab-vidairlanda">
-      <div class="section-head"><h2>Vida na Irlanda</h2><p>Um painel com tudo que envolve o dia a dia — cada tópico leva direto ao conteúdo já existente no guia, ou traz um resumo rápido quando o assunto ainda não tinha uma casa.</p></div>
-      <div class="grid cols-3" id="vidaIrlandaWrap"></div>
-    </section>
-
-    <!-- MITOS E VERDADES -->
-    <section class="section" id="sec-mitos" data-sec="mitos" role="tabpanel" aria-labelledby="tab-mitos">
-      <div class="section-head"><h2>Mitos e verdades</h2><p>Confusões comuns sobre intercâmbio na Irlanda — sem alarmismo, sem promessa fácil.</p></div>
-      <div class="card" id="mitosWrap"></div>
+      <div class="section-head"><h2>Vida na Irlanda</h2><p>Dia a dia, termos comuns e mitos sobre intercâmbio — tudo num só lugar.</p></div>
+      <div class="subtabs" id="vidaIrlandaSubtabs"></div>
+      <div id="vidaIrlandaContent"></div>
     </section>
 
     <!-- ROTEIRO COMPLETO -->
