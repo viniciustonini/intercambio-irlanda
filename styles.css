@@ -400,12 +400,17 @@ table td{vertical-align:middle;}
 .gloss-row .gloss-def{font-size:13.3px;color:var(--text);margin-top:3px;line-height:1.5;}
 .vida-toolbar-actions{display:flex;gap:10px;margin-bottom:18px;}
 .vida-toolbar-actions .btn-ghost{padding:7px 14px;font-size:12.5px;}
-.dublin-schematic{margin-bottom:16px;background:var(--surface-2);border-radius:var(--radius);padding:10px 14px 4px;}
+.dublin-schematic{margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px 6px;}
 .dublin-schematic svg{display:block;}
-.dublin-liffey{stroke:var(--accent);stroke-width:2.5;opacity:.55;}
-.dublin-schematic-side{font-size:10px;font-weight:700;letter-spacing:.08em;fill:var(--muted);}
+.dublin-land{fill:var(--surface-2);}
+.dublin-bay{fill:var(--bg);}
+.dublin-park{fill:var(--accent-soft);}
+.dublin-m50{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 4;opacity:.5;}
+.dublin-liffey{fill:none;stroke:var(--accent);stroke-width:3;opacity:.6;stroke-linecap:round;}
+.dublin-schematic-side{font-size:11px;font-weight:700;letter-spacing:.09em;fill:var(--muted);}
+.dublin-schematic-label{font-size:9.5px;font-weight:600;fill:var(--muted);}
 .dublin-pin-dot{fill:var(--navy);}
-.dublin-pin-label{font-size:11px;font-weight:700;fill:#fff;text-anchor:middle;font-family:var(--font-mono);}
+.dublin-pin-label{font-size:11.5px;font-weight:700;fill:#fff;text-anchor:middle;font-family:var(--font-mono);}
 .climate-chart-bars{display:flex;gap:8px;align-items:flex-end;}
 .climate-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;}
 .climate-bar-track{position:relative;width:100%;max-width:20px;}

@@ -1496,26 +1496,38 @@ var DUBLIN_DISTRICTS = [
   {code:"Dublin 8", side:"Sul do Liffey", d:"Mistura de áreas centrais e residenciais; perfil varia bastante dentro do próprio distrito."}
 ];
 var DUBLIN_SCHEMATIC_PINS = [
-  {code:"1", x:150, y:44, side:"n"},
-  {code:"7", x:78, y:38, side:"n"},
-  {code:"2", x:186, y:78, side:"s"},
-  {code:"4", x:246, y:82, side:"s"},
-  {code:"6", x:156, y:92, side:"s"},
-  {code:"8", x:96, y:84, side:"s"}
+  {code:"7", x:112, y:78, side:"n"},
+  {code:"1", x:192, y:82, side:"n"},
+  {code:"8", x:122, y:168, side:"s"},
+  {code:"6", x:178, y:190, side:"s"},
+  {code:"2", x:214, y:158, side:"s"},
+  {code:"4", x:272, y:178, side:"s"}
 ];
 function dublinSchematicHtml(){
   var pins = DUBLIN_SCHEMATIC_PINS.map(function(p){
-    return '<circle class="dublin-pin-dot" cx="'+p.x+'" cy="'+p.y+'" r="12"/>'+
+    return '<circle class="dublin-pin-dot" cx="'+p.x+'" cy="'+p.y+'" r="13"/>'+
       '<text class="dublin-pin-label" x="'+p.x+'" y="'+(p.y+4)+'">'+p.code+'</text>';
   }).join("");
   return '<div class="dublin-schematic">'+
-    '<svg viewBox="0 0 320 120" width="100%" height="150" role="img" aria-label="Esquema simplificado dos distritos de Dublin em relação ao rio Liffey">'+
-      '<text class="dublin-schematic-side" x="14" y="24">NORTE</text>'+
-      '<text class="dublin-schematic-side" x="14" y="108">SUL</text>'+
-      '<line class="dublin-liffey" x1="10" y1="60" x2="310" y2="63"/>'+
+    '<svg viewBox="0 0 400 260" width="100%" height="230" role="img" aria-label="Esquema ilustrativo dos distritos de Dublin em relação ao rio Liffey, ao M50 e à baía">'+
+      '<rect class="dublin-land" x="15" y="15" width="370" height="230" rx="50"/>'+
+      '<ellipse class="dublin-bay" cx="378" cy="140" rx="55" ry="75"/>'+
+      '<ellipse class="dublin-park" cx="88" cy="115" rx="34" ry="19"/>'+
+      '<path class="dublin-m50" d="M75,25 Q22,140 75,250"/>'+
+      '<path class="dublin-liffey" d="M18,140 Q150,152 225,138 T340,144"/>'+
       pins+
+      '<text class="dublin-schematic-side" x="30" y="34">NORTE</text>'+
+      '<text class="dublin-schematic-side" x="30" y="236">SUL</text>'+
+      '<text class="dublin-schematic-label" x="30" y="145" transform="rotate(-90 30 145)">M50</text>'+
+      '<text class="dublin-schematic-label" x="88" y="112">Phoenix Park</text>'+
+      '<text class="dublin-schematic-label" x="313" y="112">Dublin</text>'+
+      '<text class="dublin-schematic-label" x="313" y="124">Airport</text>'+
+      '<text class="dublin-schematic-label" x="337" y="140">Dublin</text>'+
+      '<text class="dublin-schematic-label" x="337" y="152">Bay</text>'+
+      '<text class="dublin-schematic-label" x="255" y="228">Dún Laoghaire–Rathdown</text>'+
+      '<text class="dublin-schematic-label" x="40" y="222">County Dublin</text>'+
     '</svg>'+
-    '<p class="source-note" style="margin-top:6px;">Esquema simplificado da posição relativa dos distritos citados — não é um mapa preciso nem uma indicação de qualidade.</p>'+
+    '<p class="source-note" style="margin-top:2px;">Ilustração própria e simplificada, não é um mapa oficial nem uma indicação de qualidade — sirva-se dela só para entender a posição relativa dos distritos citados.</p>'+
   '</div>';
 }
 var DUBLIN_CLIMATE = [
