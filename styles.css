@@ -393,6 +393,11 @@ table td{vertical-align:middle;}
 .district-card h4{font-size:15px;margin:2px 0 6px;}
 .district-card p{font-size:12.4px;color:var(--muted);margin:0;}
 .district-side{display:inline-block;font-size:10.8px;font-weight:700;letter-spacing:.02em;color:var(--muted);}
+.gloss-list{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;}
+@media (max-width:700px){.gloss-list{grid-template-columns:1fr;}}
+.gloss-row{padding:12px 0;border-bottom:1px solid var(--border);}
+.gloss-row .gloss-term{font-family:var(--font-mono);font-weight:700;font-size:12.8px;color:var(--accent-strong);letter-spacing:.01em;text-transform:uppercase;}
+.gloss-row .gloss-def{font-size:13.3px;color:var(--text);margin-top:3px;line-height:1.5;}
 .vida-toolbar-actions{display:flex;gap:10px;margin-bottom:18px;}
 .vida-toolbar-actions .btn-ghost{padding:7px 14px;font-size:12.5px;}
 .dublin-schematic{margin-bottom:16px;background:var(--surface-2);border-radius:var(--radius);padding:10px 14px 4px;}

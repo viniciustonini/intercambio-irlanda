@@ -1260,6 +1260,24 @@ function wireSaibaMais(wrap){
   wrap.querySelectorAll("[data-sec]").forEach(function(btn){
     btn.addEventListener("click", function(){ goToSection(btn.dataset.sec); });
   });
+  wrap.querySelectorAll("[data-glossario-term]").forEach(function(btn){
+    btn.addEventListener("click", function(){ abrirTermoGlossario(btn.dataset.glossarioTerm); });
+  });
+}
+function verGlossarioHtml(term){
+  return '<button type="button" class="ci-link" style="border:none;background:none;padding:0;font:inherit;cursor:pointer;margin-top:6px;margin-right:14px;font-size:12.3px;font-weight:600;display:inline-block;" data-glossario-term="'+term+'">Ver no Glossário →</button>';
+}
+function abrirTermoGlossario(term){
+  vidaIrlandaView = "glossario"; ls("vidaIrlandaView", vidaIrlandaView);
+  renderVidaIrlandaSubtabs(); updateVidaIrlandaPanelVisibility();
+  vidaSharedFilterState.q = term; vidaSharedFilterState.tag = null;
+  var searchInput = document.getElementById("vidaSearch");
+  if(searchInput) searchInput.value = term;
+  var tagsWrap = document.getElementById("vidaTags");
+  if(tagsWrap) tagsWrap.querySelectorAll(".subtab").forEach(function(x){ x.classList.remove("active"); });
+  renderVidaAllPanels();
+  var filterBar = document.getElementById("vidaIrlandaFilterBar");
+  if(filterBar) filterBar.scrollIntoView({behavior:"smooth", block:"start"});
 }
 var vidaSharedFilterState = {q:"", tag:null};
 function vidaFilterBarHtml(){
@@ -1391,13 +1409,14 @@ function renderGlossario(){
   var wrap = document.getElementById("glossarioWrap");
   if(!wrap) return;
   var html = GLOSSARIO_CATEGORIES.map(function(cat, idx){
-    var items = GLOSSARIO_TERMS.filter(function(g){ return g.cat===cat.id && matchesVidaFilter(g, vidaSharedFilterState); });
+    var items = GLOSSARIO_TERMS.filter(function(g){ return g.cat===cat.id && matchesVidaFilter(g, vidaSharedFilterState); })
+      .slice().sort(function(a,b){ return a.t.localeCompare(b.t, "pt-BR"); });
     if(!items.length) return "";
-    var cardsHtml = items.map(function(g){
-      return '<div class="card" style="padding:16px 18px;"><h3 style="font-size:15px;margin-bottom:4px;">'+g.t+'</h3><p style="margin:0;font-size:13.3px;">'+g.d+'</p>'+saibaMaisHtml(g.sec)+'</div>';
+    var rowsHtml = items.map(function(g){
+      return '<div class="gloss-row"><div class="gloss-term">'+g.t+'</div><div class="gloss-def">'+g.d+saibaMaisHtml(g.sec)+'</div></div>';
     }).join("");
     return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
-      '<div class="vida-cat-body"><div class="grid cols-3">'+cardsHtml+'</div></div></details>';
+      '<div class="vida-cat-body"><div class="gloss-list">'+rowsHtml+'</div></div></details>';
   }).join("");
   wrap.innerHTML = html.trim() ? html : '<div class="empty">Nenhum termo encontrado — tente outra palavra ou filtro.</div>';
   wireSaibaMais(wrap);
@@ -1420,22 +1439,18 @@ var VIDA_PRATICA_CATEGORIES = [
   {id:"saude", label:"Emergências e saúde"}
 ];
 var VIDA_PRATICA = [
-  {cat:"cultura", tags:["Cultura"], t:"\"How are you?\" não é bem uma pergunta", d:"É uma saudação — a resposta esperada é curta (\"Grand, thanks, you?\"), não um relato do seu dia."},
-  {cat:"cultura", tags:["Cultura"], t:"\"Grand\"", d:"Quer dizer \"ok, tudo bem\" — não \"grandioso\", como o cognato sugere."},
-  {cat:"cultura", tags:["Cultura"], t:"\"Cheers\"", d:"Também funciona como \"obrigado\" ou \"valeu, até mais\" — não só como brinde."},
-  {cat:"cultura", tags:["Cultura"], t:"\"Thanks a million\"", d:"Jeito comum e informal de agradecer, sem exagero — não soa afetado."},
+  {cat:"cultura", tags:["Cultura"], t:"\"How are you?\" não é bem uma pergunta", d:"É uma saudação — a resposta esperada é curta (\"Grand, thanks, you?\"), não um relato do seu dia."+verGlossarioHtml("Grand")},
+  {cat:"cultura", tags:["Cultura"], t:"\"Thanks a million\"", d:"Jeito comum e informal de agradecer, sem exagero — não soa afetado. \"Cheers\" também vale, no mesmo sentido."+verGlossarioHtml("Cheers")},
   {cat:"cultura", tags:["Cultura"], t:"\"Sorry\" e \"Excuse me\"", d:"\"Sorry\" é usado o tempo todo, até quando ninguém errou — esbarrão leve, pedir passagem, chamar atenção de alguém."},
   {cat:"cultura", tags:["Cultura"], t:"Small talk", d:"Comentar sobre o clima ou o fim de semana com desconhecidos (fila, elevador, ônibus) é normal — não é sinal de interesse maior na conversa."},
   {cat:"cultura", tags:["Cultura"], t:"Filas", d:"Levadas a sério — furar fila é malvisto mesmo em situações informais."},
   {cat:"cultura", tags:["Cultura"], t:"Pontualidade", d:"Atrasos curtos em encontros informais costumam ser tolerados; no trabalho, não."},
   {cat:"cultura", tags:["Cultura","Casa"], t:"Casa compartilhada", d:"Dividir louça, avisar sobre visitas e evitar barulho à noite fazem parte da convivência esperada."},
   {cat:"cultura", tags:["Cultura","Casa"], t:"Vizinhos", d:"Cordialidade é a norma, mas proximidade não é automática como pode ser no Brasil."},
-  {cat:"casa", tags:["Casa"], t:"Heating", d:"Aquecimento central, geralmente a gás, ligado por timer ou termostato."},
-  {cat:"casa", tags:["Casa"], t:"\"Turn off the immersion\"", d:"O immersion heater é uma resistência elétrica dentro do boiler que esquenta a água por conta própria, sem depender do aquecimento central. Como consome bastante energia se ficar ligado à toa, o pedido comum em casa compartilhada é desligar depois do banho."},
-  {cat:"casa", tags:["Casa"], t:"Boiler", d:"O reservatório que guarda a água já aquecida."},
+  {cat:"casa", tags:["Casa"], t:"\"Turn off the immersion\"", d:"É um pedido comum em casa compartilhada: a resistência elétrica que aquece a água sob demanda consome bastante energia se ficar ligada à toa, então o combinado é desligar depois do banho."+verGlossarioHtml("Immersion")},
   {cat:"casa", tags:["Casa","Dinheiro"], t:"Electricity: pré-pago x faturado", d:"Algumas casas têm medidor pré-pago (recarrega saldo, \"top up\"); outras recebem conta mensal (bill pay)."},
   {cat:"casa", tags:["Casa"], t:"Bins e reciclagem", d:"Resumo rápido aqui — detalhe completo no bloco de reciclagem logo abaixo."},
-  {cat:"casa", tags:["Casa"], t:"Lavanderia em casa x laundrette", d:"A maioria das casas tem máquina; quem mora em quarto sem máquina usa uma laundrette (lavanderia self-service, paga por uso)."},
+  {cat:"casa", tags:["Casa"], t:"Lavanderia em casa x laundrette", d:"A maioria das casas tem máquina; quem mora em quarto sem máquina usa uma laundrette."+verGlossarioHtml("Laundrette")},
   {cat:"casa", tags:["Casa"], t:"Drying rack", d:"O estendedor de secar roupa dentro de casa — secadora elétrica não é tão comum quanto no Brasil."},
   {cat:"reciclagem", tags:["Casa"], t:"As 3 lixeiras", d:"General waste (geral), recycling (reciclagem seca) e organic/food waste (orgânico). Cores e dia de coleta variam por município."},
   {cat:"reciclagem", tags:["Casa"], t:"Glass recycling", d:"Vidro normalmente não vai na lixeira de reciclagem comum — tem ecoponto próprio (bottle bank)."},
@@ -1445,13 +1460,10 @@ var VIDA_PRATICA = [
   {cat:"clima", tags:["Cultura"], t:"\"Pode chover e fazer sol no mesmo dia?\"", d:"Pode, e é bem comum."},
   {cat:"clima", tags:["Cultura"], t:"\"Guarda-chuva funciona?\"", d:"Com vento forte, capa ou jaqueta impermeável costuma ser mais prática — não é regra para toda situação."},
   {cat:"clima", tags:["Cultura"], t:"Luz do dia", d:"Quase 18h de luz em junho; escurece já no meio da tarde em dezembro.", source:"https://www.met.ie", verifiedAt:VIDA_VERIFIED_AT},
-  {cat:"enderecos", tags:["Documentos","Casa"], t:"Eircode", d:"Código postal único por endereço — cada casa tem o seu, diferente do sistema por região usado no Brasil.", source:"https://www.eircode.ie", verifiedAt:VIDA_VERIFIED_AT},
-  {cat:"enderecos", tags:["Documentos"], t:"County", d:"Divisão administrativa, mais ou menos como um \"estado\" pequeno."},
+  {cat:"enderecos", tags:["Documentos","Casa"], t:"Eircode e County", d:"Todo endereço tem um Eircode único (o \"CEP\" de cada casa) e fica dentro de um County — divisão administrativa, mais ou menos como um \"estado\" pequeno."+verGlossarioHtml("Eircode")+verGlossarioHtml("County"), source:"https://www.eircode.ie", verifiedAt:VIDA_VERIFIED_AT},
   {cat:"enderecos", tags:["Documentos","Casa"], t:"Distritos postais de Dublin", d:"Dublin 1, 2, 4 e assim por diante — explicado em detalhe no bloco de bairros logo abaixo."},
   {cat:"enderecos", tags:["Documentos"], t:"Diferenças de formato", d:"Endereço irlandês às vezes usa nome da casa/prédio em vez de número, e a ordem das linhas muda em relação ao padrão brasileiro."},
-  {cat:"compras", tags:["Dinheiro"], t:"Penneys", d:"Roupas baratas — é a mesma rede que no resto da Europa se chama Primark."},
-  {cat:"compras", tags:["Dinheiro","Casa"], t:"Dealz", d:"Utilidades domésticas baratas, equivalente à Poundland britânica."},
-  {cat:"compras", tags:["Dinheiro","Saúde"], t:"Boots", d:"Farmácia e perfumaria, bem popular para o dia a dia."},
+  {cat:"compras", tags:["Dinheiro"], t:"Lojas do dia a dia", d:"Penneys (roupa barata — é a Primark europeia), Boots (farmácia e perfumaria) e Dealz (utilidades domésticas baratas, tipo Poundland) são presença certa em qualquer cidade."},
   {cat:"compras", tags:["Dinheiro"], t:"Supermercados", d:"Tesco, Lidl, Aldi e outras redes já têm página própria com preços de referência.", sec:"mercado"},
   {cat:"pagamentos", tags:["Dinheiro"], t:"Contactless", d:"Pagamento por aproximação é muito comum — muitas vezes preferido a dinheiro, mesmo em valores pequenos."},
   {cat:"pagamentos", tags:["Dinheiro"], t:"Debit card, Apple Pay, Google Pay", d:"Aceitos amplamente em praticamente qualquer estabelecimento."},
@@ -1459,13 +1471,11 @@ var VIDA_PRATICA = [
   {cat:"pagamentos", tags:["Dinheiro","Documentos"], t:"IBAN", d:"Formato de conta bancária europeu, necessário para receber salário e pagar aluguel por transferência."},
   {cat:"pagamentos", tags:["Dinheiro"], t:"Revolut", d:"Conta digital popular entre estrangeiros por ser fácil de abrir sem PPSN — uma opção prática, não uma obrigação."},
   {cat:"celular", tags:["Casa"], t:"SIM físico x eSIM", d:"As duas opções existem lado a lado — dá para escolher pelo aparelho e pela operadora."},
-  {cat:"celular", tags:["Casa","Dinheiro"], t:"Prepaid x bill pay", d:"Pré-pago recarrega saldo quando quiser; plano mensal (bill pay) costuma pedir conta bancária irlandesa."},
-  {cat:"celular", tags:["Casa"], t:"Top up", d:"O termo para \"recarregar\" o saldo do plano pré-pago."},
+  {cat:"celular", tags:["Casa","Dinheiro"], t:"Prepaid x bill pay", d:"Pré-pago recarrega saldo (\"top up\") quando quiser; plano mensal (bill pay) costuma pedir conta bancária irlandesa."+verGlossarioHtml("Top up")},
   {cat:"celular", tags:["Casa"], t:"Por onde começar", d:"Pré-pago costuma ser mais simples logo na chegada, antes de ter conta bancária e comprovante de endereço."},
   {cat:"energia", tags:["Casa"], t:"Tomada tipo G", d:"230V/50Hz — formato diferente do padrão brasileiro."},
   {cat:"energia", tags:["Casa"], t:"Adaptador x conversor de voltagem", d:"Todo aparelho brasileiro precisa do adaptador físico; alguns também precisam de conversor de voltagem se não forem bivolt. Sempre cheque a etiqueta do aparelho antes de ligar."},
-  {cat:"pubs", tags:["Cultura"], t:"Counter service x table service", d:"Em pub, geralmente você pede e paga no balcão — não tem garçom vindo à mesa como em restaurante."},
-  {cat:"pubs", tags:["Cultura"], t:"Off-licence", d:"Loja autorizada a vender bebida alcoólica para levar."},
+  {cat:"pubs", tags:["Cultura"], t:"Counter service x table service", d:"Em pub, geralmente você pede e paga no balcão — não tem garçom vindo à mesa como em restaurante. Quer levar a bebida para casa? Isso é papel da off-licence, não do próprio pub."+verGlossarioHtml("Off-licence")},
   {cat:"pubs", tags:["Cultura"], t:"Last orders", d:"O aviso de \"últimos pedidos\" antes do bar fechar."},
   {cat:"pubs", tags:["Cultura"], t:"Frases prontas", d:"\"Can I get...\", \"Could I have...\", \"Can we split the bill?\", \"Could we get the bill, please?\""},
   {cat:"pubs", tags:["Cultura","Dinheiro"], t:"Gorjeta", d:"Comum em restaurante (10–15%), mas não obrigatória; no balcão de pub não é costume."},
