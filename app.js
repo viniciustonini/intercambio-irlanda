@@ -2923,7 +2923,7 @@ function renderCostCompare(){
     return '<tr>'+
       '<td data-label="Item">'+f.label+'</td>'+
       '<td class="num" data-label="Brasil (R$)"><input type="number" step="1" style="width:90px;text-align:right;" value="'+(brVal||"")+'" data-key="'+f.key+'" placeholder="0"></td>'+
-      '<td class="num tabular" data-label="Irlanda (R$ equiv.)">R$'+ieValBrl.toFixed(2)+'</td>'+
+      '<td class="num tabular" data-label="Irlanda (R$ equiv.)" id="costCompareIe-'+f.key+'"'+(brVal?'':' style="color:var(--muted);"')+'>R$'+ieValBrl.toFixed(2)+'</td>'+
       '</tr>';
   }).join("");
   wrap.innerHTML =
@@ -2941,6 +2941,8 @@ function renderCostCompare(){
       c[inp.dataset.key] = parseFloat(inp.value)||0;
       saveBrCosts(c);
       updateCostCompareTotals();
+      var ieCell = document.getElementById("costCompareIe-"+inp.dataset.key);
+      if(ieCell) ieCell.style.color = c[inp.dataset.key] ? "" : "var(--muted)";
     });
   });
 }
