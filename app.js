@@ -1373,29 +1373,20 @@ var GLOSSARIO_TERMS = [
   {t:"Heating", cat:"cotidiano", tags:["Casa"], d:"Aquecimento central da casa, geralmente a gás, ligado por timer ou termostato."},
   {t:"County", cat:"cotidiano", tags:["Casa","Documentos"], d:"Divisão administrativa irlandesa, mais ou menos como um \"estado\" pequeno."}
 ];
-function renderGlossarioCatTabs(){
-  var wrap = document.getElementById("glossarioCatTabs");
-  if(!wrap) return;
-  wrap.innerHTML = '<button class="subtab'+(glossarioCatView==="todos"?" active":"")+'" data-cat="todos">Todos</button>'+
-    GLOSSARIO_CATEGORIES.map(function(c){
-      return '<button class="subtab'+(glossarioCatView===c.id?" active":"")+'" data-cat="'+c.id+'">'+c.label+'</button>';
-    }).join("");
-  wrap.querySelectorAll(".subtab").forEach(function(b){
-    b.addEventListener("click", function(){ glossarioCatView = b.dataset.cat; renderGlossarioCatTabs(); renderGlossario(); });
-  });
-}
-var glossarioCatView = "todos";
 var glossarioFilterState = {q:"", tag:null};
 function renderGlossario(){
   var wrap = document.getElementById("glossarioWrap");
   if(!wrap) return;
-  var shown = GLOSSARIO_TERMS.filter(function(g){
-    if(glossarioCatView!=="todos" && g.cat!==glossarioCatView) return false;
-    return matchesVidaFilter(g, glossarioFilterState);
-  });
-  wrap.innerHTML = shown.length ? shown.map(function(g){
-    return '<div class="card" style="padding:16px 18px;"><h3 style="font-size:15px;margin-bottom:4px;">'+g.t+'</h3><p style="margin:0;font-size:13.3px;">'+g.d+'</p>'+saibaMaisHtml(g.sec)+'</div>';
-  }).join("") : '<div class="empty">Nenhum termo encontrado — tente outra palavra ou filtro.</div>';
+  var html = GLOSSARIO_CATEGORIES.map(function(cat, idx){
+    var items = GLOSSARIO_TERMS.filter(function(g){ return g.cat===cat.id && matchesVidaFilter(g, glossarioFilterState); });
+    if(!items.length) return "";
+    var cardsHtml = items.map(function(g){
+      return '<div class="card" style="padding:16px 18px;"><h3 style="font-size:15px;margin-bottom:4px;">'+g.t+'</h3><p style="margin:0;font-size:13.3px;">'+g.d+'</p>'+saibaMaisHtml(g.sec)+'</div>';
+    }).join("");
+    return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
+      '<div class="vida-cat-body"><div class="grid cols-3">'+cardsHtml+'</div></div></details>';
+  }).join("");
+  wrap.innerHTML = html.trim() ? html : '<div class="empty">Nenhum termo encontrado — tente outra palavra ou filtro.</div>';
   wireSaibaMais(wrap);
 }
 
@@ -1493,7 +1484,7 @@ function renderVidaIrlanda(){
       var districtsHtml = DUBLIN_DISTRICTS.map(function(dist){
         return '<div class="district-card"><span class="district-side">'+dist.side+'</span><h4>'+dist.code+'</h4><p>'+dist.d+'</p></div>';
       }).join("");
-      return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary>'+cat.label+' <span class="vida-cat-count">6 distritos, sem ranking</span></summary>'+
+      return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">6 distritos, sem ranking</span></span></summary>'+
         '<div class="vida-cat-body">'+
         '<p class="source-note" style="margin-bottom:10px;">Números pares ficam mais concentrados ao sul do rio Liffey, ímpares ao norte — isso é fato histórico do zoneamento postal, não uma régua de qualidade. Existem ruas ótimas em distritos ímpares e ruas medianas em distritos pares.</p>'+
         '<div class="district-grid">'+districtsHtml+'</div>'+
@@ -1505,7 +1496,7 @@ function renderVidaIrlanda(){
     var cardsHtml = items.map(function(v){
       return '<div class="exp-card"><h4>'+v.t+'</h4><p>'+v.d+'</p>'+saibaMaisHtml(v.sec)+(v.source?officialSourceHtml(v.source, v.verifiedAt):"")+'</div>';
     }).join("");
-    return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary>'+cat.label+' <span class="vida-cat-count">'+items.length+'</span></summary>'+
+    return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
       '<div class="vida-cat-body"><div class="grid cols-3">'+cardsHtml+'</div></div></details>';
   }).join("");
   wrap.innerHTML = html.trim() ? html : '<div class="empty">Nenhum resultado — tente outra palavra ou filtro.</div>';
@@ -1583,7 +1574,7 @@ function renderMitos(){
       return '<details class="acc-item"'+(idx===0 && i2===0?" open":"")+'><summary><span class="pill'+(m.cls==="mito"?" noneu":m.cls==="verdade"?" eu":"")+'" style="'+(m.cls==="depende"?"background:var(--gold-soft, rgba(185,134,46,.14));color:var(--gold-text,#7A5A12);":"")+'flex:none;margin-right:10px;">'+badgeLabel+'</span><span style="flex:1;">'+m.q+'</span></summary>'+
         '<p style="margin:10px 0 0;font-size:13.3px;line-height:1.6;">'+m.a+'</p>'+saibaMaisHtml(m.sec)+'</details>';
     }).join("");
-    return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary>'+cat.label+' <span class="vida-cat-count">'+items.length+'</span></summary>'+
+    return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
       '<div class="vida-cat-body">'+rows+'</div></details>';
   }).join("");
   wrap.innerHTML = html.trim() ? html : '<div class="empty">Nenhuma pergunta encontrada — tente outra palavra ou filtro.</div>';
@@ -1643,8 +1634,7 @@ function renderVidaIrlandaContent(){
     '</div>'+
     '<div class="vida-panel" id="vidaPanel-glossario">'+
       vidaFilterBarHtml("glossario", "Buscar termo (ex: PPSN, Stamp, Leap Card...)")+
-      '<div class="subtabs" id="glossarioCatTabs" style="margin-bottom:16px;"></div>'+
-      '<div class="grid cols-3" id="glossarioWrap"></div>'+
+      '<div id="glossarioWrap"></div>'+
     '</div>'+
     '<div class="vida-panel" id="vidaPanel-mitos">'+
       vidaFilterBarHtml("mitos", "Buscar pergunta (ex: 40 horas, Schengen, Leap Card...)")+
@@ -1653,7 +1643,6 @@ function renderVidaIrlandaContent(){
   wireVidaFilterBar("vidaPratica", function(state){ vidaPraticaFilterState = state; renderVidaIrlanda(); });
   wireVidaFilterBar("glossario", function(state){ glossarioFilterState = state; renderGlossario(); });
   wireVidaFilterBar("mitos", function(state){ mitosFilterState = state; renderMitos(); });
-  renderGlossarioCatTabs();
   renderVidaIrlanda();
   renderGlossario();
   renderMitos();
