@@ -390,8 +390,8 @@ table td{vertical-align:middle;}
 @media (max-width:800px){.school-prices{gap:8px;}}
 .schools-toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
 .schools-toolbar .subtabs{margin-bottom:0;}
-#marketAddForm,#schoolAddForm,#stayAddForm{flex:none;}
-#marketAddForm:has(.mini-form-grid),#schoolAddForm:has(.mini-form-grid),#stayAddForm:has(.mini-form-grid){flex:1 1 100%;}
+#marketAddForm,#schoolAddForm,#stayAddForm,#jobAddForm{flex:none;}
+#marketAddForm:has(.mini-form-grid),#schoolAddForm:has(.mini-form-grid),#stayAddForm:has(.mini-form-grid),#jobAddForm:has(.mini-form-grid){flex:1 1 100%;}
 .inline-add-panel{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:12px;background:var(--surface-2);}
 .tip-row:last-child{border-bottom:none;}
 .tip-row .tip-ico{width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent-strong);flex:none;display:flex;align-items:center;justify-content:center;margin-top:1px;}

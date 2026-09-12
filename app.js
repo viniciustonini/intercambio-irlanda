@@ -1487,9 +1487,12 @@ function renderJobCompanies(){
   if(!roles.some(function(r){ return r.id===jobRoleSubView; })){
     jobRoleSubView = roles.length ? roles[0].id : null;
   }
-  var tabsHtml = '<div class="subtabs" style="margin-bottom:14px;">'+roles.map(function(r){
-    return '<button class="subtab'+(jobRoleSubView===r.id?' active':'')+'" data-role="'+r.id+'">'+r.l+'</button>';
-  }).join("")+'</div>';
+  var tabsHtml = '<div class="schools-toolbar">'+
+    '<div class="subtabs">'+roles.map(function(r){
+      return '<button class="subtab'+(jobRoleSubView===r.id?' active':'')+'" data-role="'+r.id+'">'+r.l+'</button>';
+    }).join("")+'</div>'+
+    '<div id="jobAddForm"></div>'+
+    '</div>';
   var active = roles.find(function(r){ return r.id===jobRoleSubView; });
   var cardHtml = "";
   if(active){
@@ -1516,6 +1519,7 @@ function renderJobCompanies(){
       renderJobCompanies();
     });
   });
+  renderJobAddForm();
 }
 var jobAddState = {open:false};
 function renderJobAddForm(){
@@ -3532,7 +3536,6 @@ function init(){
   renderAssessoria();
   renderJobTypes();
   renderJobFinder();
-  renderJobAddForm();
   renderAgencias();
   renderVidaIrlandaSubtabs(); renderVidaIrlandaContent();
   injectFaqSchema();
