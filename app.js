@@ -1897,7 +1897,9 @@ var TRANSPORT_APPS = [
   {name:"Google Maps", url:"https://maps.google.com/", desc:"Boa cobertura de rotas de transporte público nas três cidades e integração a pé até a parada."},
   {name:"FreeNow", iconUrl:"https://free-now.com/ie/", desc:"Aplicativo de táxi mais usado na Irlanda — bom para madrugada ou com muita bagagem. Baixe pela loja de apps do seu celular."},
   {name:"TFI Driver Check", iconUrl:"https://www.transportforireland.ie/", desc:"Verifica se o motorista, veículo e licença do táxi são os cadastrados oficialmente antes de embarcar. Baixe pela loja de apps do seu celular."},
-  {name:"Irish Rail (app)", url:"https://www.irishrail.ie/", desc:"Horários e bilhetes de trens intercidades (Dublin ↔ Cork ↔ Galway) e do DART."}
+  {name:"Irish Rail (app)", url:"https://www.irishrail.ie/", desc:"Horários e bilhetes de trens intercidades (Dublin ↔ Cork ↔ Galway) e do DART."},
+  {name:"Moovit", url:"https://moovit.com/", desc:"App internacional de transporte público, com boa cobertura em Dublin, Cork e Galway — boa alternativa ao TFI Live."},
+  {name:"Uber", url:"https://www.uber.com/ie/en/", desc:"Também funciona em Dublin como alternativa ao FreeNow para pedir carro."}
 ];
 function renderTransportApps(){
   document.getElementById("transportAppsWrap").innerHTML = TRANSPORT_APPS.map(function(a){
