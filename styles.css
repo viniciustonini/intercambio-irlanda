@@ -392,7 +392,7 @@ table td{vertical-align:middle;}
 .tip-row:last-child{border-bottom:none;}
 .tip-row .tip-ico{width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent-strong);flex:none;display:flex;align-items:center;justify-content:center;margin-top:1px;}
 .tip-row .tip-ico svg{width:11px;height:11px;}
-.tip-row .tip-text b{display:block;font-size:13.6px;margin-bottom:2px;}
+.tip-row .tip-text > b{display:block;font-size:13.6px;margin-bottom:2px;}
 .tip-row .tip-text span{font-size:12.3px;color:var(--muted);}
 .summary-row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--border);}
 .summary-row:last-child{border-bottom:none;}

@@ -86,7 +86,7 @@ function animateSectionEntrance(id){
   if(!section) return;
   var items = section.querySelectorAll(".card, .tablewrap, .rules-card, .tourism-banner, .grid > *, .proscons, .seg, .subtabs, .timeline > .checkitem");
   if(!items.length) return;
-  if(hasScrollTrigger) ScrollTrigger.getAll().forEach(function(st){ st.kill(); });
+  if(hasScrollTrigger) ScrollTrigger.getAll().forEach(function(st){ if(section.contains(st.trigger)) st.kill(); });
   var above = Array.prototype.slice.call(items, 0, 4);
   var below = Array.prototype.slice.call(items, 4);
   gsap.fromTo(above, {opacity:0, y:16}, {opacity:1, y:0, duration:.5, ease:"power2.out", stagger:0.05, overwrite:true});
@@ -1934,8 +1934,8 @@ function renderLeapCards(){
 var TRANSPORT_ROUTES = {
   dublin: {
     mapQuery:"Dublin, Ireland",
-    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Dublin_Double_Bus.JPG/960px-Dublin_Double_Bus.JPG",
-    photoCredit:{name:"Cadaverexquisito", license:"CC BY-SA 3.0", url:"https://commons.wikimedia.org/wiki/File:Dublin_Double_Bus.JPG"},
+    photo:"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Dublin_Bus_EA_Class%2C_Aug24.jpg/960px-Dublin_Bus_EA_Class%2C_Aug24.jpg",
+    photoCredit:{name:"Cityswift", license:"CC BY 2.0", url:"https://commons.wikimedia.org/wiki/File:Dublin_Bus_EA_Class,_Aug24.jpg"},
     network:"Ônibus (Dublin Bus), Luas (VLT) e DART/trens suburbanos — Dublin não tem metrô em operação.",
     card:"Leap Card — para estadia de meses, o cartão comum costuma valer mais que o Visitor Leap Card. Custa €10 (com algum crédito já incluso) e é vendido em lojas Spar, Centra, SuperValu e nas estações DART.",
     airport:[
