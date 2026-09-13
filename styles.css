@@ -400,10 +400,15 @@ table td{vertical-align:middle;}
 .gloss-row .gloss-def{font-size:13.3px;color:var(--text);margin-top:3px;line-height:1.5;padding-left:16px;}
 .tag-dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block;margin-right:8px;}
 .subtab .tag-dot{margin-right:7px;vertical-align:-1px;}
-.mito-dot{width:10px;height:10px;border-radius:50%;flex:none;margin-right:12px;margin-top:4px;}
+.mito-dot{width:10px;height:10px;border-radius:50%;flex:none;margin-right:12px;margin-top:5px;}
 .mito-dot-mito{background:var(--warn);}
 .mito-dot-verdade{background:var(--accent);}
 .mito-dot-depende{background:var(--gold);}
+.mito-row{display:flex;padding:14px 0;border-bottom:1px solid var(--border);}
+.mito-row:last-child{border-bottom:none;}
+.mito-row-body{flex:1;min-width:0;}
+.mito-row .mito-q{font-weight:600;font-size:14px;margin:0 0 6px;color:var(--text);}
+.mito-row .mito-a{font-size:13.3px;line-height:1.6;color:var(--muted);margin:0;}
 .vida-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--vida-accent, var(--accent));border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;}
 .vida-card h4{font-family:var(--font-display);font-weight:600;font-size:16.5px;letter-spacing:-.01em;margin:0 0 8px;color:var(--navy);}
 .vida-card p{font-size:13px;color:var(--text);line-height:1.55;margin:0;}

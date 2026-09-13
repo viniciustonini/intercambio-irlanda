@@ -1671,15 +1671,15 @@ function mitosOverviewHtml(){
 function renderMitos(){
   var wrap = document.getElementById("mitosWrap");
   if(!wrap) return;
-  var html = MITOS_CATEGORIES.map(function(cat, idx){
+  var html = MITOS_CATEGORIES.map(function(cat){
     var items = MITOS_VERDADES.filter(function(m){ return m.cat===cat.id && matchesVidaFilter(m, vidaSharedFilterState); });
     if(!items.length) return "";
-    var rows = items.map(function(m, i2){
+    var rows = items.map(function(m){
       var badgeLabel = m.badgeLabel || MITO_BADGE_LABEL[m.cls];
-      return '<details class="acc-item"'+(idx===0 && i2===0?" open":"")+'><summary><span class="mito-dot mito-dot-'+m.cls+'" title="'+badgeLabel+'"></span><span style="flex:1;">'+m.q+'</span></summary>'+
-        '<p style="margin:10px 0 0;font-size:13.3px;line-height:1.6;">'+m.a+'</p>'+saibaMaisHtml(m.sec)+'</details>';
+      return '<div class="mito-row"><span class="mito-dot mito-dot-'+m.cls+'" title="'+badgeLabel+'"></span><div class="mito-row-body"><p class="mito-q">'+m.q+'</p>'+
+        '<p class="mito-a">'+m.a+'</p>'+saibaMaisHtml(m.sec)+'</div></div>';
     }).join("");
-    return '<details class="acc-item vida-cat"'+(idx===0?" open":"")+'><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
+    return '<details class="acc-item vida-cat" open><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
       '<div class="vida-cat-body">'+rows+'</div></details>';
   }).join("");
   wrap.innerHTML = mitosOverviewHtml() + (html.trim() ? html : '<div class="empty">Nenhuma pergunta encontrada — tente outra palavra ou filtro.</div>');
