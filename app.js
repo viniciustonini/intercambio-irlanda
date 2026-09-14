@@ -240,17 +240,21 @@ function adjustTabbarOverflow(){
     if(demoted) moreMenu.insertBefore(demoted, moreMenu.querySelector(".tab-btn") || linksBtn);
   }
 }
-var tabbarResizeTimer = null;
-window.addEventListener("resize", function(){
-  clearTimeout(tabbarResizeTimer);
-  tabbarResizeTimer = setTimeout(adjustTabbarOverflow, 150);
-});
-/* recalcula depois que a fonte customizada termina de carregar (e mais uma vez
-   um instante depois, de seguranca): o calculo inicial de espaco pode rodar
-   antes da webfont/layout estabilizar, com o texto mais estreito do que fica
-   depois, fazendo a barra "achar" que cabe mais coisa do que realmente cabe. */
-if(document.fonts && document.fonts.ready) document.fonts.ready.then(adjustTabbarOverflow);
-setTimeout(adjustTabbarOverflow, 400);
+/* varios gatilhos (resize, fonte carregada, checagem de seguranca apos o load)
+   podem pedir recalculo perto um do outro - centraliza tudo num unico timer
+   compartilhado + duplo requestAnimationFrame, pra nunca ter duas chamadas
+   correndo com medidas de layout diferentes (o que podia fazer a barra
+   "esconder" abas que cabiam de sobra, deixando espaco em branco). */
+var tabbarAdjustTimer = null;
+function scheduleTabbarAdjust(delay){
+  clearTimeout(tabbarAdjustTimer);
+  tabbarAdjustTimer = setTimeout(function(){
+    requestAnimationFrame(function(){ requestAnimationFrame(adjustTabbarOverflow); });
+  }, delay || 0);
+}
+window.addEventListener("resize", function(){ scheduleTabbarAdjust(150); });
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ scheduleTabbarAdjust(50); });
+scheduleTabbarAdjust(500);
 
 /* ---------- menu "Mais" ---------- */
 function openMoreMenu(){
