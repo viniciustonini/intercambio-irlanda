@@ -215,7 +215,7 @@ if(SCROLL_MODE_MQ.addEventListener) SCROLL_MODE_MQ.addEventListener("change", ap
 else SCROLL_MODE_MQ.addListener(applyScrollMode);
 
 /* ---------- tab bar: encolhe pra "Mais" quando nao cabe, sem seta de rolagem ---------- */
-var TABBAR_FLEX_IDS = ["tab-roteiro","tab-imigracao","tab-financas","tab-trabalho","tab-ingles","tab-acomodacao","tab-mercado","tab-transporte","tab-vidairlanda","tab-grupos"];
+var TABBAR_FLEX_IDS = ["tab-roteiro","tab-imigracao","tab-financas","tab-trabalho","tab-ingles","tab-acomodacao","tab-mercado","tab-transporte","tab-grupos"];
 function adjustTabbarOverflow(){
   var tabbar = document.getElementById("tabbar");
   var moreMenu = document.getElementById("moreMenu");
@@ -226,6 +226,12 @@ function adjustTabbarOverflow(){
     var btn = document.getElementById(id);
     if(btn) tabbar.insertBefore(btn, moreBtn);
   });
+  /* "Vida na Irlanda" nunca e escondida no menu "Mais" (fica fixa, tipo o Turismo) -
+     so reposicionada logo depois do Transporte, apos os itens flexiveis acima se
+     reorganizarem. */
+  var vidaBtn = document.getElementById("tab-vidairlanda");
+  var transporteBtn = document.getElementById("tab-transporte");
+  if(vidaBtn && transporteBtn) tabbar.insertBefore(vidaBtn, transporteBtn.nextSibling);
   for(var i=TABBAR_FLEX_IDS.length-1; i>=0 && tabbar.scrollWidth > tabbar.clientWidth; i--){
     var demoted = document.getElementById(TABBAR_FLEX_IDS[i]);
     /* insere sempre no topo do menu (nao so antes do linksBtn): como a democao
