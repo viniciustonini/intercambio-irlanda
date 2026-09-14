@@ -215,7 +215,7 @@ if(SCROLL_MODE_MQ.addEventListener) SCROLL_MODE_MQ.addEventListener("change", ap
 else SCROLL_MODE_MQ.addListener(applyScrollMode);
 
 /* ---------- tab bar: encolhe pra "Mais" quando nao cabe, sem seta de rolagem ---------- */
-var TABBAR_FLEX_IDS = ["tab-roteiro","tab-imigracao","tab-financas","tab-trabalho","tab-ingles","tab-acomodacao","tab-mercado","tab-transporte","tab-grupos"];
+var TABBAR_FLEX_IDS = ["tab-roteiro","tab-imigracao","tab-financas","tab-trabalho","tab-ingles","tab-acomodacao","tab-mercado","tab-transporte","tab-vidairlanda","tab-grupos"];
 function adjustTabbarOverflow(){
   var tabbar = document.getElementById("tabbar");
   var moreMenu = document.getElementById("moreMenu");
@@ -228,7 +228,10 @@ function adjustTabbarOverflow(){
   });
   for(var i=TABBAR_FLEX_IDS.length-1; i>=0 && tabbar.scrollWidth > tabbar.clientWidth; i--){
     var demoted = document.getElementById(TABBAR_FLEX_IDS[i]);
-    if(demoted) moreMenu.insertBefore(demoted, linksBtn);
+    /* insere sempre no topo do menu (nao so antes do linksBtn): como a democao
+       roda do fim do array pra o comeco, isso reconstroi a ordem original do
+       array em vez de inverte-la quando mais de um item e demovido. */
+    if(demoted) moreMenu.insertBefore(demoted, moreMenu.querySelector(".tab-btn") || linksBtn);
   }
 }
 var tabbarResizeTimer = null;
