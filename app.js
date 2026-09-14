@@ -1285,16 +1285,35 @@ var TAG_COLORS = {
   "Saúde":"var(--warn)", "Dinheiro":"var(--gold)", "Documentos":"var(--navy)", "Estudo":"#B5566B"
 };
 function tagColor(tag){ return TAG_COLORS[tag] || "var(--muted)"; }
+function tagHasContent(tag, view){
+  if(view==="glossario") return GLOSSARIO_TERMS.some(function(g){ return (g.tags||[]).indexOf(tag)>-1; });
+  if(view==="mitos") return MITOS_VERDADES.some(function(m){ return (m.tags||[]).indexOf(tag)>-1; });
+  return VIDA_PRATICA.some(function(v){ return (v.tags||[]).indexOf(tag)>-1; });
+}
 function vidaFilterBarHtml(){
   return '<input type="search" id="vidaSearch" placeholder="Buscar dúvida ou termo (ex: PPSN, Stamp, immersion, Leap Card...)" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:12px;">'+
     '<div class="subtabs" id="vidaTags" style="margin-bottom:10px;"></div>'+
     '<div class="vida-toolbar-actions">'+
-      '<button type="button" class="btn-ghost" id="vidaExpandAll">Abrir tudo</button>'+
       '<button type="button" class="btn-ghost" id="vidaCollapseAll">Fechar tudo</button>'+
     '</div>';
 }
 function renderVidaAllPanels(){
   renderVidaIrlanda(); renderGlossario(); renderMitos();
+}
+function refreshVidaTagsVisibility(){
+  var tagsWrap = document.getElementById("vidaTags");
+  if(!tagsWrap) return;
+  var changed = false;
+  tagsWrap.querySelectorAll(".subtab").forEach(function(b){
+    var visible = tagHasContent(b.dataset.tag, vidaIrlandaView);
+    b.hidden = !visible;
+    if(!visible && vidaSharedFilterState.tag===b.dataset.tag){
+      vidaSharedFilterState.tag = null;
+      b.classList.remove("active");
+      changed = true;
+    }
+  });
+  if(changed) renderVidaAllPanels();
 }
 function wireVidaFilterBar(){
   var tagsWrap = document.getElementById("vidaTags");
@@ -1312,8 +1331,8 @@ function wireVidaFilterBar(){
     vidaSharedFilterState.q = e.target.value;
     renderVidaAllPanels();
   });
-  document.getElementById("vidaExpandAll").addEventListener("click", function(){ setVidaAccordionsOpen(true); });
   document.getElementById("vidaCollapseAll").addEventListener("click", function(){ setVidaAccordionsOpen(false); });
+  refreshVidaTagsVisibility();
 }
 function setVidaAccordionsOpen(open){
   var activePanel = document.querySelector("#vidaIrlandaContent .vida-panel.active");
@@ -1501,36 +1520,38 @@ var DUBLIN_DISTRICTS = [
   {code:"Dublin 8", side:"Sul do Liffey", d:"Mistura de áreas centrais e residenciais; perfil varia bastante dentro do próprio distrito."}
 ];
 var DUBLIN_SCHEMATIC_PINS = [
-  {code:"7", x:112, y:78, side:"n"},
-  {code:"1", x:192, y:82, side:"n"},
-  {code:"8", x:122, y:168, side:"s"},
-  {code:"6", x:178, y:190, side:"s"},
-  {code:"2", x:214, y:158, side:"s"},
-  {code:"4", x:272, y:178, side:"s"}
+  {code:"15", x:55, y:80}, {code:"11", x:115, y:62}, {code:"7", x:175, y:78},
+  {code:"9", x:235, y:62}, {code:"17", x:300, y:52}, {code:"13", x:390, y:65},
+  {code:"1", x:210, y:110}, {code:"3", x:300, y:105}, {code:"5", x:355, y:88},
+  {code:"20", x:65, y:160}, {code:"10", x:115, y:185}, {code:"8", x:172, y:155},
+  {code:"2", x:255, y:150}, {code:"4", x:322, y:163},
+  {code:"22", x:65, y:216}, {code:"24", x:135, y:242}, {code:"12", x:175, y:200},
+  {code:"6W", x:222, y:222}, {code:"6", x:225, y:180}, {code:"14", x:262, y:220},
+  {code:"16", x:215, y:255}, {code:"18", x:338, y:207}
 ];
 function dublinSchematicHtml(){
   var pins = DUBLIN_SCHEMATIC_PINS.map(function(p){
-    return '<circle class="dublin-pin-dot" cx="'+p.x+'" cy="'+p.y+'" r="13"/>'+
-      '<text class="dublin-pin-label" x="'+p.x+'" y="'+(p.y+4)+'">'+p.code+'</text>';
+    return '<circle class="dublin-pin-dot" cx="'+p.x+'" cy="'+p.y+'" r="11"/>'+
+      '<text class="dublin-pin-label" x="'+p.x+'" y="'+(p.y+3.5)+'">'+p.code+'</text>';
   }).join("");
   return '<div class="dublin-schematic">'+
-    '<svg viewBox="0 0 400 260" width="100%" height="230" role="img" aria-label="Esquema ilustrativo dos distritos de Dublin em relação ao rio Liffey, ao M50 e à baía">'+
-      '<rect class="dublin-land" x="15" y="15" width="370" height="230" rx="50"/>'+
-      '<ellipse class="dublin-bay" cx="378" cy="140" rx="55" ry="75"/>'+
-      '<ellipse class="dublin-park" cx="88" cy="115" rx="34" ry="19"/>'+
-      '<path class="dublin-m50" d="M75,25 Q22,140 75,250"/>'+
-      '<path class="dublin-liffey" d="M18,140 Q150,152 225,138 T340,144"/>'+
+    '<svg viewBox="0 0 440 300" width="100%" height="280" role="img" aria-label="Esquema ilustrativo dos distritos postais de Dublin em relação ao rio Liffey, ao M50 e à baía">'+
+      '<rect class="dublin-land" x="15" y="15" width="410" height="270" rx="55"/>'+
+      '<ellipse class="dublin-bay" cx="415" cy="160" rx="60" ry="90"/>'+
+      '<ellipse class="dublin-park" cx="108" cy="128" rx="36" ry="20"/>'+
+      '<path class="dublin-m50" d="M88,25 Q26,160 88,290"/>'+
+      '<path class="dublin-liffey" d="M18,145 Q165,158 245,142 T385,148"/>'+
       pins+
-      '<text class="dublin-schematic-side" x="30" y="34">NORTE</text>'+
-      '<text class="dublin-schematic-side" x="30" y="236">SUL</text>'+
-      '<text class="dublin-schematic-label" x="30" y="145" transform="rotate(-90 30 145)">M50</text>'+
-      '<text class="dublin-schematic-label" x="88" y="112">Phoenix Park</text>'+
-      '<text class="dublin-schematic-label" x="313" y="112">Dublin</text>'+
-      '<text class="dublin-schematic-label" x="313" y="124">Airport</text>'+
-      '<text class="dublin-schematic-label" x="337" y="140">Dublin</text>'+
-      '<text class="dublin-schematic-label" x="337" y="152">Bay</text>'+
-      '<text class="dublin-schematic-label" x="255" y="228">Dún Laoghaire–Rathdown</text>'+
-      '<text class="dublin-schematic-label" x="40" y="222">County Dublin</text>'+
+      '<text class="dublin-schematic-side" x="32" y="34">NORTE</text>'+
+      '<text class="dublin-schematic-side" x="32" y="278">SUL</text>'+
+      '<text class="dublin-schematic-label" x="45" y="160" transform="rotate(-90 45 160)">M50</text>'+
+      '<text class="dublin-schematic-label" x="108" y="123">Phoenix Park</text>'+
+      '<text class="dublin-schematic-label" x="325" y="30">Dublin</text>'+
+      '<text class="dublin-schematic-label" x="325" y="42">Airport</text>'+
+      '<text class="dublin-schematic-label" x="392" y="150">Dublin</text>'+
+      '<text class="dublin-schematic-label" x="392" y="162">Bay</text>'+
+      '<text class="dublin-schematic-label" x="270" y="288">Dún Laoghaire–Rathdown</text>'+
+      '<text class="dublin-schematic-label" x="35" y="262">County Dublin</text>'+
     '</svg>'+
     '<p class="source-note" style="margin-top:2px;">Ilustração própria e simplificada, não é um mapa oficial nem uma indicação de qualidade — sirva-se dela só para entender a posição relativa dos distritos citados.</p>'+
   '</div>';
@@ -1727,8 +1748,9 @@ function updateVidaIrlandaPanelVisibility(){
     var panel = document.getElementById("vidaPanel-"+id);
     if(panel) panel.classList.toggle("active", vidaIrlandaView===id);
   });
-  var actions = document.getElementById("vidaExpandAll");
+  var actions = document.getElementById("vidaCollapseAll");
   if(actions) actions.closest(".vida-toolbar-actions").hidden = vidaIrlandaView==="glossario";
+  refreshVidaTagsVisibility();
 }
 function renderVidaIrlandaContent(){
   var wrap = document.getElementById("vidaIrlandaContent");
