@@ -245,6 +245,12 @@ window.addEventListener("resize", function(){
   clearTimeout(tabbarResizeTimer);
   tabbarResizeTimer = setTimeout(adjustTabbarOverflow, 150);
 });
+/* recalcula depois que a fonte customizada termina de carregar (e mais uma vez
+   um instante depois, de seguranca): o calculo inicial de espaco pode rodar
+   antes da webfont/layout estabilizar, com o texto mais estreito do que fica
+   depois, fazendo a barra "achar" que cabe mais coisa do que realmente cabe. */
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(adjustTabbarOverflow);
+setTimeout(adjustTabbarOverflow, 400);
 
 /* ---------- menu "Mais" ---------- */
 function openMoreMenu(){
