@@ -64,7 +64,15 @@ function showSection(id){
   if(isScrollMode()){
     highlightTab(id);
     var target = document.querySelector('.section[data-sec="'+id+'"]');
-    if(target) target.scrollIntoView({behavior:"smooth", block:"start"});
+    if(target){
+      /* rolagem instantanea, nao suave: com o conteudo atual (varias secoes
+         somando dezenas de milhares de px), uma rolagem suave em navegador
+         real as vezes para no meio do caminho antes de chegar ao alvo. */
+      scrollSpySuppressed = true;
+      clearTimeout(scrollSpyResumeTimer);
+      target.scrollIntoView({behavior:"auto", block:"start"});
+      scrollSpyResumeTimer = setTimeout(function(){ scrollSpySuppressed = false; }, 120);
+    }
     return;
   }
   document.querySelectorAll(".section").forEach(function(s){ s.classList.toggle("active", s.dataset.sec===id); });
@@ -150,15 +158,26 @@ function animateHeroEntrance(){
   }
 }
 document.querySelectorAll(".tab-btn[data-sec]").forEach(function(b){
-  b.addEventListener("click", function(){ location.hash = b.dataset.sec; showSection(b.dataset.sec); });
+  b.addEventListener("click", function(){ history.replaceState(null, "", "#"+b.dataset.sec); showSection(b.dataset.sec); });
 });
 window.addEventListener("hashchange", function(){ showSection(location.hash.replace("#","") || "inicio"); });
 
 /* ---------- rolagem contínua (somente mobile) ---------- */
 var scrollSpyObserver = null;
+/* enquanto uma navegacao por clique esta rolando ate a secao alvo (pode ser uma
+   rolagem longa, atravessando varias secoes), o observer fica suspenso pra nao
+   ficar trocando a aba ativa a cada secao que passa no caminho ("vai e volta"). */
+var scrollSpySuppressed = false;
+var scrollSpyResumeTimer = null;
+window.addEventListener("scroll", function(){
+  if(!scrollSpySuppressed) return;
+  clearTimeout(scrollSpyResumeTimer);
+  scrollSpyResumeTimer = setTimeout(function(){ scrollSpySuppressed = false; }, 120);
+}, {passive:true});
 function enableScrollSpy(){
   if(scrollSpyObserver) return;
   scrollSpyObserver = new IntersectionObserver(function(entries){
+    if(scrollSpySuppressed) return;
     entries.forEach(function(entry){
       if(entry.isIntersecting){
         var id = entry.target.dataset.sec;

@@ -105,8 +105,8 @@
   <div class="more-menu-backdrop" id="moreMenuBackdrop" hidden></div>
   <div class="more-menu" id="moreMenu" role="menu" aria-label="Mais seções" hidden>
     <div class="more-menu-handle" id="moreMenuHandle"></div>
-    <button class="tab-btn" id="tab-links" data-sec="links" role="menuitem" aria-controls="sec-links">Links oficiais</button>
     <button class="tab-btn" id="tab-vidairlanda" data-sec="vidairlanda" role="menuitem" aria-controls="sec-vidairlanda">Vida na Irlanda</button>
+    <button class="tab-btn" id="tab-links" data-sec="links" role="menuitem" aria-controls="sec-links">Links oficiais</button>
   </div>
 
   <main class="main" id="main-content">
@@ -418,12 +418,6 @@
       <div id="transportIntercityWrap"></div>
     </section>
 
-    <!-- LINKS OFICIAIS -->
-    <section class="section" id="sec-links" data-sec="links" role="tabpanel" aria-labelledby="tab-links">
-      <div class="section-head"><h2>Links oficiais</h2><p>Regras de imigração mudam com frequência — confirme sempre nestas fontes antes de tomar decisões importantes.</p></div>
-      <div id="linksWrap"></div>
-    </section>
-
     <!-- ROTEIRO COMPLETO -->
     <section class="section" id="sec-roteiro" data-sec="roteiro" role="tabpanel" aria-labelledby="tab-roteiro">
       <div class="section-head" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
@@ -439,6 +433,14 @@
       <div id="dias30Wrap" class="timeline"></div>
     </section>
 
+    <!-- VIDA NA IRLANDA (vida pratica / glossario / mitos, unificado) -->
+    <section class="section" id="sec-vidairlanda" data-sec="vidairlanda" role="tabpanel" aria-labelledby="tab-vidairlanda">
+      <div class="section-head"><h2>Vida na Irlanda</h2><p>Dia a dia, termos comuns e mitos sobre intercâmbio — tudo num só lugar.</p></div>
+      <div class="subtabs" id="vidaIrlandaSubtabs"></div>
+      <div id="vidaIrlandaFilterBar"></div>
+      <div id="vidaIrlandaContent"></div>
+    </section>
+
     <!-- GRUPOS -->
     <section class="section" id="sec-grupos" data-sec="grupos" role="tabpanel" aria-labelledby="tab-grupos">
       <div class="section-head"><h2>Grupos de WhatsApp &amp; Facebook</h2><p>Espaços para tirar dúvidas, achar moradia e conhecer outros brasileiros já na Irlanda.</p></div>
@@ -446,12 +448,10 @@
       <div id="groupsWrap"></div>
     </section>
 
-    <!-- VIDA NA IRLANDA (vida pratica / glossario / mitos, unificado) -->
-    <section class="section" id="sec-vidairlanda" data-sec="vidairlanda" role="tabpanel" aria-labelledby="tab-vidairlanda">
-      <div class="section-head"><h2>Vida na Irlanda</h2><p>Dia a dia, termos comuns e mitos sobre intercâmbio — tudo num só lugar.</p></div>
-      <div class="subtabs" id="vidaIrlandaSubtabs"></div>
-      <div id="vidaIrlandaFilterBar"></div>
-      <div id="vidaIrlandaContent"></div>
+    <!-- LINKS OFICIAIS -->
+    <section class="section" id="sec-links" data-sec="links" role="tabpanel" aria-labelledby="tab-links">
+      <div class="section-head"><h2>Links oficiais</h2><p>Regras de imigração mudam com frequência — confirme sempre nestas fontes antes de tomar decisões importantes.</p></div>
+      <div id="linksWrap"></div>
     </section>
 
     <!-- TURISMO (independente do resto do guia) -->
