@@ -215,8 +215,8 @@ if(SCROLL_MODE_MQ.addEventListener) SCROLL_MODE_MQ.addEventListener("change", ap
 else SCROLL_MODE_MQ.addListener(applyScrollMode);
 
 /* ---------- tab bar: encolhe pra "Mais" quando nao cabe, sem seta de rolagem ---------- */
-var TABBAR_FLEX_IDS = ["tab-roteiro","tab-imigracao","tab-financas","tab-trabalho","tab-ingles","tab-acomodacao","tab-mercado","tab-transporte","tab-grupos"];
-var TABBAR_PINNED_IDS = ["tab-inicio","tab-vidairlanda","tabMoreBtn","tab-turismo"];
+var TABBAR_FLEX_IDS = ["tab-roteiro","tab-imigracao","tab-financas","tab-trabalho","tab-ingles","tab-acomodacao","tab-mercado"];
+var TABBAR_PINNED_IDS = ["tab-inicio","tab-transporte","tab-grupos","tabMoreBtn","tab-turismo"];
 function adjustTabbarOverflow(){
   var tabbar = document.getElementById("tabbar");
   var moreMenu = document.getElementById("moreMenu");
@@ -227,12 +227,15 @@ function adjustTabbarOverflow(){
     var btn = document.getElementById(id);
     if(btn) tabbar.insertBefore(btn, moreBtn);
   });
-  /* "Vida na Irlanda" nunca e escondida no menu "Mais" (fica fixa, tipo o Turismo) -
-     so reposicionada logo depois do Transporte, apos os itens flexiveis acima se
-     reorganizarem. */
-  var vidaBtn = document.getElementById("tab-vidairlanda");
+  /* "Transporte" e "Grupos" nunca sao escondidos no menu "Mais" (fixos, tipo
+     o Turismo) - reposiciona os dois logo depois do ultimo item flexivel
+     (Mercado), ja que o reorder acima os deixaria presos logo apos o Inicio. */
+  var lastFlexId = TABBAR_FLEX_IDS[TABBAR_FLEX_IDS.length-1];
+  var lastFlexBtn = document.getElementById(lastFlexId);
   var transporteBtn = document.getElementById("tab-transporte");
-  if(vidaBtn && transporteBtn) tabbar.insertBefore(vidaBtn, transporteBtn.nextSibling);
+  var gruposBtn = document.getElementById("tab-grupos");
+  if(lastFlexBtn && transporteBtn) tabbar.insertBefore(transporteBtn, lastFlexBtn.nextSibling);
+  if(transporteBtn && gruposBtn) tabbar.insertBefore(gruposBtn, transporteBtn.nextSibling);
 
   /* calculo em passo unico: mede a largura de cada botao UMA vez (com tudo
      visivel) e decide matematicamente quantos itens flexiveis cabem, em vez
