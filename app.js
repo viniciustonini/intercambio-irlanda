@@ -215,8 +215,7 @@ if(SCROLL_MODE_MQ.addEventListener) SCROLL_MODE_MQ.addEventListener("change", ap
 else SCROLL_MODE_MQ.addListener(applyScrollMode);
 
 /* ---------- tab bar: encolhe pra "Mais" quando nao cabe, sem seta de rolagem ---------- */
-var TABBAR_FLEX_IDS = ["tab-roteiro","tab-imigracao","tab-financas","tab-trabalho","tab-ingles","tab-acomodacao","tab-mercado"];
-var TABBAR_PINNED_IDS = ["tab-inicio","tab-transporte","tab-grupos","tabMoreBtn","tab-turismo"];
+var TABBAR_FLEX_IDS = ["tab-roteiro","tab-imigracao","tab-financas","tab-trabalho","tab-ingles","tab-acomodacao","tab-mercado","tab-transporte","tab-grupos"];
 function adjustTabbarOverflow(){
   var tabbar = document.getElementById("tabbar");
   var moreMenu = document.getElementById("moreMenu");
@@ -227,41 +226,7 @@ function adjustTabbarOverflow(){
     var btn = document.getElementById(id);
     if(btn) tabbar.insertBefore(btn, moreBtn);
   });
-  /* "Transporte" e "Grupos" nunca sao escondidos no menu "Mais" (fixos, tipo
-     o Turismo) - reposiciona os dois logo depois do ultimo item flexivel
-     (Mercado), ja que o reorder acima os deixaria presos logo apos o Inicio. */
-  var lastFlexId = TABBAR_FLEX_IDS[TABBAR_FLEX_IDS.length-1];
-  var lastFlexBtn = document.getElementById(lastFlexId);
-  var transporteBtn = document.getElementById("tab-transporte");
-  var gruposBtn = document.getElementById("tab-grupos");
-  if(lastFlexBtn && transporteBtn) tabbar.insertBefore(transporteBtn, lastFlexBtn.nextSibling);
-  if(transporteBtn && gruposBtn) tabbar.insertBefore(gruposBtn, transporteBtn.nextSibling);
-
-  /* calculo em passo unico: mede a largura de cada botao UMA vez (com tudo
-     visivel) e decide matematicamente quantos itens flexiveis cabem, em vez
-     de ficar testando/escondendo/remedindo em loop - isso evita qualquer
-     chance de duas medidas de layout ligeiramente diferentes entre si
-     causarem um resultado inconsistente (abas escondidas sem necessidade). */
-  var gapPx = parseFloat(getComputedStyle(tabbar).columnGap) || 2;
-  var paddingPx = 12;
-  var pinnedWidth = TABBAR_PINNED_IDS.reduce(function(sum, id){
-    var el = document.getElementById(id);
-    return sum + (el ? el.getBoundingClientRect().width : 0);
-  }, 0);
-  var flexWidths = TABBAR_FLEX_IDS.map(function(id){
-    var el = document.getElementById(id);
-    return el ? el.getBoundingClientRect().width : 0;
-  });
-  var available = tabbar.clientWidth - 8; /* margem de seguranca p/ arredondamento de subpixel */
-  var keep = TABBAR_FLEX_IDS.length;
-  for(; keep >= 0; keep--){
-    var flexSum = 0;
-    for(var k=0; k<keep; k++) flexSum += flexWidths[k];
-    var childCount = TABBAR_PINNED_IDS.length + keep;
-    var needed = pinnedWidth + flexSum + (childCount>1 ? (childCount-1)*gapPx : 0) + paddingPx;
-    if(needed <= available) break;
-  }
-  for(var i=TABBAR_FLEX_IDS.length-1; i>=keep; i--){
+  for(var i=TABBAR_FLEX_IDS.length-1; i>=0 && tabbar.scrollWidth > tabbar.clientWidth; i--){
     var demoted = document.getElementById(TABBAR_FLEX_IDS[i]);
     /* insere sempre no topo do menu (nao so antes do linksBtn): como a democao
        roda do fim do array pra o comeco, isso reconstroi a ordem original do
