@@ -26,6 +26,16 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://intercambio-irlanda.com/turismo</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://intercambio-irlanda.com/vida-na-irlanda</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://intercambio-irlanda.com/sobre</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
