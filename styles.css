@@ -40,6 +40,7 @@ input{font-family:var(--font-body);}
 .tabular{font-variant-numeric:tabular-nums;font-family:var(--font-mono);}
 ::selection{background:var(--accent-soft);}
 [hidden]{display:none!important;}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent-strong);outline-offset:2px;border-radius:4px;}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:10px;padding:12px 18px;font-size:14.5px;font-weight:600;background:var(--navy);color:#fff;width:100%;transition:background .15s ease,transform .1s cubic-bezier(0.23,1,0.32,1);}
 .btn:hover{background:var(--navy-2);}
@@ -93,7 +94,7 @@ input{font-family:var(--font-body);}
   position:relative;overflow:hidden;background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);
   padding:26px 5vw 64px;color:#fff;
 }
-.hero-illustration{position:absolute;inset:0;pointer-events:none;background-size:cover;background-position:center 60%;}
+.hero-illustration{position:absolute;inset:0;pointer-events:none;background-size:cover;background-position:center 60%;background-image:url('hero-dublin.webp');}
 .hero-scrim{position:absolute;inset:0;background:linear-gradient(100deg,rgba(10,16,22,.86) 18%,rgba(10,16,22,.5) 48%,rgba(10,16,22,.12) 78%);}
 .hero-topbar{position:relative;max-width:1180px;margin:0 auto 26px;display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.16);}
 .hero-topbar .avatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13.5px;flex:none;font-family:var(--font-display);}
