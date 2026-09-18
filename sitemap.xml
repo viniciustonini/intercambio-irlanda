@@ -76,6 +76,11 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://intercambio-irlanda.com/politica-editorial</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://intercambio-irlanda.com/termos</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
