@@ -529,7 +529,14 @@
     </section>
 
   </main>
-  <footer class="site">Guia mantido por Vinicius para ajudar outros intercambistas. · Última atualização: <span id="lastUpdated"></span> · <a href="#" id="privacyLink">Política de privacidade</a></footer>
+  <footer class="site">Guia mantido por Vinicius para ajudar outros intercambistas. · Última atualização: <span id="lastUpdated"></span>
+    <div class="static-footer-links">
+      <a href="sobre.html" target="_blank" rel="noopener">Sobre</a>
+      <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a>
+      <a href="termos.html" target="_blank" rel="noopener">Termos de uso</a>
+      <a href="contato.html" target="_blank" rel="noopener">Contato</a>
+    </div>
+  </footer>
 </div>
 
 <div class="modal-overlay" id="onboardingModal" hidden>
@@ -579,20 +586,8 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="privacyModal" hidden>
-  <div class="modal-card" style="max-width:560px;max-height:80vh;overflow-y:auto;text-align:left;">
-    <h3>Política de privacidade</h3>
-    <p><strong>O que este site guarda:</strong> checklist, orçamento, favoritos e outras respostas que você preenche ficam salvos só no seu navegador (localStorage) — não existe servidor ou banco de dados nosso recebendo esses dados. Se você limpar os dados do navegador ou trocar de aparelho, essas informações se perdem.</p>
-    <p><strong>Cookies e publicidade:</strong> este site pode exibir anúncios do Google AdSense. O Google e seus parceiros usam cookies para veicular anúncios com base em visitas anteriores suas a este e a outros sites — isso pode incluir anúncios personalizados. Você pode desativar a publicidade personalizada nas <a href="https://adssettings.google.com" target="_blank" rel="noopener">configurações de anúncios do Google</a>.</p>
-    <p><strong>Fontes e bibliotecas externas:</strong> carregamos fontes do Google Fonts e a biblioteca GSAP via CDN — esses serviços podem registrar sua requisição (como IP e navegador) para entregar o arquivo, seguindo as políticas de privacidade deles.</p>
-    <p><strong>Links externos:</strong> os links para sites oficiais (imigração, transporte, bancos etc.) levam a páginas de terceiros, cada uma com sua própria política de privacidade — este site não tem controle sobre elas.</p>
-    <p><strong>Contato:</strong> dúvidas sobre esta política podem ser enviadas a quem administra o site.</p>
-    <div class="modal-actions"><button class="btn btn-ghost" id="privacyModalClose" type="button">Fechar</button></div>
-  </div>
-</div>
-
 <div class="cookie-bar" id="cookieBar" hidden>
-  <span>Este site usa cookies para exibir anúncios personalizados do Google. <a href="#" id="cookieBarLink">Saiba mais</a>.</span>
+  <span>Este site usa cookies para exibir anúncios personalizados do Google. <a href="privacidade.html" id="cookieBarLink" target="_blank" rel="noopener">Saiba mais</a>.</span>
   <button class="btn btn-accent" id="cookieBarAccept" type="button">Entendi</button>
 </div>
 

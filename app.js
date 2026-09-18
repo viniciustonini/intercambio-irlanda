@@ -456,12 +456,6 @@ document.addEventListener("keydown", function(e){
 });
 
 /* ---------- privacidade & cookies ---------- */
-function openPrivacyModal(){ document.getElementById("privacyModal").hidden = false; }
-function closePrivacyModal(){ document.getElementById("privacyModal").hidden = true; }
-document.getElementById("privacyLink").addEventListener("click", function(e){ e.preventDefault(); openPrivacyModal(); });
-document.getElementById("privacyModalClose").addEventListener("click", closePrivacyModal);
-document.getElementById("privacyModal").addEventListener("click", function(e){ if(e.target.id==="privacyModal") closePrivacyModal(); });
-document.getElementById("cookieBarLink").addEventListener("click", function(e){ e.preventDefault(); openPrivacyModal(); });
 document.getElementById("cookieBarAccept").addEventListener("click", function(){
   ls("cookieConsent", true);
   document.getElementById("cookieBar").hidden = true;
