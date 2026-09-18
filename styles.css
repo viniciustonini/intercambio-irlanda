@@ -496,6 +496,16 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
 .static-page p{color:var(--text);font-size:14.5px;line-height:1.7;}
 .static-page p.muted{color:var(--muted);font-size:13px;}
 .static-page a{color:var(--accent-strong);}
+.static-breadcrumb{font-size:12.5px;color:var(--muted);margin-bottom:14px;}
+.static-breadcrumb a{color:var(--muted);}
+.static-byline{font-size:12.5px;color:var(--muted);margin:-8px 0 22px;}
+.static-cta{background:var(--accent-soft);border-radius:var(--radius);padding:16px 18px;margin:28px 0;}
+.static-cta a{font-weight:600;}
+.static-sources{background:var(--surface-2);border-radius:var(--radius);padding:16px 18px;margin-top:30px;font-size:13.5px;}
+.static-sources h2{font-size:15px;margin-bottom:8px;}
+.static-sources ul{margin:0;padding-left:20px;}
+.static-continue{border-top:1px solid var(--border);margin-top:36px;padding-top:20px;}
+.static-continue h2{font-size:16px;margin-bottom:10px;}
 
 @media (max-width:620px){
   .hero{padding:20px 5vw 46px;}
