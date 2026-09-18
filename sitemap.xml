@@ -46,6 +46,26 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://intercambio-irlanda.com/primeiros-dias-na-irlanda</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://intercambio-irlanda.com/saude</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://intercambio-irlanda.com/cidadania-europeia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://intercambio-irlanda.com/bancos</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://intercambio-irlanda.com/sobre</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
