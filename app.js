@@ -91,28 +91,6 @@ function goToSection(sec, elId){
     }, isScrollMode() ? 350 : 60);
   }
 }
-/* ---------- comece aqui ---------- */
-var COMECE_AQUI = [
-  {label:"Quero entender como funciona o intercâmbio", sec:"inicio", el:"faqStartWrap"},
-  {label:"Quero saber quanto dinheiro preciso", sec:"financas"},
-  {label:"Quero escolher uma cidade", sec:"inicio", el:"cityFacts"},
-  {label:"Quero pesquisar escolas", sec:"trabalho", el:"comoEscolherEscolaWrap"},
-  {label:"Quero entender trabalho", sec:"trabalho", el:"jobTypesWrap"},
-  {label:"Quero pesquisar moradia", sec:"acomodacao"},
-  {label:"Quero entender documentação", sec:"imigracao"},
-  {label:"Quero comparar fazer sozinho x assessoria", sec:"trabalho", el:"assessoriaWrap"}
-];
-function renderComeceAqui(){
-  var wrap = document.getElementById("comeceAquiGrid");
-  if(!wrap) return;
-  wrap.innerHTML = COMECE_AQUI.map(function(c){
-    return '<button type="button" class="tip-card scroll-to-btn" data-sec="'+c.sec+'" data-el="'+(c.el||"")+'"><h4 style="margin:0;">'+c.label+'</h4></button>';
-  }).join("");
-  wrap.querySelectorAll("button").forEach(function(btn){
-    btn.addEventListener("click", function(){ goToSection(btn.dataset.sec, btn.dataset.el || null); });
-  });
-}
-
 /* ---------- animações (GSAP, somente versão web) ---------- */
 var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 var animEnabled = (typeof gsap !== "undefined") && !reduceMotion;
@@ -3951,7 +3929,6 @@ function init(){
     else openOnboarding();
   }
   renderNationalRules();
-  renderComeceAqui();
   renderComoEscolherEscola();
   renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm();
   renderAssessoria();
