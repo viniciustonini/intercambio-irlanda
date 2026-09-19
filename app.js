@@ -3283,7 +3283,7 @@ function renderReservePlanner(){
   if(reserve==null) reserve = "";
   var months = (reserve && totalExpenses>0) ? (parseFloat(reserve)/totalExpenses) : null;
   wrap.innerHTML =
-    '<div class="grid cols-2">'+
+    '<div>'+
       '<div class="card"><h3>Quanto custa o primeiro mês?</h3>'+
         '<p class="source-note" style="margin-bottom:10px;">Baseado no seu orçamento mensal (acima) + um depósito equivalente a 1 aluguel.</p>'+
         '<div class="summary-row big"><span class="lbl">Estimativa do primeiro mês</span><span class="val">€'+firstMonth.toFixed(2)+'</span></div>'+
