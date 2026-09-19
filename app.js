@@ -3272,6 +3272,94 @@ function updateBudgetSummary(){
     row("Total de gastos mensais","€"+totalExpenses.toFixed(2))+row("Saldo livre no mês","€"+freeBalance.toFixed(2), freeBalance<0?"warn big":"big")+
     row("% da renda comprometida", pctCommitted.toFixed(1)+"%", pctCommitted>85?"warn":"")+row("Reserva possível em 12 meses","€"+yearlyReserve.toFixed(2));
 }
+/* ---------- quanto dinheiro preciso (custos iniciais) ---------- */
+var GASTOS_INICIAIS_CENARIOS = {
+  cols: ["Econômico","Intermediário","Confortável"],
+  rows: [
+    {item:"Passagem aérea (ida)", v:[600,900,1400]},
+    {item:"Escola de inglês (4 semanas)", v:[580,800,1500]},
+    {item:"Seguro-viagem/saúde (1 mês)", v:[30,50,80]},
+    {item:"Acomodação inicial (7–14 noites)", v:[300,500,800]},
+    {item:"Depósito de aluguel (1 mês)", v:[600,900,1200]},
+    {item:"Primeiro aluguel (1 mês)", v:[600,900,1200]},
+    {item:"Alimentação (1 mês)", v:[150,250,350]},
+    {item:"Transporte (1 mês)", v:[60,80,120]},
+    {item:"Celular/eSIM (1 mês)", v:[15,25,40]},
+    {item:"Documentação (IRP €300 + fotos/cópias)", v:[320,350,400]},
+    {item:"Reserva de emergência", v:[500,1000,2000]}
+  ]
+};
+function getGastosOverrides(){ return ls("gastosIniciaisOverrides") || {}; }
+function saveGastosOverrides(o){ ls("gastosIniciaisOverrides", o); }
+function getGastosPagos(){ return ls("gastosIniciaisPagos") || {}; }
+function saveGastosPagos(o){ ls("gastosIniciaisPagos", o); }
+var gastosEditOpen = false;
+function gastosValor(ri, ci){
+  var ov = getGastosOverrides()[ri+"_"+ci];
+  return ov!=null ? ov : GASTOS_INICIAIS_CENARIOS.rows[ri].v[ci];
+}
+/* Totais por cenário: itens marcados como "já pago" saem do total e vão pra linha "já pago". */
+function gastosTotais(){
+  var pagos = getGastosPagos(), a = [0,0,0], p = [0,0,0], qtd = 0;
+  GASTOS_INICIAIS_CENARIOS.rows.forEach(function(r, ri){
+    var paid = !!pagos[ri]; if(paid) qtd++;
+    [0,1,2].forEach(function(ci){ (paid ? p : a)[ci] += gastosValor(ri, ci); });
+  });
+  return {aPagar:a, pago:p, qtdPagos:qtd};
+}
+function fmtEuro(v){ return "€"+v.toLocaleString("pt-BR"); }
+function renderGastosIniciais(){
+  var wrap = document.getElementById("gastosIniciaisWrap");
+  if(!wrap) return;
+  var g = GASTOS_INICIAIS_CENARIOS, pagos = getGastosPagos();
+  var rows = g.rows.map(function(r, ri){
+    var paid = !!pagos[ri];
+    var tds = r.v.map(function(_, ci){
+      var v = gastosValor(ri, ci);
+      return gastosEditOpen
+        ? '<td class="num" data-label="'+g.cols[ci]+'"><input type="number" step="1" style="width:68px;text-align:right;" value="'+v+'" data-ri="'+ri+'" data-ci="'+ci+'"></td>'
+        : '<td class="num tabular" data-label="'+g.cols[ci]+'">'+fmtEuro(v)+'</td>';
+    }).join("");
+    return '<tr'+(paid?' style="opacity:.5;"':'')+'><td data-label="Item"'+(paid?' style="text-decoration:line-through;"':'')+'>'+r.item+'</td>'+tds+
+      '<td class="num" data-label="Já pago?"><input type="checkbox" class="gasto-pago" data-ri="'+ri+'" aria-label="Já paguei: '+r.item+'"'+(paid?' checked':'')+' style="width:18px;height:18px;"></td></tr>';
+  }).join("");
+  var t = gastosTotais();
+  var totalRow = '<tr style="font-weight:700;"><td data-label="Item">Total a pagar</td>'+t.aPagar.map(function(v,ci){ return '<td class="num tabular" data-label="'+g.cols[ci]+'" id="gastosTotal-'+ci+'">'+fmtEuro(v)+'</td>'; }).join("")+'<td></td></tr>';
+  var paidRow = '<tr id="gastosPagoRow" style="color:var(--muted);'+(t.qtdPagos?'':'display:none;')+'"><td data-label="Item">Já pago (fora do total)</td>'+t.pago.map(function(v,ci){ return '<td class="num tabular" data-label="'+g.cols[ci]+'" id="gastosPago-'+ci+'">'+fmtEuro(v)+'</td>'; }).join("")+'<td></td></tr>';
+  var editControls = gastosEditOpen
+    ? '<button type="button" class="btn-ghost btn" id="gastosDoneBtn" style="width:auto;padding:8px 14px;margin-top:10px;">Concluir edição</button>'+
+      '<button type="button" class="btn-ghost btn" id="gastosResetBtn" style="width:auto;padding:8px 14px;margin-top:10px;margin-left:8px;">Restaurar valores padrão</button>'
+    : '<button type="button" class="btn-ghost btn" id="gastosEditBtn" style="width:auto;padding:8px 14px;margin-top:10px;">✎ Personalizar valores</button>';
+  wrap.innerHTML =
+    '<div class="tablewrap"><table><thead><tr><th>Item</th>'+g.cols.map(function(c){ return '<th class="num">'+c+'</th>'; }).join("")+'<th class="num">Já pago?</th></tr></thead>'+
+    '<tbody>'+rows+totalRow+paidRow+'</tbody></table></div>'+editControls;
+  wrap.querySelectorAll(".gasto-pago").forEach(function(cb){
+    cb.addEventListener("change", function(){
+      var p = getGastosPagos();
+      if(cb.checked) p[cb.dataset.ri] = true; else delete p[cb.dataset.ri];
+      saveGastosPagos(p);
+      renderGastosIniciais();
+    });
+  });
+  if(gastosEditOpen){
+    wrap.querySelectorAll("input[data-ri][data-ci]").forEach(function(inp){
+      inp.addEventListener("input", function(){
+        var ov = getGastosOverrides();
+        ov[inp.dataset.ri+"_"+inp.dataset.ci] = parseFloat(inp.value)||0;
+        saveGastosOverrides(ov);
+        var tt = gastosTotais();
+        [0,1,2].forEach(function(ci){
+          document.getElementById("gastosTotal-"+ci).textContent = fmtEuro(tt.aPagar[ci]);
+          document.getElementById("gastosPago-"+ci).textContent = fmtEuro(tt.pago[ci]);
+        });
+      });
+    });
+    document.getElementById("gastosDoneBtn").addEventListener("click", function(){ gastosEditOpen=false; renderGastosIniciais(); });
+    document.getElementById("gastosResetBtn").addEventListener("click", function(){ saveGastosOverrides({}); renderGastosIniciais(); });
+  } else {
+    document.getElementById("gastosEditBtn").addEventListener("click", function(){ gastosEditOpen=true; renderGastosIniciais(); });
+  }
+}
 /* ---------- primeiro mês / reserva ---------- */
 function renderReservePlanner(){
   var wrap = document.getElementById("reservePlannerWrap");
@@ -3890,7 +3978,7 @@ function init(){
   renderHousingPhrases();
   renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity();
   renderTransportCityTabs(); renderTransportRoutes();
-  renderMarket(); renderBudget(); renderReservePlanner(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();
+  renderMarket(); renderBudget(); renderReservePlanner(); renderGastosIniciais(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();
   renderAll();
   setInterval(renderHero, 60000);
   document.getElementById("lastUpdated").textContent = LAST_UPDATED;
