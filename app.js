@@ -3272,59 +3272,18 @@ function updateBudgetSummary(){
     row("Total de gastos mensais","€"+totalExpenses.toFixed(2))+row("Saldo livre no mês","€"+freeBalance.toFixed(2), freeBalance<0?"warn big":"big")+
     row("% da renda comprometida", pctCommitted.toFixed(1)+"%", pctCommitted>85?"warn":"")+row("Reserva possível em 12 meses","€"+yearlyReserve.toFixed(2));
 }
-/* ---------- quanto dinheiro preciso / reserva ---------- */
-var GASTOS_INICIAIS_CENARIOS = {
-  cols: ["Econômico","Intermediário","Confortável"],
-  rows: [
-    {item:"Passagem aérea (ida)", v:[600,900,1400]},
-    {item:"Escola de inglês (4 semanas)", v:[580,800,1500]},
-    {item:"Seguro-viagem/saúde (1 mês)", v:[30,50,80]},
-    {item:"Acomodação inicial (7–14 noites)", v:[300,500,800]},
-    {item:"Depósito de aluguel (1 mês)", v:[600,900,1200]},
-    {item:"Primeiro aluguel (1 mês)", v:[600,900,1200]},
-    {item:"Alimentação (1 mês)", v:[150,250,350]},
-    {item:"Transporte (1 mês)", v:[60,80,120]},
-    {item:"Celular/eSIM (1 mês)", v:[15,25,40]},
-    {item:"Documentação (IRP €300 + fotos/cópias)", v:[320,350,400]},
-    {item:"Reserva de emergência", v:[500,1000,2000]}
-  ]
-};
-function getGastosOverrides(){ return ls("gastosIniciaisOverrides") || {}; }
-function saveGastosOverrides(o){ ls("gastosIniciaisOverrides", o); }
-var gastosEditOpen = false;
+/* ---------- primeiro mês / reserva ---------- */
 function renderReservePlanner(){
   var wrap = document.getElementById("reservePlannerWrap");
   if(!wrap) return;
-  var g = GASTOS_INICIAIS_CENARIOS;
-  var overrides = getGastosOverrides();
-  function valAt(ri, ci){ var key = ri+"_"+ci; return overrides[key]!=null ? overrides[key] : g.rows[ri].v[ci]; }
-  var totals = [0,0,0];
-  var rows = g.rows.map(function(r, ri){
-    var tds = r.v.map(function(_, ci){
-      var v = valAt(ri, ci);
-      totals[ci] += v;
-      return gastosEditOpen
-        ? '<td class="num" data-label="'+g.cols[ci]+'"><input type="number" step="1" style="width:68px;text-align:right;" value="'+v+'" data-ri="'+ri+'" data-ci="'+ci+'"></td>'
-        : '<td class="num tabular" data-label="'+g.cols[ci]+'">€'+v.toLocaleString("pt-BR")+'</td>';
-    }).join("");
-    return '<tr><td data-label="Item">'+r.item+'</td>'+tds+'</tr>';
-  }).join("");
-  var totalRow = '<tr style="font-weight:700;"><td data-label="Item">Total estimado</td>'+totals.map(function(t,ci){ return '<td class="num tabular" data-label="'+g.cols[ci]+'" id="gastosTotal-'+ci+'">€'+t.toLocaleString("pt-BR")+'</td>'; }).join("")+'</tr>';
   var b = getBudget();
   var totalExpenses = sumExpenses(b);
   var firstMonth = totalExpenses + b.rent;
   var reserve = ls("travelReserve");
   if(reserve==null) reserve = "";
   var months = (reserve && totalExpenses>0) ? (parseFloat(reserve)/totalExpenses) : null;
-  var editControlsHtml = gastosEditOpen
-    ? '<button type="button" class="btn-ghost btn" id="gastosDoneBtn" style="width:auto;padding:8px 14px;margin-top:10px;">Concluir edição</button>'+
-      '<button type="button" class="btn-ghost btn" id="gastosResetBtn" style="width:auto;padding:8px 14px;margin-top:10px;margin-left:8px;">Restaurar padrão</button>'
-    : '<button type="button" class="btn-ghost btn" id="gastosEditBtn" style="width:auto;padding:8px 14px;margin-top:10px;">✎ Personalizar valores</button>';
   wrap.innerHTML =
-    '<div class="tablewrap"><table><thead><tr><th>Item</th>'+g.cols.map(function(c){ return '<th class="num">'+c+'</th>'; }).join("")+'</tr></thead>'+
-    '<tbody>'+rows+totalRow+'</tbody></table></div>'+
-    editControlsHtml+
-    '<div class="grid cols-2" style="margin-top:16px;">'+
+    '<div class="grid cols-2">'+
       '<div class="card"><h3>Quanto custa o primeiro mês?</h3>'+
         '<p class="source-note" style="margin-bottom:10px;">Baseado no seu orçamento mensal (acima) + um depósito equivalente a 1 aluguel.</p>'+
         '<div class="summary-row big"><span class="lbl">Estimativa do primeiro mês</span><span class="val">€'+firstMonth.toFixed(2)+'</span></div>'+
@@ -3334,22 +3293,6 @@ function renderReservePlanner(){
         (months!=null ? '<div class="summary-row big" style="margin-top:8px;"><span class="lbl">Reserva estimada</span><span class="val">'+months.toFixed(1).replace(".",",")+' meses</span></div><p class="source-note">Reserva ÷ custo mensal estimado ('+"€"+totalExpenses.toFixed(2)+'/mês).</p>' : '<p class="source-note" style="margin-top:8px;">Informe sua reserva para ver quantos meses ela cobre, com base no seu orçamento mensal.</p>')+
       '</div>'+
     '</div>';
-  if(gastosEditOpen){
-    wrap.querySelectorAll("input[data-ri]").forEach(function(inp){
-      inp.addEventListener("input", function(){
-        var ov = getGastosOverrides();
-        ov[inp.dataset.ri+"_"+inp.dataset.ci] = parseFloat(inp.value)||0;
-        saveGastosOverrides(ov);
-        var ci = inp.dataset.ci, sum = 0;
-        wrap.querySelectorAll('input[data-ci="'+ci+'"]').forEach(function(i2){ sum += parseFloat(i2.value)||0; });
-        document.getElementById("gastosTotal-"+ci).textContent = "€"+sum.toLocaleString("pt-BR");
-      });
-    });
-    document.getElementById("gastosDoneBtn").addEventListener("click", function(){ gastosEditOpen=false; renderReservePlanner(); });
-    document.getElementById("gastosResetBtn").addEventListener("click", function(){ saveGastosOverrides({}); renderReservePlanner(); });
-  } else {
-    document.getElementById("gastosEditBtn").addEventListener("click", function(){ gastosEditOpen=true; renderReservePlanner(); });
-  }
   var input = document.getElementById("travelReserveInput");
   if(input) input.addEventListener("input", function(){ ls("travelReserve", input.value); renderReservePlanner(); });
 }
