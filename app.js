@@ -3293,17 +3293,27 @@ function getGastosOverrides(){ return ls("gastosIniciaisOverrides") || {}; }
 function saveGastosOverrides(o){ ls("gastosIniciaisOverrides", o); }
 function getGastosPagos(){ return ls("gastosIniciaisPagos") || {}; }
 function saveGastosPagos(o){ ls("gastosIniciaisPagos", o); }
+function getGastosRemovidos(){ return ls("gastosIniciaisRemovidos") || {}; }
+function saveGastosRemovidos(o){ ls("gastosIniciaisRemovidos", o); }
+function getGastosExtras(){ return ls("gastosIniciaisExtras") || []; }
+function saveGastosExtras(a){ ls("gastosIniciaisExtras", a); }
 var gastosEditOpen = false;
-function gastosValor(ri, ci){
-  var ov = getGastosOverrides()[ri+"_"+ci];
-  return ov!=null ? ov : GASTOS_INICIAIS_CENARIOS.rows[ri].v[ci];
+/* Linhas visíveis: itens padrão (id = índice) que não foram removidos + itens adicionados pela pessoa (id "x..."). */
+function gastosLinhas(){
+  var ov = getGastosOverrides(), rem = getGastosRemovidos(), out = [];
+  GASTOS_INICIAIS_CENARIOS.rows.forEach(function(r, ri){
+    if(rem[ri]) return;
+    out.push({id:String(ri), item:r.item, custom:false, v:r.v.map(function(d, ci){ var o = ov[ri+"_"+ci]; return o!=null ? o : d; })});
+  });
+  getGastosExtras().forEach(function(x){ out.push({id:x.id, item:x.item, custom:true, v:x.v}); });
+  return out;
 }
 /* Totais por cenário: itens marcados como "já pago" saem do total e vão pra linha "já pago". */
 function gastosTotais(){
   var pagos = getGastosPagos(), a = [0,0,0], p = [0,0,0], qtd = 0;
-  GASTOS_INICIAIS_CENARIOS.rows.forEach(function(r, ri){
-    var paid = !!pagos[ri]; if(paid) qtd++;
-    [0,1,2].forEach(function(ci){ (paid ? p : a)[ci] += gastosValor(ri, ci); });
+  gastosLinhas().forEach(function(l){
+    var paid = !!pagos[l.id]; if(paid) qtd++;
+    [0,1,2].forEach(function(ci){ (paid ? p : a)[ci] += (parseFloat(l.v[ci])||0); });
   });
   return {aPagar:a, pago:p, qtdPagos:qtd};
 }
@@ -3311,51 +3321,102 @@ function fmtEuro(v){ return "€"+v.toLocaleString("pt-BR"); }
 function renderGastosIniciais(){
   var wrap = document.getElementById("gastosIniciaisWrap");
   if(!wrap) return;
-  var g = GASTOS_INICIAIS_CENARIOS, pagos = getGastosPagos();
-  var rows = g.rows.map(function(r, ri){
-    var paid = !!pagos[ri];
-    var tds = r.v.map(function(_, ci){
-      var v = gastosValor(ri, ci);
+  var g = GASTOS_INICIAIS_CENARIOS, pagos = getGastosPagos(), linhas = gastosLinhas();
+  var rows = linhas.map(function(l){
+    var paid = !!pagos[l.id];
+    var tds = l.v.map(function(v, ci){
       return gastosEditOpen
-        ? '<td class="num" data-label="'+g.cols[ci]+'"><input type="number" step="1" style="width:68px;text-align:right;" value="'+v+'" data-ri="'+ri+'" data-ci="'+ci+'"></td>'
-        : '<td class="num tabular" data-label="'+g.cols[ci]+'">'+fmtEuro(v)+'</td>';
+        ? '<td class="num" data-label="'+g.cols[ci]+'"><input type="number" step="1" style="width:68px;text-align:right;" value="'+v+'" data-id="'+l.id+'" data-ci="'+ci+'"></td>'
+        : '<td class="num tabular" data-label="'+g.cols[ci]+'">'+fmtEuro(parseFloat(v)||0)+'</td>';
     }).join("");
-    return '<tr'+(paid?' style="opacity:.5;"':'')+'><td data-label="Item"'+(paid?' style="text-decoration:line-through;"':'')+'>'+r.item+'</td>'+tds+
-      '<td class="num" data-label="Já pago?"><input type="checkbox" class="gasto-pago" data-ri="'+ri+'" aria-label="Já paguei: '+r.item+'"'+(paid?' checked':'')+' style="width:18px;height:18px;"></td></tr>';
+    var nome = escapeHtml(l.item);
+    return '<tr'+(paid?' style="opacity:.5;"':'')+'><td data-label="Item"'+(paid?' style="text-decoration:line-through;"':'')+'>'+nome+'</td>'+tds+
+      '<td class="num" data-label="Já pago?"><input type="checkbox" class="gasto-pago" data-id="'+l.id+'" aria-label="Já paguei: '+nome+'"'+(paid?' checked':'')+' style="width:18px;height:18px;"></td>'+
+      (gastosEditOpen ? '<td class="num" data-label="Remover"><button type="button" class="gasto-remover btn-ghost btn" data-id="'+l.id+'" aria-label="Remover '+nome+'" style="width:auto;padding:4px 10px;font-size:15px;line-height:1;">✕</button></td>' : '')+'</tr>';
   }).join("");
+  if(!linhas.length) rows = '<tr><td colspan="'+(gastosEditOpen?6:5)+'" style="color:var(--muted);text-align:center;padding:18px;">Nenhum item na lista. Use "Personalizar valores e itens" para adicionar os seus.</td></tr>';
   var t = gastosTotais();
-  var totalRow = '<tr style="font-weight:700;"><td data-label="Item">Total a pagar</td>'+t.aPagar.map(function(v,ci){ return '<td class="num tabular" data-label="'+g.cols[ci]+'" id="gastosTotal-'+ci+'">'+fmtEuro(v)+'</td>'; }).join("")+'<td></td></tr>';
-  var paidRow = '<tr id="gastosPagoRow" style="color:var(--muted);'+(t.qtdPagos?'':'display:none;')+'"><td data-label="Item">Já pago (fora do total)</td>'+t.pago.map(function(v,ci){ return '<td class="num tabular" data-label="'+g.cols[ci]+'" id="gastosPago-'+ci+'">'+fmtEuro(v)+'</td>'; }).join("")+'<td></td></tr>';
+  var extraTd = gastosEditOpen ? '<td></td>' : '';
+  var totalRow = '<tr style="font-weight:700;"><td data-label="Item">Total a pagar</td>'+t.aPagar.map(function(v,ci){ return '<td class="num tabular" data-label="'+g.cols[ci]+'" id="gastosTotal-'+ci+'">'+fmtEuro(v)+'</td>'; }).join("")+'<td></td>'+extraTd+'</tr>';
+  var paidRow = '<tr id="gastosPagoRow" style="color:var(--muted);'+(t.qtdPagos?'':'display:none;')+'"><td data-label="Item">Já pago (fora do total)</td>'+t.pago.map(function(v,ci){ return '<td class="num tabular" data-label="'+g.cols[ci]+'" id="gastosPago-'+ci+'">'+fmtEuro(v)+'</td>'; }).join("")+'<td></td>'+extraTd+'</tr>';
+  var nRem = Object.keys(getGastosRemovidos()).length;
+  var inputStyle = 'padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;';
   var editControls = gastosEditOpen
-    ? '<button type="button" class="btn-ghost btn" id="gastosDoneBtn" style="width:auto;padding:8px 14px;margin-top:10px;">Concluir edição</button>'+
-      '<button type="button" class="btn-ghost btn" id="gastosResetBtn" style="width:auto;padding:8px 14px;margin-top:10px;margin-left:8px;">Restaurar valores padrão</button>'
-    : '<button type="button" class="btn-ghost btn" id="gastosEditBtn" style="width:auto;padding:8px 14px;margin-top:10px;">✎ Personalizar valores</button>';
+    ? '<div class="card" style="margin-top:12px;"><h3 style="font-size:15px;">Adicionar item</h3>'+
+        '<p class="source-note" style="margin-bottom:10px;">Crie um item seu (ex.: "Visto", "Curso extra") com o valor em cada cenário.</p>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">'+
+          '<input type="text" id="gNovoNome" maxlength="60" placeholder="Nome do item" aria-label="Nome do novo item" style="flex:1 1 200px;min-width:160px;'+inputStyle+'">'+
+          g.cols.map(function(c, ci){ return '<input type="number" step="1" id="gNovoV'+ci+'" placeholder="'+c+' €" aria-label="Valor '+c+'" style="width:110px;text-align:right;'+inputStyle+'">'; }).join("")+
+          '<button type="button" class="btn btn-accent" id="gastosAddBtn" style="width:auto;padding:9px 16px;">+ Adicionar</button>'+
+        '</div></div>'+
+      '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;">'+
+        '<button type="button" class="btn-ghost btn" id="gastosDoneBtn" style="width:auto;padding:8px 14px;">Concluir edição</button>'+
+        (nRem ? '<button type="button" class="btn-ghost btn" id="gastosRestoreRemBtn" style="width:auto;padding:8px 14px;">Reexibir '+nRem+(nRem>1?' itens removidos':' item removido')+'</button>' : '')+
+        '<button type="button" class="btn-ghost btn" id="gastosResetBtn" style="width:auto;padding:8px 14px;">Restaurar padrão</button>'+
+      '</div>'
+    : '<button type="button" class="btn-ghost btn" id="gastosEditBtn" style="width:auto;padding:8px 14px;margin-top:10px;">✎ Personalizar valores e itens</button>';
   wrap.innerHTML =
-    '<div class="tablewrap"><table><thead><tr><th>Item</th>'+g.cols.map(function(c){ return '<th class="num">'+c+'</th>'; }).join("")+'<th class="num">Já pago?</th></tr></thead>'+
+    '<div class="tablewrap"><table><thead><tr><th>Item</th>'+g.cols.map(function(c){ return '<th class="num">'+c+'</th>'; }).join("")+'<th class="num">Já pago?</th>'+(gastosEditOpen?'<th class="num">Remover</th>':'')+'</tr></thead>'+
     '<tbody>'+rows+totalRow+paidRow+'</tbody></table></div>'+editControls;
   wrap.querySelectorAll(".gasto-pago").forEach(function(cb){
     cb.addEventListener("change", function(){
       var p = getGastosPagos();
-      if(cb.checked) p[cb.dataset.ri] = true; else delete p[cb.dataset.ri];
+      if(cb.checked) p[cb.dataset.id] = true; else delete p[cb.dataset.id];
       saveGastosPagos(p);
       renderGastosIniciais();
     });
   });
   if(gastosEditOpen){
-    wrap.querySelectorAll("input[data-ri][data-ci]").forEach(function(inp){
+    wrap.querySelectorAll("input[data-id][data-ci]").forEach(function(inp){
       inp.addEventListener("input", function(){
-        var ov = getGastosOverrides();
-        ov[inp.dataset.ri+"_"+inp.dataset.ci] = parseFloat(inp.value)||0;
-        saveGastosOverrides(ov);
+        var val = parseFloat(inp.value)||0, id = inp.dataset.id, ci = parseInt(inp.dataset.ci,10);
+        if(id.charAt(0)==="x"){
+          var ex = getGastosExtras();
+          ex.forEach(function(x){ if(x.id===id) x.v[ci] = val; });
+          saveGastosExtras(ex);
+        } else {
+          var ov = getGastosOverrides();
+          ov[id+"_"+ci] = val;
+          saveGastosOverrides(ov);
+        }
         var tt = gastosTotais();
-        [0,1,2].forEach(function(ci){
-          document.getElementById("gastosTotal-"+ci).textContent = fmtEuro(tt.aPagar[ci]);
-          document.getElementById("gastosPago-"+ci).textContent = fmtEuro(tt.pago[ci]);
+        [0,1,2].forEach(function(c){
+          document.getElementById("gastosTotal-"+c).textContent = fmtEuro(tt.aPagar[c]);
+          document.getElementById("gastosPago-"+c).textContent = fmtEuro(tt.pago[c]);
         });
       });
     });
+    wrap.querySelectorAll(".gasto-remover").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.dataset.id;
+        if(id.charAt(0)==="x"){
+          saveGastosExtras(getGastosExtras().filter(function(x){ return x.id!==id; }));
+        } else {
+          var rem = getGastosRemovidos(); rem[id] = true; saveGastosRemovidos(rem);
+        }
+        var p = getGastosPagos(); delete p[id]; saveGastosPagos(p);
+        renderGastosIniciais();
+      });
+    });
+    document.getElementById("gastosAddBtn").addEventListener("click", function(){
+      var nomeEl = document.getElementById("gNovoNome");
+      var nome = nomeEl.value.trim();
+      if(!nome){ nomeEl.focus(); nomeEl.style.borderColor = "var(--warn)"; return; }
+      var ex = getGastosExtras();
+      ex.push({id:"x"+Date.now().toString(36)+Math.floor(Math.random()*1000).toString(36), item:nome, v:[0,1,2].map(function(ci){ return parseFloat(document.getElementById("gNovoV"+ci).value)||0; })});
+      saveGastosExtras(ex);
+      renderGastosIniciais();
+      document.getElementById("gNovoNome").focus();
+    });
+    document.getElementById("gNovoNome").addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); document.getElementById("gastosAddBtn").click(); } });
+    var rr = document.getElementById("gastosRestoreRemBtn");
+    if(rr) rr.addEventListener("click", function(){ saveGastosRemovidos({}); renderGastosIniciais(); });
     document.getElementById("gastosDoneBtn").addEventListener("click", function(){ gastosEditOpen=false; renderGastosIniciais(); });
-    document.getElementById("gastosResetBtn").addEventListener("click", function(){ saveGastosOverrides({}); renderGastosIniciais(); });
+    document.getElementById("gastosResetBtn").addEventListener("click", function(){
+      if(!window.confirm("Restaurar a lista padrão? Isso desfaz seus valores editados, reexibe os itens removidos e apaga os itens que você adicionou. O que você marcou como já pago é mantido.")) return;
+      saveGastosOverrides({}); saveGastosRemovidos({}); saveGastosExtras([]);
+      renderGastosIniciais();
+    });
   } else {
     document.getElementById("gastosEditBtn").addEventListener("click", function(){ gastosEditOpen=true; renderGastosIniciais(); });
   }
