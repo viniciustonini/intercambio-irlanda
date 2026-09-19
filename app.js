@@ -3148,7 +3148,7 @@ var WAGE_PRESETS = [{v:14.15,l:"Salário mínimo (€14,15)"},{v:15,l:"€15"},{
 var EXPENSE_KEYS = ["rent","phone","transport","groceries","englishCourse","insurance","gym","leisure","other"];
 function getBudget(){ return Object.assign({}, BUDGET_DEFAULTS, ls("budget")||{}); }
 function sumExpenses(b){ return EXPENSE_KEYS.reduce(function(sum,k){ return sum+(b[k]||0); }, 0); }
-function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderTaxLine(); renderOverview(); }
+function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderTaxLine(); renderOverview(); refreshReservePlanner(); }
 /* Regras fiscais irlandesas usadas na estimativa de PAYE + USC + PRSI.
    Estrutura pensada pra ser facil de atualizar ano a ano sem mexer na
    formula de calculo — so trocar os valores/fontes/datas aqui. */
@@ -3361,28 +3361,44 @@ function renderGastosIniciais(){
   }
 }
 /* ---------- primeiro mês / reserva ---------- */
-function renderReservePlanner(){
-  var wrap = document.getElementById("reservePlannerWrap");
-  if(!wrap) return;
+/* Só o resultado é atualizado ao digitar: reconstruir o cartão inteiro tirava o foco do campo a cada dígito. */
+function reservePlannerValues(){
   var b = getBudget();
   var totalExpenses = sumExpenses(b);
-  var firstMonth = totalExpenses + b.rent;
   var reserve = ls("travelReserve");
   if(reserve==null) reserve = "";
   var months = (reserve && totalExpenses>0) ? (parseFloat(reserve)/totalExpenses) : null;
+  return {firstMonth: totalExpenses + b.rent, totalExpenses:totalExpenses, reserve:reserve, months:months};
+}
+function reserveResultHtml(v){
+  return v.months!=null
+    ? '<div class="summary-row big" style="margin-top:8px;"><span class="lbl">Reserva estimada</span><span class="val">'+v.months.toFixed(1).replace(".",",")+' meses</span></div><p class="source-note">Reserva ÷ custo mensal estimado (€'+v.totalExpenses.toFixed(2)+'/mês).</p>'
+    : '<p class="source-note" style="margin-top:8px;">Informe sua reserva para ver quantos meses ela cobre, com base no seu orçamento mensal.</p>';
+}
+function refreshReservePlanner(){
+  var fm = document.getElementById("firstMonthVal"), res = document.getElementById("reserveResult");
+  if(!fm || !res) return;
+  var v = reservePlannerValues();
+  fm.textContent = "€"+v.firstMonth.toFixed(2);
+  res.innerHTML = reserveResultHtml(v);
+}
+function renderReservePlanner(){
+  var wrap = document.getElementById("reservePlannerWrap");
+  if(!wrap) return;
+  var v = reservePlannerValues();
   wrap.innerHTML =
     '<div class="grid cols-2">'+
       '<div class="card"><h3>Quanto custa o primeiro mês?</h3>'+
         '<p class="source-note" style="margin-bottom:10px;">Baseado no seu orçamento mensal (acima) + um depósito equivalente a 1 aluguel.</p>'+
-        '<div class="summary-row big"><span class="lbl">Estimativa do primeiro mês</span><span class="val">€'+firstMonth.toFixed(2)+'</span></div>'+
+        '<div class="summary-row big"><span class="lbl">Estimativa do primeiro mês</span><span class="val" id="firstMonthVal">€'+v.firstMonth.toFixed(2)+'</span></div>'+
       '</div>'+
       '<div class="card"><h3>Quanto tempo minha reserva dura?</h3>'+
-        '<div class="numfield"><label>Reserva disponível (€)</label><input type="number" step="1" id="travelReserveInput" value="'+reserve+'" placeholder="Ex: 5000"></div>'+
-        (months!=null ? '<div class="summary-row big" style="margin-top:8px;"><span class="lbl">Reserva estimada</span><span class="val">'+months.toFixed(1).replace(".",",")+' meses</span></div><p class="source-note">Reserva ÷ custo mensal estimado ('+"€"+totalExpenses.toFixed(2)+'/mês).</p>' : '<p class="source-note" style="margin-top:8px;">Informe sua reserva para ver quantos meses ela cobre, com base no seu orçamento mensal.</p>')+
+        '<div class="numfield"><label>Reserva disponível (€)</label><input type="number" step="1" id="travelReserveInput" value="'+v.reserve+'" placeholder="Ex: 5000"></div>'+
+        '<div id="reserveResult">'+reserveResultHtml(v)+'</div>'+
       '</div>'+
     '</div>';
   var input = document.getElementById("travelReserveInput");
-  if(input) input.addEventListener("input", function(){ ls("travelReserve", input.value); renderReservePlanner(); });
+  if(input) input.addEventListener("input", function(){ ls("travelReserve", input.value); refreshReservePlanner(); });
 }
 function renderConverter(){
   var eurEl = document.getElementById("convEur"), brlEl = document.getElementById("convBrl");
