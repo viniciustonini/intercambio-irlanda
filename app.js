@@ -3616,6 +3616,32 @@ function renderLinks(){
   }).join("");
 }
 
+/* Cartão "Bancos e dinheiro" da aba Finanças: compacto pra caber no espaço ao lado de "Gastos mensais".
+   "sem PPSN" vem das descrições de Revolut/N26 que já existem em LINKS; os bancos tradicionais entram só como link. */
+var BANCOS_FINANCAS = [
+  {label:"Revolut", url:"https://www.revolut.com", tag:"conta digital · sem PPSN"},
+  {label:"N26", url:"https://n26.com", tag:"conta digital · sem PPSN"},
+  {label:"Wise", url:"https://wise.com", tag:"câmbio e transferência"},
+  {label:"AIB", url:"https://aib.ie", tag:"banco tradicional"},
+  {label:"Bank of Ireland", url:"https://www.bankofireland.com", tag:"banco tradicional"},
+  {label:"PTSB", url:"https://www.ptsb.ie", tag:"banco tradicional"}
+];
+function renderBancosFinancas(){
+  var wrap = document.getElementById("bancosFinancasWrap");
+  if(!wrap) return;
+  var rows = BANCOS_FINANCAS.map(function(l){
+    var fav = faviconUrl(l.url);
+    return '<li style="padding:8px 0;align-items:center;">'+
+      '<a href="'+l.url+'" target="_blank" rel="noopener" class="lbl" style="text-decoration:none;color:var(--text);display:inline-flex;align-items:center;gap:8px;">'+
+      (fav?'<img src="'+fav+'" alt="" width="16" height="16" loading="lazy" onerror="this.remove()">':'')+l.label+' <span style="color:var(--muted);">↗</span></a>'+
+      '<span class="desc">'+l.tag+'</span></li>';
+  }).join("");
+  wrap.innerHTML =
+    '<div class="card"><h3>Bancos e dinheiro</h3>'+
+    '<p class="source-note" style="margin:-4px 0 8px;">Exigências e taxas mudam — confira no site de cada um. <a href="/bancos">Guia completo →</a></p>'+
+    '<ul class="linklist">'+rows+'</ul></div>';
+}
+
 /* ---------- turismo (seção independente) ---------- */
 var TOURIST_ENTRY = [
   "Passaporte válido por pelo menos 6 meses além da data de retorno.",
@@ -4055,7 +4081,7 @@ function init(){
   renderHousingPhrases();
   renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity();
   renderTransportCityTabs(); renderTransportRoutes();
-  renderMarket(); renderBudget(); renderReservePlanner(); renderGastosIniciais(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderGroups();
+  renderMarket(); renderBudget(); renderReservePlanner(); renderGastosIniciais(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderBancosFinancas(); renderGroups();
   renderAll();
   setInterval(renderHero, 60000);
   document.getElementById("lastUpdated").textContent = LAST_UPDATED;
