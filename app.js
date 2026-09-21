@@ -1220,13 +1220,8 @@ function renderJobFinder(){
     var matches = JOB_TYPES_COMMON.filter(function(j){ return fits(j) && (!cat || j.cat===cat); });
     if(!matches.length) matches = JOB_TYPES_COMMON.filter(fits);
     var shown = matches.slice(0,6);
-    var names = shown.map(function(j){ return j.title; });
-    var lastText = names.length>1 ? names.slice(0,-1).join(", ")+" e "+names[names.length-1] : (names[0]||"Cleaner, Kitchen Porter e Stock Assistant");
     var expLabel = JOB_FINDER_EXP_OPTIONS.find(function(o){ return o.id===expId; }).l.toLowerCase();
-    var dispoText = dispoSelected.length ? " Considerando sua disponibilidade ("+dispoSelected.join(", ")+"), confirme os turnos de cada vaga antes de se candidatar." : "";
-    document.getElementById("jfResult").innerHTML =
-      '<div class="callout">Com inglês '+ingles.toLowerCase()+' e experiência em "'+expLabel+'", vale pesquisar vagas de '+lastText+'.'+dispoText+
-      '<p style="margin:10px 0 0;font-size:12.5px;">Isso não significa garantia de contratação. Requisitos variam por empresa.</p></div>';
+    renderJobResult(document.getElementById("jfResult"), shown, ingles, expLabel, dispoSelected);
   });
 }
 

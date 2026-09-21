@@ -244,3 +244,41 @@ function renderLeapAdvisor(){
     });
   });
 }
+
+/* ---------- Trabalho: sugestões com palavras para buscar ---------- */
+function jobTerms(list){
+  var out = [];
+  list.forEach(function(j){
+    j.title.split("/").forEach(function(t){ t = t.trim().toLowerCase(); if(t && out.indexOf(t)<0) out.push(t); });
+  });
+  return out;
+}
+function copyText(text, done){
+  function fallback(){
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); }catch(e){}
+    ta.remove(); if(done) done();
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function(){ if(done) done(); }, fallback);
+  else fallback();
+}
+function renderJobResult(el, shown, ingles, expLabel, dispo){
+  if(!shown.length){ el.innerHTML = '<div class="empty">Nenhuma sugestão para essa combinação. Tente outro nível de inglês ou outra experiência.</div>'; return; }
+  var terms = jobTerms(shown);
+  var dispoText = dispo.length ? ' Você marcou disponibilidade ('+dispo.join(", ")+'): confirme os turnos de cada vaga antes de se candidatar.' : '';
+  el.innerHTML = '<div class="jf-res">'+
+    '<p class="jf-lead">Com inglês '+ingles.toLowerCase()+' e experiência em "'+escapeHtml(expLabel)+'", estes são bons tipos de vaga para pesquisar.'+dispoText+'</p>'+
+    '<ul class="jf-list">'+shown.map(function(j){
+      return '<li><b>'+j.title+'</b><span>'+j.desc+'</span><small>'+j.turno+' · Inglês '+j.ingles.toLowerCase()+'</small></li>';
+    }).join("")+'</ul>'+
+    '<div class="jf-terms"><span class="eyebrow">Palavras para buscar</span>'+
+      '<div class="jf-chips">'+terms.map(function(t){ return '<button type="button" class="jf-chip" data-copy="'+escapeHtml(t)+'" title="Copiar">'+escapeHtml(t)+'</button>'; }).join("")+'</div>'+
+      '<button type="button" class="btn btn-ghost jf-copy" id="jfCopyAll">Copiar todas</button><span class="jf-copied" role="status"></span></div>'+
+    '<p class="la-note">Cole essas palavras no LinkedIn, no Indeed.ie ou no site das agências abaixo. Isso não é garantia de contratação, e os requisitos variam por empresa.</p></div>';
+  var flag = el.querySelector(".jf-copied");
+  function say(t){ flag.textContent = t; clearTimeout(say.t); say.t = setTimeout(function(){ flag.textContent = ""; }, 1800); }
+  el.querySelectorAll("[data-copy]").forEach(function(b){ b.addEventListener("click", function(){ copyText(b.dataset.copy, function(){ say('Copiado: '+b.dataset.copy); }); }); });
+  document.getElementById("jfCopyAll").addEventListener("click", function(){ copyText(terms.join("\n"), function(){ say('Copiadas '+terms.length+' palavras, uma por linha.'); }); });
+}

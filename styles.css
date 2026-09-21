@@ -1125,3 +1125,18 @@ body:not(.app-ready) footer.site{visibility:hidden;}
 .la-result p{margin:0 0 10px;font-size:13.6px;}
 .la-result .tablewrap{margin:0 0 12px;max-width:380px;}
 .la-result .la-note{font-size:12.4px;color:var(--muted);}
+
+/* Trabalho: sugestões e palavras para buscar */
+.jf-lead{margin:0 0 14px;font-size:14px;}
+.jf-list{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:0;}
+.jf-list li{display:grid;gap:2px;padding:10px 0;border-top:1px solid var(--border);}
+.jf-list li:first-child{border-top:0;}
+.jf-list b{font-size:14.4px;}
+.jf-list span{font-size:13.2px;}
+.jf-list small{font-size:12.2px;color:var(--muted);}
+.jf-terms{padding:16px 0 4px;border-top:1px solid var(--border);}
+.jf-chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 12px;}
+.jf-chip{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:999px;padding:6px 13px;font-family:var(--font-mono);font-size:12.6px;cursor:pointer;transition:background .15s ease,border-color .15s ease;}
+.jf-chip:hover{background:var(--accent-soft);border-color:var(--accent-strong);}
+.jf-copy{width:auto;padding:8px 16px;font-size:13px;}
+.jf-copied{margin-left:12px;font-size:12.6px;color:var(--accent-strong);}
