@@ -310,9 +310,8 @@ function renderFinDuo(st){
 
 /* ---------- bloco 4: quanto dinheiro preciso ---------- */
 var FIN_GROUPS = [
-  {name:"Antes de viajar", rows:[0,1,2]},
-  {name:"Na chegada", rows:[3,4,5,9]},
-  {name:"Primeiro mês", rows:[6,7,8]},
+  {name:"Antes de viajar", rows:[0,1,2,3]},
+  {name:"Primeiro mês", rows:[4,5,6,7,8,9]},
   {name:"Segurança", rows:[10]}
 ];
 var FIN_ROW_ICONS = {0:"plane",1:"cap",2:"shield",3:"house",4:"key",5:"house",6:"food",7:"bus",8:"phone",9:"id",10:"lifebuoy"};
