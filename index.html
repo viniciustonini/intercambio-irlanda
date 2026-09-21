@@ -72,9 +72,22 @@
         <h1 id="heroHeadline">Seu caminho até a Irlanda, sem perder o próximo passo.</h1>
         <p>Documentos, dinheiro, chegada e adaptação reunidos em um painel que acompanha seu progresso.</p>
       </div>
-      <div class="hero-tools">
-        <button class="hero-tool" id="heroBackupBtn" type="button">Meus dados</button>
-        <button class="hero-tool" id="heroResetBtn" type="button">Resetar progresso</button>
+      <div class="hero-card">
+        <div class="days tabular" id="heroDays">—</div>
+        <div class="days-lbl">dias para a viagem</div>
+        <div class="date-row">
+          <div class="date" id="heroDate">—</div>
+          <div class="route" id="heroRoute">Brasil → Irlanda</div>
+        </div>
+        <div class="hero-actions">
+          <button class="edit-link" id="heroEditDate" type="button">editar data</button>
+          <button class="edit-link edit-link-muted" id="heroBackupBtn" type="button">meus dados</button>
+          <button class="edit-link edit-link-muted" id="heroResetBtn" type="button">resetar progresso</button>
+        </div>
+        <div class="hero-date-editor" id="heroDateEditor" hidden>
+          <label for="heroDateInput">Data de embarque</label>
+          <input type="date" id="heroDateInput">
+        </div>
       </div>
     </div>
   </header>
@@ -323,6 +336,7 @@
       <p class="source-note" style="margin-bottom:14px;">Faixas de referência, não uma exigência fixa — cada pessoa gasta diferente. Marque <b>Já pago?</b> nos itens que você já quitou antes de viajar (eles saem do total) e use <b>Personalizar valores</b> para ajustar cada número ao seu caso.</p>
       <div id="gastosIniciaisWrap"></div>
       <div id="reservePlannerWrap" style="margin-top:16px;"></div>
+      <div class="card" id="savingsWrap"></div>
 
       <h3 style="margin:28px 0 12px;font-size:18px;">Dinheiro para a viagem</h3>
       <div class="card"><div id="moneyTipsWrap"></div></div>

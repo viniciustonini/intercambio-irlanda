@@ -191,22 +191,12 @@ function renderPersonalizedHero(){
     lead = c ? c.tag+"." : "Escolha sua cidade de destino para ver custos, pontos fortes e fracos.";
   }
 
-  var count;
-  if(days===null){
-    count = '<div class="trip-count-k">Data da viagem</div><button type="button" class="trip-count-link" data-act="date">Definir data da viagem</button>';
-  } else if(past){
-    count = '<div class="trip-count-k">Data ultrapassada</div><div class="trip-count-date">'+tripDateLong()+'</div><button type="button" class="trip-count-link" data-act="date">Atualizar data</button>';
-  } else if(days===0){
-    count = '<div class="trip-count-k">Embarque</div><div class="trip-count-num">Hoje</div><div class="trip-count-date">'+tripDateLong()+'</div><button type="button" class="trip-count-link trip-count-edit" data-act="date">editar data</button>';
-  } else {
-    count = '<div class="trip-count-k">Faltam</div><div class="trip-count-num tabular">'+days+'</div><div class="trip-count-unit">'+(days===1?'dia':'dias')+' até a viagem</div><div class="trip-count-date">'+tripDateLong()+'</div><button type="button" class="trip-count-link trip-count-edit" data-act="date">editar data</button>';
-  }
-
   var facts = [];
   var pl = profileLabel(p);
   facts.push('<li class="trip-chip"><span class="trip-chip-k">Cidadania</span> '+(pl || '<button type="button" class="trip-inline-link" data-act="edit">definir</button>')+'</li>');
   var goal = goalLabel(getGoal());
   facts.push('<li class="trip-chip"><span class="trip-chip-k">Objetivo</span> '+(goal ? escapeHtml(goal) : '<button type="button" class="trip-inline-link" data-act="edit">definir</button>')+'</li>');
+  if(days===null || past) facts.push('<li class="trip-chip"><span class="trip-chip-k">Viagem</span> <button type="button" class="trip-inline-link" data-act="date">'+(past ? 'Atualizar data' : 'Definir data da viagem')+'</button></li>');
   if(!c) facts.push('<li class="trip-chip"><span class="trip-chip-k">Destino</span> <button type="button" class="trip-inline-link" data-act="city">Escolher meu destino</button></li>');
 
   var status = statusChip(fl.flight,"Passagem comprada","Passagem ainda não comprada")+statusChip(fl.stay,"Acomodação definida","Acomodação pendente");
@@ -232,7 +222,6 @@ function renderPersonalizedHero(){
       '<ul class="trip-chips trip-chips-status" aria-label="Situação da viagem">'+status+'</ul>'+
       '<div class="trip-actions">'+primary+'<button class="btn btn-ghost trip-edit" type="button">Editar perfil</button></div>'+
     '</div>'+
-    '<div class="trip-count">'+count+'</div>'+
     (function(){ var ph = photo || slides[0]; return ph && ph.photoCredit ? '<a class="trip-credit" href="'+ph.photoCredit.url+'" target="_blank" rel="noopener">Foto: '+escapeHtml(ph.photoCredit.name)+' · '+ph.photoCredit.license+'</a>' : ''; })();
   startPhotoRotation(el, slides);
 
@@ -423,6 +412,7 @@ function renderDashboard(){
   renderNextStepCard();
   renderProgressOverview();
   renderTripStats();
+  renderSavingsPlanner();
   renderJourneyTimeline();
   renderUrgentChecklist();
   renderRecommendedGuides();
@@ -446,4 +436,88 @@ function celebrateProfileSaved(){
     el.classList.remove("flash");
     sec.classList.remove("dash-animate");
   }, 4500);
+}
+
+/* ---------- meta de reserva até a viagem ---------- */
+/* €833/mês × 8 meses = €6.665: valor oficial do ISD para curso de inglês de até 8 meses (conferido em 20/09/2026). */
+var PROOF_OF_FUNDS_EUR = 6665, PROOF_CHECKED_AT = "2026-09-20";
+function eur0(v){ return "€"+Math.round(v).toLocaleString("pt-BR"); }
+function brl0(v){ return "R$ "+Math.round(v).toLocaleString("pt-BR"); }
+function addMonthsClamped(d, k){
+  var y = d.getFullYear(), m = d.getMonth()+k, last = new Date(y, m+1, 0).getDate();
+  return new Date(y, m, Math.min(d.getDate(), last));
+}
+function fmtDay(d){ return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear(); }
+function savingsGoalValue(){
+  var g = ls("savingsGoal");
+  if(g!==null && g!==undefined && g!=="") return parseFloat(g) || 0;
+  return getProfile()==="non-eu" ? PROOF_OF_FUNDS_EUR : 0;
+}
+function savedValue(){ return parseFloat(ls("travelReserve")) || 0; }
+/* Depósitos mensais no mesmo dia do mês de hoje, até a data da viagem (o último cai antes do embarque). */
+function savingsPlan(goal, saved){
+  var days = tripDaysLeft();
+  if(days===null || days<=0) return {days:days};
+  var now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var trip = new Date(ls("tripDate")+"T00:00:00");
+  var n = 0;
+  while(addMonthsClamped(today, n+1) <= trip) n++;
+  var missing = Math.max(0, goal - saved);
+  var deposits = Math.max(1, n);
+  var monthly = Math.ceil(missing / deposits);
+  var rows = [];
+  for(var k=1; k<=deposits; k++){
+    rows.push({date: n===0 ? trip : addMonthsClamped(today, k), total: Math.min(goal, saved + monthly*k)});
+  }
+  return {days:days, n:n, deposits:deposits, missing:missing, monthly:monthly, rows:rows};
+}
+function savingsResultHtml(){
+  var goal = savingsGoalValue(), saved = savedValue();
+  if(goal<=0) return '<p class="source-note">Defina uma meta para ver quanto guardar por mês. Uma boa referência é o total da tabela "Quanto dinheiro preciso?" acima.</p>';
+  var pct = Math.min(100, Math.round(saved/goal*100));
+  var html = '<div class="sv-bar">'+dashBar(Math.min(saved, goal), goal)+'</div>'+
+    '<div class="sv-line"><span><b class="tabular">'+eur0(saved)+'</b> de <b class="tabular">'+eur0(goal)+'</b> ('+pct+'%)</span><span>Falta <b class="tabular">'+eur0(Math.max(0, goal-saved))+'</b></span></div>';
+  if(saved>=goal) return html+'<div class="sv-monthly"><span class="sv-monthly-k">Meta atingida</span><span class="sv-monthly-sub">Você já tem o valor da meta guardado.</span></div>';
+  var plan = savingsPlan(goal, saved);
+  if(plan.days===null) return html+'<p class="source-note">Defina a data da viagem para calcular quanto guardar por mês. <button type="button" class="trip-inline-link" data-act="date">Definir data da viagem</button></p>';
+  if(plan.days<=0) return html+'<p class="source-note">A data da viagem já passou. <button type="button" class="trip-inline-link" data-act="date">Atualizar data</button> para recalcular.</p>';
+  var prazo = plan.n===0 ? "A viagem é em menos de 1 mês ("+plan.days+(plan.days===1?" dia":" dias")+"): o ideal é ter o valor agora." : plan.days+" dias até a viagem · "+plan.deposits+(plan.deposits===1?" depósito mensal":" depósitos mensais");
+  html += '<div class="sv-monthly"><span class="sv-monthly-k">'+(plan.n===0?'Guardar agora':'Guardar por mês')+'</span><span class="sv-monthly-v tabular">'+eur0(plan.monthly)+'</span>'+
+    '<span class="sv-monthly-sub">≈ '+brl0(plan.monthly*getCotacao())+' (1 € = R$ '+getCotacao().toFixed(2).replace(".",",")+')</span></div>'+
+    '<p class="source-note" style="margin-top:8px;">'+prazo+'</p>'+
+    '<details class="sv-details"><summary>Ver mês a mês</summary><ul class="sv-schedule">'+
+      plan.rows.map(function(r){ return '<li><span class="tabular">até '+fmtDay(r.date)+'</span><span class="tabular">'+eur0(r.total)+' guardados</span></li>'; }).join("")+
+    '</ul></details>';
+  return html;
+}
+function wireSavingsLinks(root){
+  root.querySelectorAll('[data-act="date"]').forEach(function(b){ b.addEventListener("click", function(){ openOnboarding("date"); }); });
+  root.querySelectorAll("[data-go]").forEach(function(a){ a.addEventListener("click", function(e){ e.preventDefault(); dashGo(a.dataset.go); }); });
+}
+function renderSavingsPlanner(){
+  var el = document.getElementById("savingsWrap");
+  if(!el) return;
+  var goal = savingsGoalValue(), saved = ls("travelReserve");
+  var nonEU = getProfile()==="non-eu", customGoal = ls("savingsGoal")!==null && ls("savingsGoal")!==undefined && ls("savingsGoal")!=="" && parseFloat(ls("savingsGoal"))!==PROOF_OF_FUNDS_EUR;
+  el.innerHTML =
+    '<h3 class="dash-h">Meta de reserva até a viagem</h3>'+
+    '<div class="sv-fields">'+
+      '<div class="numfield"><label for="svGoal">Meta (€)</label><input type="number" step="1" min="0" id="svGoal" value="'+(goal||"")+'" placeholder="Ex: 6665"></div>'+
+      '<div class="numfield"><label for="svSaved">Já guardado (€)</label><input type="number" step="1" min="0" id="svSaved" value="'+(saved==null?"":saved)+'" placeholder="Ex: 2000"></div>'+
+    '</div>'+
+    '<div id="svResult">'+savingsResultHtml()+'</div>'+
+    (nonEU ? '<p class="source-note sv-note">"Já guardado" é o mesmo valor de "Reserva disponível" acima. Meta sugerida: <b>€6.665</b> (€833 × 8 meses), valor oficial de comprovação financeira do ISD para curso de inglês de até 8 meses. Ele não substitui seu orçamento e muda para estadias mais longas. Conferido em '+formatDateBR(PROOF_CHECKED_AT)+'. <a href="'+F_FIN+'" target="_blank" rel="noopener">Fonte oficial ↗</a>'+(customGoal ? ' · <button type="button" class="trip-inline-link" id="svReset">voltar a €6.665</button>' : '')+'</p>'
+            : '<p class="source-note sv-note">"Já guardado" é o mesmo valor do campo "Reserva disponível" acima: mudar um atualiza o outro.</p>');
+  var goalIn = document.getElementById("svGoal"), savedIn = document.getElementById("svSaved"), result = document.getElementById("svResult");
+  function refresh(){ result.innerHTML = savingsResultHtml(); wireSavingsLinks(result); }
+  goalIn.addEventListener("input", function(){ ls("savingsGoal", goalIn.value); refresh(); });
+  savedIn.addEventListener("input", function(){
+    ls("travelReserve", savedIn.value);
+    var fin = document.getElementById("travelReserveInput"); if(fin) fin.value = savedIn.value;
+    if(typeof refreshReservePlanner==="function") refreshReservePlanner();
+    refresh();
+  });
+  var reset = document.getElementById("svReset");
+  if(reset) reset.addEventListener("click", function(){ ls("savingsGoal", null); renderSavingsPlanner(); });
+  wireSavingsLinks(el);
 }

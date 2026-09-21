@@ -121,13 +121,19 @@ function animateSectionEntrance(id){
 }
 function animateHeroEntrance(){
   if(!animEnabled) return;
-  var els = [".hero-topbar", ".hero-text h1", ".hero-text p", ".hero-tools"];
+  var els = [".hero-topbar", ".hero-text h1", ".hero-text p", ".hero-card"];
   gsap.set(els, {opacity:0, y:18});
   var tl = gsap.timeline({defaults:{duration:.7, ease:"power2.out"}});
   tl.to(".hero-topbar", {opacity:1, y:0})
     .to(".hero-text h1", {opacity:1, y:0}, "-=0.45")
     .to(".hero-text p", {opacity:1, y:0}, "-=0.5")
-    .to(".hero-tools", {opacity:1, y:0, duration:.8}, "-=0.45");
+    .to(".hero-card", {opacity:1, y:0, duration:.8}, "-=0.45");
+  var daysEl = document.getElementById("heroDays");
+  var target = parseInt(daysEl.textContent, 10);
+  if(!isNaN(target)){
+    var counter = {v:0};
+    gsap.to(counter, {v:target, duration:1.1, ease:"power1.out", delay:.35, onUpdate:function(){ daysEl.textContent = Math.round(counter.v); }});
+  }
 }
 document.querySelectorAll(".tab-btn[data-sec]").forEach(function(b){
   b.addEventListener("click", function(){ history.replaceState(null, "", "#"+b.dataset.sec); showSection(b.dataset.sec); });
@@ -263,21 +269,40 @@ window.addEventListener("scroll", function(){
 window.addEventListener("resize", function(){
   if(!document.getElementById("moreMenu").hidden) closeMoreMenu();
 });
+document.getElementById("heroEditDate").addEventListener("click", function(){
+  var editor = document.getElementById("heroDateEditor");
+  editor.hidden = !editor.hidden;
+  if(!editor.hidden) document.getElementById("heroDateInput").focus();
+});
 
 /* ---------- trip date & countdown ---------- */
 function todayISO(){ return new Date().toISOString().slice(0,10); }
 var MONTHS = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
 function getTripDate(){ return ls("tripDate") || "2027-03-11"; }
+function setTripDate(v){ ls("tripDate", v); renderHero(); renderDashboard(); }
 function renderHero(){
+  var dstr = ls("tripDate");
+  var days = tripDaysLeft();
+  document.getElementById("heroDays").textContent = days!==null && days>=0 ? days : "—";
+  if(dstr && days!==null){
+    var d = new Date(dstr+"T00:00:00");
+    document.getElementById("heroDate").textContent = d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear();
+  } else {
+    document.getElementById("heroDate").textContent = "Defina a data";
+  }
   var city = getCity();
   var cityObj = city ? CITIES.find(function(c){return c.id===city;}) : null;
+  document.getElementById("heroRoute").textContent = "Brasil → " + (cityObj ? cityObj.name : "Irlanda");
   document.getElementById("heroHeadline").textContent = cityObj ? ("Seu caminho até "+cityObj.name+", sem perder o próximo passo.") : "Seu caminho até a Irlanda, sem perder o próximo passo.";
   document.getElementById("heroAvatar").textContent = cityObj ? cityObj.name.charAt(0) : "I";
   document.getElementById("heroTopTitle").textContent = (cityObj ? cityObj.name+" · " : "") + "IRLANDA";
   document.getElementById("heroTopSub").textContent = "Planejamento revisado em " + LAST_UPDATED;
   document.getElementById("heroCotacaoVal").textContent = "R$ " + getCotacao().toFixed(2).replace(".", ",");
+  var input = document.getElementById("heroDateInput");
+  if(input){ input.min = todayISO(); input.value = dstr || ""; }
 }
 document.getElementById("heroCotacao").addEventListener("click", function(){ location.hash = "acomodacao"; showSection("acomodacao"); });
+document.getElementById("heroDateInput").addEventListener("change", function(e){ setTripDate(e.target.value); });
 document.getElementById("heroResetBtn").addEventListener("click", function(){
   document.getElementById("resetModal").hidden = false;
 });
@@ -3365,7 +3390,7 @@ function renderReservePlanner(){
       '</div>'+
     '</div>';
   var input = document.getElementById("travelReserveInput");
-  if(input) input.addEventListener("input", function(){ ls("travelReserve", input.value); refreshReservePlanner(); });
+  if(input) input.addEventListener("input", function(){ ls("travelReserve", input.value); refreshReservePlanner(); if(typeof renderSavingsPlanner==="function") renderSavingsPlanner(); });
 }
 function renderConverter(){
   var eurEl = document.getElementById("convEur"), brlEl = document.getElementById("convBrl");
