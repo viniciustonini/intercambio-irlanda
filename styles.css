@@ -285,6 +285,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   padding:8px 14px;border-radius:999px;box-shadow:0 8px 20px -8px rgba(15,122,81,.6);
 }
 
+.dash-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.dash-top:not(:has(> :not([hidden]))){display:none;}
+.dash-top #backupReminderWrap{flex:1 1 340px;min-width:0;}
+.dash-top .callout{margin:0;padding:10px 14px;}
 .dash-block{margin-bottom:16px;}
 .dash-h{font-size:18px;margin:0 0 12px;}
 .next-card{border-color:rgba(27,156,107,.35);background:linear-gradient(120deg,var(--accent-soft),rgba(255,255,255,0) 55%),var(--surface);}
@@ -322,6 +326,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .sv-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 32px;}
 .sv-fields .numfield{border-bottom:none;}
 .sv-fields .numfield input{width:120px;}
+.sv-lock{display:block;font-size:11px;color:var(--muted);font-weight:500;}
+.sv-lock[hidden]{display:none;}
+.sv-fields .numfield input.sv-locked{background:var(--surface-2);cursor:pointer;border-style:dashed;}
 .sv-bar{margin:6px 0 4px;}
 .sv-line{display:flex;justify-content:space-between;gap:12px;font-size:12.8px;color:var(--muted);margin-bottom:14px;}
 .sv-line b{color:var(--text);font-weight:600;}

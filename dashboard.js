@@ -453,6 +453,10 @@ function savingsGoalValue(){
   if(g!==null && g!==undefined && g!=="") return parseFloat(g) || 0;
   return getProfile()==="non-eu" ? PROOF_OF_FUNDS_EUR : 0;
 }
+function goalIsCustom(){
+  var g = ls("savingsGoal");
+  return g!==null && g!==undefined && g!=="" && parseFloat(g)!==PROOF_OF_FUNDS_EUR;
+}
 function savedValue(){ return parseFloat(ls("travelReserve")) || 0; }
 /* Depósitos mensais no mesmo dia do mês de hoje, até a data da viagem (o último cai antes do embarque). */
 function savingsPlan(goal, saved){
@@ -498,18 +502,35 @@ function renderSavingsPlanner(){
   var el = document.getElementById("savingsWrap");
   if(!el) return;
   var goal = savingsGoalValue(), saved = ls("travelReserve");
-  var nonEU = getProfile()==="non-eu", customGoal = ls("savingsGoal")!==null && ls("savingsGoal")!==undefined && ls("savingsGoal")!=="" && parseFloat(ls("savingsGoal"))!==PROOF_OF_FUNDS_EUR;
+  var nonEU = getProfile()==="non-eu";
+  /* não-UE: a meta começa travada no valor oficial; clicar no campo destrava */
+  var locked = nonEU && !goalIsCustom();
   el.innerHTML =
     '<h3 class="dash-h">Meta de reserva até a viagem</h3>'+
     '<div class="sv-fields">'+
-      '<div class="numfield"><label for="svGoal">Meta (€)</label><input type="number" step="1" min="0" id="svGoal" value="'+(goal||"")+'" placeholder="Ex: 6665"></div>'+
+      '<div class="numfield"><label for="svGoal">Meta (€)<span class="sv-lock" id="svLockHint"'+(locked?'':' hidden')+'>valor oficial · clique para alterar</span></label><input type="number" step="1" min="0" id="svGoal" class="'+(locked?'sv-locked':'')+'"'+(locked?' readonly title="Valor oficial do ISD. Clique para alterar."':'')+' value="'+(goal||"")+'" placeholder="Ex: 6665"></div>'+
       '<div class="numfield"><label for="svSaved">Já guardado (€)</label><input type="number" step="1" min="0" id="svSaved" value="'+(saved==null?"":saved)+'" placeholder="Ex: 2000"></div>'+
     '</div>'+
     '<div id="svResult">'+savingsResultHtml()+'</div>'+
-    (nonEU ? '<p class="source-note sv-note">"Já guardado" é o mesmo valor de "Reserva disponível" acima. Meta sugerida: <b>€6.665</b> (€833 × 8 meses), valor oficial de comprovação financeira do ISD para curso de inglês de até 8 meses. Ele não substitui seu orçamento e muda para estadias mais longas. Conferido em '+formatDateBR(PROOF_CHECKED_AT)+'. <a href="'+F_FIN+'" target="_blank" rel="noopener">Fonte oficial ↗</a>'+(customGoal ? ' · <button type="button" class="trip-inline-link" id="svReset">voltar a €6.665</button>' : '')+'</p>'
+    (nonEU ? '<p class="source-note sv-note">"Já guardado" é o mesmo valor de "Reserva disponível" acima. Meta sugerida: <b>€6.665</b> (€833 × 8 meses), valor oficial de comprovação financeira do ISD para curso de inglês de até 8 meses. Ele não substitui seu orçamento e muda para estadias mais longas. Conferido em '+formatDateBR(PROOF_CHECKED_AT)+'. <a href="'+F_FIN+'" target="_blank" rel="noopener">Fonte oficial ↗</a>'+'<span id="svResetSlot"></span></p>'
             : '<p class="source-note sv-note">"Já guardado" é o mesmo valor do campo "Reserva disponível" acima: mudar um atualiza o outro.</p>');
   var goalIn = document.getElementById("svGoal"), savedIn = document.getElementById("svSaved"), result = document.getElementById("svResult");
-  function refresh(){ result.innerHTML = savingsResultHtml(); wireSavingsLinks(result); }
+  var resetSlot = document.getElementById("svResetSlot");
+  function syncReset(){
+    if(!resetSlot) return;
+    resetSlot.innerHTML = goalIsCustom() ? ' · <button type="button" class="trip-inline-link" id="svReset">voltar a €6.665</button>' : "";
+    var r = document.getElementById("svReset");
+    if(r) r.addEventListener("click", function(){ ls("savingsGoal", null); renderSavingsPlanner(); });
+  }
+  function refresh(){ result.innerHTML = savingsResultHtml(); wireSavingsLinks(result); syncReset(); }
+  function unlock(){
+    if(!goalIn.readOnly) return;
+    goalIn.readOnly = false; goalIn.classList.remove("sv-locked"); goalIn.removeAttribute("title");
+    var hint = document.getElementById("svLockHint"); if(hint) hint.hidden = true;
+    goalIn.select();
+  }
+  goalIn.addEventListener("focus", unlock);
+  goalIn.addEventListener("click", unlock);
   goalIn.addEventListener("input", function(){ ls("savingsGoal", goalIn.value); refresh(); });
   savedIn.addEventListener("input", function(){
     ls("travelReserve", savedIn.value);
@@ -517,7 +538,6 @@ function renderSavingsPlanner(){
     if(typeof refreshReservePlanner==="function") refreshReservePlanner();
     refresh();
   });
-  var reset = document.getElementById("svReset");
-  if(reset) reset.addEventListener("click", function(){ ls("savingsGoal", null); renderSavingsPlanner(); });
+  syncReset();
   wireSavingsLinks(el);
 }
