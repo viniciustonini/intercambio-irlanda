@@ -670,7 +670,12 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
 /* ===== Finanças: plano financeiro (financas.js) ===== */
 .phi{width:1em;height:1em;flex:none;}
 .fin-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:0 0 34px;}
-.fin-head-text{max-width:680px;min-width:0;}
+.fin-head-text{max-width:620px;min-width:0;flex:1 1 auto;}
+.fin-tools{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:12px;max-width:560px;}
+.fin-tools-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+.fin-tour-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--accent-strong);border-radius:999px;background:var(--accent-strong);color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s ease;}
+.fin-tour-btn:hover{background:var(--accent-strong-2);}
+.fin-tour-btn .phi{width:20px;height:20px;}
 .fin-eye{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text);font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s ease,border-color .15s ease;}
 .fin-eye:hover{border-color:var(--accent);background:var(--surface-2);}
 .fin-eye .phi{width:22px;height:22px;color:var(--accent-strong);}
@@ -850,8 +855,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{position:absolute;inset:0;
 .brl{display:block;font-size:.78em;font-weight:500;font-family:var(--font-body);color:var(--muted);letter-spacing:0;line-height:1.25;font-variant-numeric:tabular-nums;}
 .fin-figs .brl,.fin-feedback .brl{display:inline;}
 .summary-row .val .brl{text-align:right;}
-.fin-rate{font-size:12.8px;color:var(--muted);margin:10px 0 0;}
-.fin-rate b{color:var(--text);font-weight:600;}
+.fin-rate{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px 10px;font-size:13px;color:var(--muted);margin:0;}
+.fin-rate-l{font-weight:600;color:var(--text);}
+.fin-rate-eq{font-family:var(--font-mono);font-size:13px;color:var(--text);}
+.fin-rate-in{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:0 10px;height:40px;transition:border-color .15s ease,box-shadow .15s ease;}
+.fin-rate-in:focus-within{border-color:var(--accent-strong);box-shadow:0 0 0 3px var(--accent-soft);}
+.fin-rate-in span{font-size:13px;color:var(--muted);}
+.fin-rate-in input{width:64px;border:0;background:transparent;font-family:var(--font-mono);font-size:15px;font-weight:600;color:var(--text);text-align:right;outline:none;}
+.fin-rate-src{width:auto;padding:0 14px;height:40px;font-size:12.8px;}
+.fin-rate-up{flex-basis:100%;text-align:right;font-size:12px;}
 .fin-lock{display:inline-flex;align-items:center;gap:5px;margin-left:10px;padding:3px 10px 3px 8px;border-radius:999px;background:var(--surface);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--accent-strong-2);}
 .fin-lock[hidden]{display:none;}
 .fin-lock .phi{width:14px;height:14px;}
@@ -895,4 +907,46 @@ input[type="date"]::-webkit-calendar-picker-indicator{position:absolute;inset:0;
 .hide-brl .brl,.hide-brl .brl-i,.hide-brl .fin-in-brl,.hide-brl .fin-big-brl,.hide-brl .fin-eq-brl,.hide-brl .rota-b,.hide-brl .fin-goal-brl,.hide-brl .fin-pace-brl,.hide-brl .fin-rate{display:none !important;}
 @media (max-width:600px){
   .fin-eye{padding:0 12px;}
+}
+
+/* passo a passo */
+.fin-tour-card{max-width:540px;padding:26px 28px 24px;}
+.fin-tour-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.fin-tour-count{font-size:13px;font-weight:600;color:var(--muted);}
+.fin-tour-x{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:0;background:transparent;border-radius:50%;color:var(--muted);cursor:pointer;}
+.fin-tour-x:hover{background:var(--surface-2);}
+.fin-tour-x .phi{width:18px;height:18px;}
+.fin-tour-bar{height:4px;border-radius:999px;background:var(--surface-2);overflow:hidden;margin-bottom:22px;}
+.fin-tour-bar i{display:block;height:100%;background:var(--accent-strong);border-radius:999px;transition:width .3s cubic-bezier(.23,1,.32,1);}
+.fin-tour-card h3{font-size:24px;line-height:1.15;letter-spacing:-.01em;margin:0 0 10px;}
+.fin-tour-card p{font-size:15px;line-height:1.55;color:var(--text);margin:0 0 20px;min-height:6em;}
+.fin-tour-dots{display:flex;gap:6px;margin-bottom:22px;}
+.fin-tour-dot{flex:1;height:10px;padding:0;border:0;border-radius:999px;background:var(--surface-2);cursor:pointer;position:relative;}
+.fin-tour-dot::before{content:"";position:absolute;inset:-8px 0;}
+.fin-tour-dot.is-done{background:rgba(27,156,107,.4);}
+.fin-tour-dot.is-on{background:var(--accent-strong);}
+.fin-tour-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.fin-tour-actions .btn{width:auto;gap:8px;}
+.fin-tour-actions .btn .phi{width:16px;height:16px;}
+.fin-tour-actions .btn:disabled{opacity:.4;cursor:default;}
+.fin-tour-actions #finTourNext{margin-left:auto;}
+.fin-tour-back{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:150;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--navy);color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;box-shadow:0 14px 30px -12px rgba(15,28,43,.6);}
+.fin-tour-back[hidden]{display:none;}
+.fin-tour-back .phi{width:18px;height:18px;}
+.fin-spot{outline:3px solid var(--accent-strong);outline-offset:10px;border-radius:14px;}
+@media (prefers-reduced-motion: no-preference){
+  .fin-spot{animation:finSpot 3.2s ease-out;}
+}
+@keyframes finSpot{0%{outline-color:transparent;}12%{outline-color:var(--accent-strong);}80%{outline-color:var(--accent-strong);}100%{outline-color:transparent;}}
+@media (max-width:900px){
+  .fin-head{flex-direction:column;}
+  .fin-tools{align-items:flex-start;max-width:none;width:100%;}
+  .fin-rate,.fin-tools-btns{justify-content:flex-start;}
+  .fin-rate-up{text-align:left;}
+}
+@media (max-width:600px){
+  .fin-tour-card{padding:22px 20px 20px;}
+  .fin-tour-actions #finTourNext{margin-left:0;flex:1 1 100%;}
+  .fin-tour-actions .btn{flex:1 1 auto;}
+  .fin-tour-card p{min-height:0;}
 }
