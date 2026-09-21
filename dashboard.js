@@ -366,7 +366,7 @@ var GUIDES = {
   "saude": {t:"Saúde", d:"GP, seguro médico para não-europeus e emergências."},
   "moradia": {t:"Moradia", d:"Tipos de quarto, golpes comuns, tenancy x licence e bairros de Dublin."},
   "custo-de-vida": {t:"Custo de vida", d:"Quanto sobra do salário mínimo depois de aluguel, contas e impostos."},
-  "ingles": {t:"Curso de inglês", d:"Credenciamento ILEP, curso intensivo x noturno e erros comuns."},
+  "ingles": {t:"Curso de inglês", d:"Credenciamento (ILEP e TrustEd Ireland), curso intensivo x noturno e erros comuns."},
   "transporte": {t:"Transporte", d:"Leap Card, apps essenciais e trens entre as cidades."},
   "turismo": {t:"Turismo", d:"Quando ir, o que ver e o que saber sobre a Irlanda do Norte."},
   "primeiros-dias-na-irlanda": {t:"Primeiros dias", d:"Do embarque ao primeiro mês: o que resolver e em que ordem."},

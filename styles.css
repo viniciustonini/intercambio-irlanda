@@ -1140,3 +1140,10 @@ body:not(.app-ready) footer.site{visibility:hidden;}
 .jf-chip:hover{background:var(--accent-soft);border-color:var(--accent-strong);}
 .jf-copy{width:auto;padding:8px 16px;font-size:13px;}
 .jf-copied{margin-left:12px;font-size:12.6px;color:var(--accent-strong);}
+
+/* Artigos: resumo e verificação */
+.static-summary{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin:18px 0 26px;}
+.static-summary h2{font-family:var(--font-body);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-strong);margin:0 0 10px;}
+.static-summary ul{margin:0;padding-left:18px;display:grid;gap:7px;font-size:14.4px;}
+.static-lbl{font-weight:600;margin:0 0 4px;font-size:13.4px;}
+.static-verify{margin:12px 0 0;font-size:13px;}
