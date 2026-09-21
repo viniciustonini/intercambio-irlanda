@@ -835,3 +835,52 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
   .fin-pace{padding:24px 20px 22px;border-radius:18px;}
   .fin-legend li{grid-template-columns:12px minmax(0,1fr) auto 38px;gap:8px;}
 }
+
+/* Data: o campo inteiro abre o calendário (o ícone nativo cobre toda a área, fica invisível e o desenho vem do fundo) */
+input[type="date"]{position:relative;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%2357626F'%3E%3Cpath d='M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z'/%3E%3C/svg%3E") !important;background-repeat:no-repeat !important;background-position:right 12px center !important;background-size:18px !important;padding-right:40px !important;}
+input[type="date"]::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:pointer;}
+
+/* reais sob os euros */
+.brl{display:block;font-size:.78em;font-weight:500;font-family:var(--font-body);color:var(--muted);letter-spacing:0;line-height:1.25;font-variant-numeric:tabular-nums;}
+.fin-figs .brl,.fin-feedback .brl{display:inline;}
+.summary-row .val .brl{text-align:right;}
+.fin-rate{font-size:12.8px;color:var(--muted);margin:10px 0 0;}
+.fin-rate b{color:var(--text);font-weight:600;}
+.fin-lock{display:inline-flex;align-items:center;gap:5px;margin-left:10px;padding:3px 10px 3px 8px;border-radius:999px;background:var(--surface);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--accent-strong-2);}
+.fin-lock[hidden]{display:none;}
+.fin-lock .phi{width:14px;height:14px;}
+.fin-goal-brl{font-size:15px;color:var(--muted);margin:8px 0 0;font-variant-numeric:tabular-nums;}
+.fin-in-brl{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.fin-big-brl{font-size:15px;color:var(--muted);margin:-2px 0 12px;font-variant-numeric:tabular-nums;}
+.fin-eq-brl{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);margin:-10px 0 18px;}
+.rota-b{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:-3px;}
+.fin-legend b{display:flex;flex-direction:column;align-items:flex-end;}
+.fin-legend .brl{font-family:var(--font-body);font-weight:500;}
+.fin-seg-btn .brl{margin-top:2px;}
+.fin-group header span{text-align:right;}
+.fin-group header .brl{font-family:var(--font-body);}
+.fin-compare td .brl{text-align:right;font-family:var(--font-body);}
+
+/* edição direta dos valores */
+.fin-row{grid-template-columns:28px minmax(0,1fr) auto auto 32px;}
+.fin-amt-wrap{display:flex;flex-direction:column;align-items:flex-end;min-width:104px;}
+.fin-amt{display:inline-flex;align-items:baseline;gap:3px;border-radius:8px;padding:2px 6px;transition:background .15s ease,box-shadow .15s ease;cursor:text;}
+.fin-amt > span{font-family:var(--font-mono);font-size:14.5px;color:var(--muted);}
+.fin-amt-in{width:5ch;min-width:3ch;border:0;background:transparent;text-align:right;font-family:var(--font-mono);font-size:14.5px;font-weight:600;color:var(--text);padding:2px 0;outline:none;}
+.fin-amt:hover{background:var(--surface-2);}
+.fin-amt:focus-within{background:var(--surface);box-shadow:inset 0 -2px 0 var(--accent-strong);}
+.fin-row.is-paid .fin-amt-in{color:var(--muted);text-decoration:line-through;font-weight:500;}
+.fin-name-in{min-width:0;width:100%;border:0;background:transparent;font:inherit;font-size:14.5px;color:var(--text);padding:4px 6px;border-radius:8px;outline:none;}
+.fin-name-in:hover{background:var(--surface-2);}
+.fin-name-in:focus{background:var(--surface);box-shadow:inset 0 -2px 0 var(--accent-strong);}
+.fin-x{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:0;background:transparent;border-radius:50%;color:var(--muted);cursor:pointer;opacity:.45;transition:opacity .15s ease,background .15s ease;}
+.fin-x .phi{width:16px;height:16px;}
+.fin-row:hover .fin-x,.fin-x:focus-visible{opacity:1;}
+.fin-x:hover{background:var(--surface-2);color:var(--warn-strong);}
+.fin-need-actions .fin-link{font-size:13px;}
+@media (max-width:600px){
+  .fin-row{grid-template-columns:24px minmax(0,1fr) auto 44px 28px;gap:8px;}
+  .fin-amt-wrap{min-width:86px;}
+  .fin-amt-in{min-width:3ch;}
+  .fin-x{width:28px;height:28px;opacity:.7;}
+}

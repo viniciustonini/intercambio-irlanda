@@ -2412,6 +2412,8 @@ function fetchLiveCotacao(){
       if(!rate) return;
       ls("cotacao", rate);
       ls("cotacaoUpdatedAt", today);
+      if(typeof renderFinancas==="function") renderFinancas();
+      if(typeof renderDashboard==="function") renderDashboard();
       var val = document.getElementById("heroCotacaoVal");
       if(val) val.textContent = "R$ " + rate.toFixed(2).replace(".", ",");
       var inp = document.getElementById("cotacaoInput");
@@ -2436,6 +2438,8 @@ function renderStayFields(){
     '<p class="source-note" style="margin-top:8px;" id="cotacaoAutoNote">'+noteText+'</p>';
   document.getElementById("cotacaoInput").addEventListener("input", function(e){
     ls("cotacao", parseFloat(e.target.value)||1);
+    if(typeof renderFinancas==="function") renderFinancas();
+    if(typeof renderDashboard==="function") renderDashboard();
     updateStayComputed();
     document.getElementById("heroCotacaoVal").textContent = "R$ " + getCotacao().toFixed(2).replace(".", ",");
   });
@@ -3132,12 +3136,12 @@ function calcIrishTax(wage, hoursWeek){
 function renderTaxLine(){
   var b = getBudget();
   var t = calcIrishTax(b.wage, b.hoursWeek);
-  document.getElementById("taxEstValue").textContent = fmtEur(t.totalMonth);
+  document.getElementById("taxEstValue").innerHTML = fmtEur(t.totalMonth)+brlSub(t.totalMonth);
   document.getElementById("taxDetailWrap").innerHTML =
-    '<div class="summary-row"><span class="lbl">PAYE (imposto de renda)</span><span class="val">'+fmtEur(t.payeMonth)+'</span></div>'+
-    '<div class="summary-row"><span class="lbl">USC</span><span class="val">'+fmtEur(t.uscMonth)+'</span></div>'+
-    '<div class="summary-row"><span class="lbl">PRSI</span><span class="val">'+fmtEur(t.prsiMonth)+'</span></div>'+
-    '<div class="summary-row big"><span class="lbl">Total de descontos</span><span class="val">'+fmtEur(t.totalMonth)+'</span></div>'+
+    '<div class="summary-row"><span class="lbl">PAYE (imposto de renda)</span><span class="val">'+fmtEur(t.payeMonth)+brlSub(t.payeMonth)+'</span></div>'+
+    '<div class="summary-row"><span class="lbl">USC</span><span class="val">'+fmtEur(t.uscMonth)+brlSub(t.uscMonth)+'</span></div>'+
+    '<div class="summary-row"><span class="lbl">PRSI</span><span class="val">'+fmtEur(t.prsiMonth)+brlSub(t.prsiMonth)+'</span></div>'+
+    '<div class="summary-row big"><span class="lbl">Total de descontos</span><span class="val">'+fmtEur(t.totalMonth)+brlSub(t.totalMonth)+'</span></div>'+
     '<button class="btn-ghost btn" id="taxInfoToggle" type="button" style="width:auto;padding:5px 10px;font-size:12.5px;margin-top:8px;gap:6px;"><svg viewBox="0 0 16 16" fill="none" width="13" height="13"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2v4.1M8 5.1v.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Como calcula?</button>'+
     '<div id="taxInfoWrap" hidden style="margin-top:8px;font-size:12.6px;color:var(--muted);">'+
     '<p style="margin:0 0 8px;"><strong>PAYE:</strong> 20% até € 44.000/ano, 40% acima, menos € 4.000/ano de créditos fiscais padrão (com 20h/semana no mínimo, o crédito costuma zerar o PAYE).</p>'+
@@ -3197,11 +3201,12 @@ function updateBudgetSummary(){
   var netMonth = grossMonth - t.totalMonth;
   var totalExpenses = sumExpenses(b);
   var freeBalance = netMonth-totalExpenses, pctCommitted = netMonth>0 ? (totalExpenses/netMonth*100):0, yearlyReserve = freeBalance*12;
+  function rowE(lbl,v,cls){ return row(lbl, fmtEur(v)+brlSub(v), cls); }
   function row(lbl,val,cls){ return '<div class="summary-row '+(cls||"")+'"><span class="lbl">'+lbl+'</span><span class="val">'+val+'</span></div>'; }
   document.getElementById("budgetSummary").innerHTML =
-    row("Salário bruto semanal",fmtEur(t.grossWeek))+row("Salário bruto mensal",fmtEur(grossMonth))+row("Salário líquido estimado",fmtEur(netMonth))+
-    row("Total de gastos mensais",fmtEur(totalExpenses))+row("Saldo livre no mês",fmtEur(freeBalance), freeBalance<0?"warn big":"big")+
-    row("% da renda comprometida", pctCommitted.toFixed(1).replace(".",",")+"%", pctCommitted>85?"warn":"")+row("Reserva possível em 12 meses",fmtEur(yearlyReserve));
+    rowE("Salário bruto semanal",t.grossWeek)+rowE("Salário bruto mensal",grossMonth)+rowE("Salário líquido estimado",netMonth)+
+    rowE("Total de gastos mensais",totalExpenses)+rowE("Saldo livre no mês",freeBalance, freeBalance<0?"warn big":"big")+
+    row("% da renda comprometida", pctCommitted.toFixed(1).replace(".",",")+"%", pctCommitted>85?"warn":"")+rowE("Reserva possível em 12 meses",yearlyReserve);
 }
 /* ---------- quanto dinheiro preciso (custos iniciais) ---------- */
 var GASTOS_INICIAIS_CENARIOS = {
