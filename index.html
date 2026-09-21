@@ -45,6 +45,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=optional" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<noscript><style>body footer.site{visibility:visible !important;}</style></noscript>
 <link rel="preload" as="image" href="hero-dublin.webp" fetchpriority="high">
 
 
@@ -60,7 +61,7 @@
       <div class="avatar" id="heroAvatar">I</div>
       <div>
         <div class="htb-title" id="heroTopTitle">IRLANDA</div>
-        <div class="htb-sub" id="heroTopSub">Planejamento revisado em —</div>
+        <div class="htb-sub" id="heroTopSub">Guia atualizado em 21/09/2026</div>
       </div>
       <button class="htb-cotacao" id="heroCotacao" type="button" title="Editar cotação em Acomodação">
         <span class="htb-cotacao-label">1 € =</span>
@@ -82,7 +83,6 @@
         <div class="hero-actions">
           <button class="edit-link" id="heroEditDate" type="button">editar data</button>
           <button class="edit-link edit-link-muted" id="heroBackupBtn" type="button">meus dados</button>
-          <button class="edit-link edit-link-muted" id="heroResetBtn" type="button">resetar progresso</button>
         </div>
         <div class="hero-date-editor" id="heroDateEditor" hidden>
           <label for="heroDateInput">Data de embarque</label>
@@ -141,7 +141,7 @@
         <h3>Cidadania</h3>
         <div class="seg">
           <button class="seg-btn" id="pickEU"><h4>🇪🇺 Sou cidadão europeu</h4><p>UE, EEE ou Suíço — liberdade de movimento, sem visto, Stamp 2, IRP ou limite de horas ligado a curso.</p></button>
-          <button class="seg-btn" id="pickNONEU"><h4>🌎 Não sou cidadão europeu</h4><p>Rota de visto de estudante: curso credenciado, Stamp 2, IRP, comprovação financeira e limite de horas.</p></button>
+          <button class="seg-btn" id="pickNONEU"><h4>🌎 Não sou cidadão europeu</h4><p>Permissão de estudante: curso elegível, Stamp 2, IRP, comprovação financeira e limite de horas.</p></button>
         </div>
       </div>
       <div class="card">
@@ -550,7 +550,7 @@
     </section>
 
   </main>
-  <footer class="site">Guia mantido por Vinicius para ajudar outros intercambistas. · Última atualização: <span id="lastUpdated"></span>
+  <footer class="site">Guia mantido por Vinicius para ajudar outros intercambistas. · Última atualização: <span id="lastUpdated">21/09/2026</span>
     <div class="static-footer-links">
       <a href="documentos" target="_blank" rel="noopener">Guia: Documentos</a>
       <a href="trabalho" target="_blank" rel="noopener">Guia: Trabalho</a>
@@ -582,7 +582,7 @@
     <label class="onb-label">Sua cidadania</label>
     <div class="seg" id="onbProfileSeg" style="margin-bottom:18px;">
       <button class="seg-btn" type="button" data-profile="eu"><h4>🇪🇺 Sou cidadão europeu</h4><p>UE, EEE ou Suíço</p></button>
-      <button class="seg-btn" type="button" data-profile="non-eu"><h4>🌎 Não sou cidadão europeu</h4><p>Visto de estudante, Stamp 2</p></button>
+      <button class="seg-btn" type="button" data-profile="non-eu"><h4>🌎 Não sou cidadão europeu</h4><p>Permissão de estudante, Stamp 2</p></button>
     </div>
 
     <label class="onb-label">Cidade de destino</label>
@@ -626,15 +626,21 @@
 </div>
 
 <div class="modal-overlay" id="backupModal" hidden>
-  <div class="modal-card">
-    <h3>Meus dados</h3>
-    <p>Tudo o que você preenche (perfil, checklist, orçamento, mercado, acomodação, escolas) fica salvo só neste navegador — não é sincronizado entre aparelhos. Baixe um backup de vez em quando, ou antes de limpar os dados do navegador.</p>
+  <div class="modal-card modal-card-lg" role="dialog" aria-modal="true" aria-labelledby="backupTitle">
+    <h3 id="backupTitle">Meus dados</h3>
+    <p>Perfil, checklist, orçamento e favoritos ficam salvos só neste navegador. Nada vai para um servidor e nada sincroniza entre aparelhos. Baixe um backup de vez em quando, ou antes de limpar os dados do navegador.</p>
+    <p class="last-backup" id="backupLast"></p>
     <div class="modal-actions" style="justify-content:flex-start;flex-wrap:wrap;">
-      <button class="btn btn-accent" id="backupExportBtn" type="button" style="width:auto;">Exportar backup (.json)</button>
+      <button class="btn btn-accent" id="backupExportBtn" type="button" style="width:auto;">Baixar backup (.json)</button>
       <button class="btn btn-ghost" id="backupImportBtn" type="button" style="width:auto;">Importar backup</button>
       <input type="file" id="backupImportInput" accept="application/json" hidden>
     </div>
     <p class="source-note" id="backupStatus" style="margin-top:12px;"></p>
+    <div class="danger-zone">
+      <h4>Zona de perigo</h4>
+      <p>Apaga todos os dados deste navegador. Não dá para desfazer, então baixe um backup antes.</p>
+      <button class="btn btn-danger-outline" id="dataResetBtn" type="button">Resetar progresso</button>
+    </div>
     <div class="modal-actions"><button class="btn btn-ghost" id="backupModalClose" type="button">Fechar</button></div>
   </div>
 </div>
@@ -642,7 +648,7 @@
 <div class="modal-overlay" id="resetModal" hidden>
   <div class="modal-card">
     <h3>Resetar progresso?</h3>
-    <p>Isso vai apagar TODOS os seus dados salvos neste navegador — perfil, checklist, cronograma, orçamento, mercado, acomodação, escolas e favoritos de turismo. Essa ação não pode ser desfeita. Considere exportar um backup antes (botão "meus dados" ao lado).</p>
+    <p>Isso vai apagar TODOS os seus dados salvos neste navegador — perfil, checklist, cronograma, orçamento, mercado, acomodação, escolas e favoritos de turismo. Essa ação não pode ser desfeita. Baixe um backup antes, na janela "Meus dados".</p>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="resetModalCancel" type="button">Cancelar</button>
       <button class="btn btn-danger" id="resetModalConfirm" type="button">Apagar e resetar</button>

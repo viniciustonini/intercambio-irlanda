@@ -61,9 +61,9 @@ function progressData(){
   };
 }
 function dashGo(sec){ location.hash = sec; showSection(sec); }
-function dashBar(done, total){
+function dashBar(done, total, label){
   var r = total ? done/total : 0;
-  return '<div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+done+'"><div class="progress-fill" style="transform:scaleX('+r+')"></div></div>';
+  return '<div class="progress-track" role="progressbar" aria-label="'+escapeHtml(label||"Progresso")+'" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+done+'"><div class="progress-fill" style="transform:scaleX('+r+')"></div></div>';
 }
 
 /* ---------- sincronização formulário → plano ---------- */
@@ -217,7 +217,7 @@ function renderPersonalizedHero(){
       '<div class="eyebrow">'+(c ? escapeHtml(c.name)+' · Irlanda' : 'Sua viagem')+'</div>'+
       '<h3 class="trip-city">'+title+'</h3>'+
       '<p class="trip-lead">'+lead+'</p>'+
-      '<div class="trip-prog"><div class="trip-prog-row"><span>Preparação</span><b class="tabular">'+prog.done+' de '+prog.total+' etapas · '+prog.pct+'%</b></div>'+dashBar(prog.done, prog.total)+'</div>'+
+      '<div class="trip-prog"><div class="trip-prog-row"><span>Preparação</span><b class="tabular">'+prog.done+' de '+prog.total+' etapas · '+prog.pct+'%</b></div>'+dashBar(prog.done, prog.total, "Preparação geral")+'</div>'+
       '<ul class="trip-chips">'+facts.join("")+'</ul>'+
       '<ul class="trip-chips trip-chips-status" aria-label="Situação da viagem">'+status+'</ul>'+
       '<div class="trip-actions">'+primary+'<button class="btn btn-ghost trip-edit" type="button">Editar perfil</button></div>'+
@@ -278,9 +278,9 @@ function renderProgressOverview(){
     '<div class="prep-head"><div><div class="eyebrow">Sua preparação</div>'+
       '<div class="prep-frac tabular">'+d.done+' de '+d.total+' etapas concluídas</div></div>'+
       '<div class="prep-pct tabular">'+d.pct+'%</div></div>'+
-    dashBar(d.done, d.total)+
+    dashBar(d.done, d.total, "Preparação geral")+
     '<div class="prep-cats">'+d.cats.map(function(c){
-      return '<div class="prep-cat"><div class="prep-cat-row"><span>'+c.label+'</span><b class="tabular">'+c.done+' / '+c.total+'</b></div>'+dashBar(c.done, c.total)+'</div>';
+      return '<div class="prep-cat"><div class="prep-cat-row"><span>'+c.label+'</span><b class="tabular">'+c.done+' / '+c.total+'</b></div>'+dashBar(c.done, c.total, c.label)+'</div>';
     }).join("")+'</div>';
 }
 

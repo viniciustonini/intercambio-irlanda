@@ -1,9 +1,50 @@
-var LAST_UPDATED = "03/09/2026";
+var LAST_UPDATED = "21/09/2026";
 var LS = "ie_guide_";
 function ls(key, val){
   if(val===undefined){ try{ var v = localStorage.getItem(LS+key); return v===null?null:JSON.parse(v); }catch(e){ return null; } }
   try{ localStorage.setItem(LS+key, JSON.stringify(val)); }catch(e){}
 }
+/* ---------- render em duas etapas ----------
+   Etapa 1 (antes do primeiro quadro): Início, topo e navegação.
+   Etapa 2 (nos intervalos livres, ou na hora em que a pessoa abre a aba): as demais abas.
+   Isso tira ~3 s de trabalho contínuo da carga e evita o salto de layout no fim dela. */
+var deferredTasks = [], deferredIdle = null;
+function defer(sec, fn){ deferredTasks.push({sec:sec, fn:fn, done:false}); }
+function runDeferred(t){
+  if(t.done) return;
+  t.done = true;
+  try{ t.fn(); }catch(e){ if(window.console) console.error(e); }
+}
+function ensureRendered(sec){ deferredTasks.forEach(function(t){ if(t.sec===sec) runDeferred(t); }); }
+function markAppReady(){ document.body.classList.add("app-ready"); }
+function cancelDeferredIdle(){
+  if(deferredIdle===null) return;
+  if(window.cancelIdleCallback) window.cancelIdleCallback(deferredIdle); else clearTimeout(deferredIdle);
+  deferredIdle = null;
+}
+function flushDeferred(){
+  cancelDeferredIdle();
+  deferredTasks.forEach(runDeferred);
+  markAppReady();
+}
+function scheduleDeferred(){
+  function step(dl){
+    deferredIdle = null;
+    var start = performance.now();
+    for(;;){
+      var next = null;
+      for(var i=0; i<deferredTasks.length; i++){ if(!deferredTasks[i].done){ next = deferredTasks[i]; break; } }
+      if(!next){ markAppReady(); return; }
+      runDeferred(next);
+      var spent = performance.now()-start;
+      if(dl && dl.timeRemaining ? dl.timeRemaining() < 4 : spent > 12) break;
+    }
+    deferredIdle = window.requestIdleCallback ? window.requestIdleCallback(step, {timeout:800}) : setTimeout(step, 30);
+  }
+  deferredIdle = window.requestIdleCallback ? window.requestIdleCallback(step, {timeout:800}) : setTimeout(step, 30);
+  window.addEventListener("scroll", flushDeferred, {once:true, passive:true});
+}
+
 /* Escapa texto vindo do usuario antes de inserir em HTML/atributos — evita XSS
    armazenado quando esse texto (item de mercado, escola, acomodacao etc.) e
    depois re-renderizado via innerHTML. */
@@ -59,6 +100,7 @@ function highlightTab(id){
 }
 
 function showSection(id){
+  if(isScrollMode()) flushDeferred(); else ensureRendered(id);
   if(id && id!=="inicio") ls("lastSection", id);
   else if(id==="inicio") renderContinueCard();
   if(isScrollMode()){
@@ -180,6 +222,7 @@ function applyScrollMode(){
     var id = location.hash.replace("#","") || "inicio";
     highlightTab(id);
     if(id !== "inicio"){
+      flushDeferred();
       var target = document.querySelector('.section[data-sec="'+id+'"]');
       if(target) target.scrollIntoView({block:"start"});
     }
@@ -296,14 +339,14 @@ function renderHero(){
   document.getElementById("heroHeadline").textContent = cityObj ? ("Seu caminho até "+cityObj.name+", sem perder o próximo passo.") : "Seu caminho até a Irlanda, sem perder o próximo passo.";
   document.getElementById("heroAvatar").textContent = cityObj ? cityObj.name.charAt(0) : "I";
   document.getElementById("heroTopTitle").textContent = (cityObj ? cityObj.name+" · " : "") + "IRLANDA";
-  document.getElementById("heroTopSub").textContent = "Planejamento revisado em " + LAST_UPDATED;
+  document.getElementById("heroTopSub").textContent = "Guia atualizado em " + LAST_UPDATED;
   document.getElementById("heroCotacaoVal").textContent = "R$ " + getCotacao().toFixed(2).replace(".", ",");
   var input = document.getElementById("heroDateInput");
   if(input){ input.min = todayISO(); input.value = dstr || ""; }
 }
 document.getElementById("heroCotacao").addEventListener("click", function(){ location.hash = "acomodacao"; showSection("acomodacao"); });
 document.getElementById("heroDateInput").addEventListener("change", function(e){ setTripDate(e.target.value); });
-document.getElementById("heroResetBtn").addEventListener("click", function(){
+document.getElementById("dataResetBtn").addEventListener("click", function(){
   document.getElementById("resetModal").hidden = false;
 });
 document.getElementById("resetModalCancel").addEventListener("click", function(){
@@ -369,6 +412,8 @@ function renderBackupReminder(){
 }
 function openBackupModal(){
   document.getElementById("backupStatus").textContent = "";
+  var last = ls("lastBackupAt");
+  document.getElementById("backupLast").textContent = last ? "Último backup: "+formatDateBR(String(last).slice(0,10)) : "Você ainda não baixou um backup.";
   document.getElementById("backupModal").hidden = false;
 }
 function restoreBackup(file, statusEl){
@@ -466,7 +511,7 @@ var CITIES = [
 var NATIONAL_RULES = [
   "Estudante com Stamp 2 pode trabalhar até 20 horas por semana durante o período letivo.",
   "Em períodos oficiais de férias escolares, pode trabalhar até 40 horas semanais.",
-  "O objetivo principal do visto de estudante deve ser o estudo, não o trabalho.",
+  "O objetivo principal da permissão de estudante deve ser o estudo, não o trabalho.",
   "Salário mínimo nacional para 20 anos ou mais: €14,15/hora em 2026 (previsão de €14,94 a partir de jan/2027).",
   "Estudantes não-UE precisam comprovar recursos financeiros — €6.665 para cursos de inglês de até 8 meses.",
   "Cursos de inglês têm limite de permanência no percurso de estudante — confirme sempre o prazo vigente no site oficial.",
@@ -636,8 +681,8 @@ var CHECKLIST = [
     {id:"consular", label:"Registro consular, se seu país exigir (ex.: AIRE para italianos)"},
     {id:"cartao-saude-eu", label:"Cartão europeu de seguro-saúde, se elegível"}
   ]},
-  {cat:"Visto de estudante (não-UE)", scope:"non-eu", items:[
-    {id:"visto", label:"Visto D solicitado via AVATS (curso acima de 90 dias)", note:"Comece com 2–3 meses de antecedência — processamento leva de 4 a 8 semanas."},
+  {cat:"Permissão de estudante (não-UE)", scope:"non-eu", items:[
+    {id:"visto", label:"Confirmar se o seu passaporte exige visto de estudo (tipo D)", note:"Brasileiros não precisam de visto para entrar na Irlanda. Se a sua nacionalidade precisar, o pedido é feito antes da viagem e pode levar semanas."},
     {id:"loa", label:"Letter of Acceptance de escola credenciada (ILEP)"},
     {id:"pagamento-curso", label:"Comprovante de pagamento do curso"},
     {id:"comprovacao", label:"Comprovação financeira (extratos bancários recentes)"},
@@ -696,7 +741,7 @@ var CRONOGRAMA = [
   {id:"c1", when:"Mês 1–2", title:"Documentos pessoais", detail:"Passaporte, identidade, cópias digitais e, se aplicável, documentos de cidadania.", link:{sec:"imigracao", label:"Ver Imigração"}},
   {id:"c2", when:"Mês 2", title:"Financeiro", detail:"Defina orçamento, comece a poupar em euros e trace a meta de reserva até a viagem.", link:{sec:"financas", label:"Ver Finanças"}},
   {id:"c3", when:"Mês 3", title:"Escolha da cidade e da escola", detail:"Compare Dublin, Cork e Galway; pesquise escolas de inglês credenciadas.", link:{sec:"inicio", label:"Ver perfil e cidade"}},
-  {id:"c4", when:"Mês 4", title:"Visto (se não-UE)", detail:"Carta de aceite, comprovação financeira, seguro-saúde e agendamento do visto.", link:{sec:"imigracao", label:"Ver Imigração"}},
+  {id:"c4", when:"Mês 4", title:"Visto de estudo (só se sua nacionalidade exigir)", detail:"Confirme se o seu passaporte exige visto. Separe carta de aceite, comprovação financeira e seguro-saúde, que também são pedidos na chegada.", link:{sec:"imigracao", label:"Ver Imigração"}},
   {id:"c5", when:"Mês 5", title:"Inglês prático", detail:"Treine vocabulário de aeroporto, aluguel, trabalho e entrevistas.", link:{sec:"trabalho", label:"Ver Trabalho & estudo"}},
   {id:"c6", when:"Mês 6", title:"Saúde &amp; seguro", detail:"Compare seguros de viagem/saúde e confirme cobertura para todo o período.", link:{sec:"imigracao", label:"Ver Imigração"}},
   {id:"c7", when:"Mês 6–7", title:"Trabalho", detail:"Prepare CV em inglês, LinkedIn e treine para entrevistas.", link:{sec:"trabalho", label:"Ver Trabalho & estudo"}},
@@ -813,11 +858,11 @@ function renderOverview(){
 /* ---------- vistos / trabalho / curso ---------- */
 var VISTOS_VERIFIED_AT = "2026-09-08";
 var F_FAQ = "https://www.irishimmigration.ie/coming-to-study-in-ireland/frequently-asked-questions-for-students/";
-var F_BRVISA = "https://www.ireland.ie/en/brazil/saopaulo/services/visas/visas-for-ireland/";
+var F_CITINFO_VISA = "https://www.citizensinformation.ie/en/moving-country/visas-for-ireland/visa-requirements-for-entering-ireland/";
 var F_IRP = "https://www.irishimmigration.ie/registering-your-immigration-permission/how-to-register-your-immigration-permission-for-the-first-time/information-on-registering-your-immigration-permission-for-the-first-time/";
 var F_FIN = "https://www.irishimmigration.ie/coming-to-study-in-ireland/what-are-my-study-options/a-fee-paying-private-primary-or-secondary-school/information-on-student-finances/";
 var VISTOS = [
-  {title:"Entrada e visto de estudante — antes de embarcar", eu:false, body:"Brasileiros com passaporte brasileiro são dispensados de visto para estadias curtas (turismo/visita) — mas isso <strong>não vale</strong> para a maioria dos cursos de inglês (6–8 meses, acima de 90 dias). Nesse caso, é preciso solicitar o visto de longa duração <strong>tipo D</strong> ANTES de viajar: não dá para entrar como turista e regularizar depois. O pedido é feito online no <strong>AVATS</strong> (sistema oficial de vistos irlandês); depois você agenda horário num centro <strong>VFS Global</strong> (parceiro oficial no Brasil) para entregar biometria, documentos e pagar a taxa. Processamento de <strong>4 a 8 semanas</strong> (pode demorar mais entre maio e agosto) — comece com antecedência e só compre passagens não-reembolsáveis depois do visto aprovado. Ao chegar, apresente o propósito de estudo e os documentos exigidos; a entrada final depende da avaliação da imigração. Outras nacionalidades podem ter regras diferentes — confira os requisitos do seu passaporte antes de comprar a passagem.", sourceUrl:F_BRVISA, verifiedAt:VISTOS_VERIFIED_AT},
+  {title:"Entrada na Irlanda para brasileiros", eu:false, body:"O Brasil está na lista de países cujos cidadãos <strong>não precisam de visto</strong> para entrar na Irlanda, inclusive para estudar. Você embarca sem visto e, na chegada, um oficial de imigração decide a sua permissão. Para curso de inglês em programa elegível, ela pode ser concedida por até <strong>8 meses</strong> (Stamp 2), a critério do oficial. Tenha à mão o comprovante de matrícula e de pagamento do curso, a comprovação financeira e o seguro-saúde (veja os cartões abaixo). Depois da chegada, faça o registro (IRP). <strong>Outras nacionalidades</strong> podem precisar de visto de estudo (tipo D) antes de viajar: confira o seu passaporte na lista oficial. As regras mudam, então reconfirme no site oficial antes de comprar a passagem.", sourceUrl:F_CITINFO_VISA, verifiedAt:"2026-09-21"},
   {title:"Stamp 2", eu:false, body:"Permissão de estudante para cursos elegíveis, incluindo inglês (em escola credenciada no ILEP) e ensino superior. A elegibilidade do curso e as condições da permissão precisam ser verificadas antes da matrícula. Não se aplica a cidadãos europeus, que têm liberdade de movimento.", sourceUrl:F_FAQ, verifiedAt:VISTOS_VERIFIED_AT},
   {title:"IRP: primeiro registro depois da chegada", eu:false, body:"Desde <strong>13/01/2025</strong>, o primeiro registro de residência de toda a República da Irlanda (não só Dublin) é feito pelo ISD em <strong>Burgh Quay, Dublin</strong>. Agende pelo canal oficial (conta no Digital Contact Centre) assim que chegar — não há prazo garantido para vaga. Agendar é gratuito; a taxa de registro do cartão pode ser de <strong>€300</strong>, paga só com cartão. Leve passaporte, formulário de endereço, carta da escola com matrícula e mensalidade paga, comprovação financeira e seguro-saúde.", sourceUrl:F_IRP, verifiedAt:VISTOS_VERIFIED_AT},
   {title:"Seguro-saúde exigido", eu:false, body:"Estudantes não europeus devem apresentar seguro médico privado adequado às condições da permissão — normalmente cobertura mínima de <strong>€25.000 para acidente e €25.000 para doença</strong>, válida por todo o período. Confira cobertura, exclusões e documentos aceitos com o ISD antes de contratar; seguro de viagem e seguro médico não são automaticamente equivalentes.", sourceUrl:F_FAQ, verifiedAt:VISTOS_VERIFIED_AT},
@@ -1022,10 +1067,10 @@ function renderSchoolAddForm(){
 var COMO_ESCOLHER_ESCOLA = [
   {t:"Tipos de curso", b:'<b>General English</b> — foco em conversação, gramática e vocabulário do dia a dia; é o mais comum e mais barato. <b>Intensive English</b> — mais horas por semana, evolução mais rápida, custo mais alto. <b>IELTS/Cambridge</b> — preparação para exames de proficiência, útil se você vai precisar de certificado (trabalho, universidade, imigração para outro país). <b>Study & Work</b> — pacote com curso + apoio voltado a intercambistas não-UE, geralmente mais longo e mais caro; confira exatamente o que está incluído antes de comparar preço.'},
   {t:"O horário da escola influencia seu trabalho", b:"<b>Manhã</b> libera tarde e noite pra trabalhar — o mais comum entre intercambistas. <b>Tarde</b> libera manhã e noite. <b>Noite</b> (2–3x/semana) é mais leve e costuma ser usada por quem já trabalha em horário comercial. Pense no emprego que pretende buscar antes de escolher o turno."},
-  {t:"Horas semanais", b:"Cursos de 15h/semana costumam ser o mínimo aceito para o visto de estudante (não-UE). Cursos intensivos passam de 20h/semana — aceleram o aprendizado, mas custam mais e sobra menos tempo livre para trabalhar."},
+  {t:"Horas semanais", b:"Cursos de 15h/semana costumam ser o mínimo aceito para a permissão de estudante (não-UE). Cursos intensivos passam de 20h/semana — aceleram o aprendizado, mas custam mais e sobra menos tempo livre para trabalhar."},
   {t:"Matrícula e material", b:"Quase toda escola cobra uma taxa de matrícula (enrollment fee) única, além do material didático — peça os dois valores separados da mensalidade antes de comparar preços entre escolas."},
   {t:"Política de cancelamento", b:"Pergunte por escrito o que acontece se você quiser trocar de escola, adiar o início ou cancelar — prazos e valores de reembolso variam bastante entre escolas."},
-  {t:"Acreditação", b:"Para o curso valer como base do visto de estudante, a escola precisa constar na lista oficial ILEP. Fora do visto de estudante, selos como ACELS, Cambridge English ou IALC são um bom sinal de qualidade."},
+  {t:"Acreditação", b:"Para o curso valer como base da permissão de estudante, a escola precisa constar na lista oficial ILEP. Fora da permissão de estudante, selos como ACELS, Cambridge English ou IALC são um bom sinal de qualidade."},
   {t:"Tamanho das turmas", b:"Turmas menores (8–12 alunos) tendem a dar mais prática de fala; turmas maiores costumam ser mais baratas. Pergunte a média de alunos por turma antes de decidir."}
 ];
 function renderComoEscolherEscola(){
@@ -1571,7 +1616,7 @@ var MITOS_VERDADES = [
   {cat:"moradia", tags:["Casa"], cls:"mito", badgeLabel:"MITO / PERIGOSO", q:"Preciso mandar depósito antes de visitar, senão vou perder o quarto?", a:"Não pague nada sem visitar (ou alguém de confiança visitar) antes.", sec:"acomodacao"},
   {cat:"moradia", tags:["Casa","Dinheiro"], cls:"mito", q:"Bills sempre estão incluídas no aluguel?", a:"Não, precisa confirmar no anúncio — \"bills included\" é a exceção, não a regra."},
   {cat:"moradia", tags:["Casa"], cls:"mito", q:"Double room sempre significa quarto para duas pessoas?", a:"Não necessariamente — às vezes é só uma cama de casal para uma pessoa só."},
-  {cat:"imigracao", tags:["Documentos"], cls:"mito", q:"Com cidadania europeia eu preciso de visto de estudante?", a:"Não — cidadãos UE/EEE/Suíço têm liberdade de movimento na Irlanda."},
+  {cat:"imigracao", tags:["Documentos"], cls:"mito", q:"Com cidadania europeia eu preciso de permissão de estudante?", a:"Não — cidadãos UE/EEE/Suíço têm liberdade de movimento na Irlanda."},
   {cat:"imigracao", tags:["Documentos"], cls:"mito", q:"Com cidadania europeia não preciso fazer nenhum documento na Irlanda?", a:"Precisa sim — PPS, Revenue, conta bancária continuam necessários."},
   {cat:"imigracao", tags:["Documentos","Trabalho"], cls:"verdade", q:"Quem tem cidadania europeia pode trabalhar legalmente na Irlanda?", a:"Sim, sem necessidade de permissão de trabalho."},
   {cat:"imigracao", tags:["Documentos"], cls:"mito", q:"A Irlanda faz parte do Espaço Schengen?", a:"Não — é da União Europeia, mas fora do Espaço Schengen."},
@@ -3377,7 +3422,7 @@ var LINKS = [
   {group:"Moradia", icon:"home", label:"Roomgo (ex-Easyroommate)", url:"https://ie.roomgo.net/", desc:"Encontrar colegas de quarto e vagas em repúblicas"},
   {group:"Moradia", icon:"home", label:"Threshold", url:"https://www.threshold.ie", desc:"ONG irlandesa de apoio e orientação a inquilinos"},
   {group:"Aeroportos", icon:"plane", label:"Dublin Airport", url:"https://www.dublinairport.com", desc:"Informações do principal aeroporto de chegada"},
-  {group:"Estudo & escola", icon:"book", label:"ILEP / TrustEd Ireland", url:"https://www.irishimmigration.ie/coming-to-study-in-ireland/what-are-my-study-options/interim-list-of-eligible-programmes-ilep/", desc:"Lista oficial de cursos de inglês elegíveis para visto — está sendo substituída pelo selo TrustEd Ireland, confira sempre a versão vigente"},
+  {group:"Estudo & escola", icon:"book", label:"ILEP / TrustEd Ireland", url:"https://www.irishimmigration.ie/coming-to-study-in-ireland/what-are-my-study-options/interim-list-of-eligible-programmes-ilep/", desc:"Lista oficial de cursos de inglês elegíveis para a permissão de estudante — está sendo substituída pelo selo TrustEd Ireland, confira sempre a versão vigente"},
   {group:"Estudo & escola", icon:"book", label:"Education in Ireland", url:"https://www.educationinireland.com", desc:"Site oficial do governo para quem vai estudar na Irlanda"},
   {group:"Estudo & escola", icon:"book", label:"QQI", url:"https://www.qqi.ie", desc:"Órgão oficial de qualidade e acreditação de ensino na Irlanda"},
   {group:"Estudo & escola", icon:"book", label:"ICOS", url:"https://www.internationalstudents.ie", desc:"Conselho irlandês de apoio a estudantes internacionais — guias e orientação"},
@@ -3855,33 +3900,39 @@ function init(){
     if(getProfile() || getCity()) ls("onboardingDone", true);
     else openOnboarding();
   }
+  /* etapa 1: o que aparece no primeiro quadro */
   renderNationalRules();
-  renderComoEscolherEscola();
-  renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm();
-  renderAssessoria();
-  renderJobTypes();
-  renderJobFinder();
-  renderAgencias();
-  renderVidaIrlandaSubtabs(); renderVidaIrlandaContent();
   injectFaqSchema();
-  renderEnglish();
-  renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences();
-  renderNiInfo(); renderTourismCalendar(); renderTourismPasses(); renderTourismChecklist();
-  renderAttrCatTabs(); renderAttrGrid(); renderAttrProgress();
-  renderItineraryTabs(); renderItinerary(); renderMyItinerary(); renderMistakes();
-  renderTiposAcomodacao();
-  renderMoradia();
-  renderHousingPhrases();
-  renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity();
-  renderTransportCityTabs(); renderTransportRoutes();
-  renderMarket(); renderBudget(); renderFinancas(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderBancosFinancas(); renderGroups();
-  renderAll();
+  renderFaqStart(); renderProfileSeg(); renderCitySeg();
+  renderOverview();
   setInterval(renderHero, 60000);
   document.getElementById("lastUpdated").textContent = LAST_UPDATED;
+  /* etapa 2: as demais abas, na ordem em que sempre foram montadas */
+  defer("trabalho", function(){ renderComoEscolherEscola(); renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm(); });
+  defer("trabalho", function(){ renderAssessoria(); renderJobTypes(); renderJobFinder(); renderAgencias(); });
+  defer("vidairlanda", function(){ renderVidaIrlandaSubtabs(); renderVidaIrlandaContent(); });
+  defer("ingles", renderEnglish);
+  defer("turismo", function(){ renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences(); });
+  defer("turismo", function(){ renderNiInfo(); renderTourismCalendar(); renderTourismPasses(); renderTourismChecklist(); });
+  defer("turismo", function(){ renderAttrCatTabs(); renderAttrGrid(); renderAttrProgress(); renderItineraryTabs(); renderItinerary(); renderMyItinerary(); renderMistakes(); });
+  defer("acomodacao", function(){ renderTiposAcomodacao(); renderMoradia(); renderHousingPhrases(); renderStayFields(); });
+  defer("transporte", function(){ renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity(); renderTransportCityTabs(); renderTransportRoutes(); });
+  defer("mercado", renderMarket);
+  defer("financas", function(){ renderBudget(); renderConverter(); renderMoneyTips(); renderBancosFinancas(); });
+  defer("links", renderLinks);
+  defer("grupos", renderGroups);
+  defer("imigracao", renderVistos);
+  defer("trabalho", function(){ renderTrabalho(); renderCursoRegras(); });
+  defer("roteiro", function(){
+    renderChecklist();
+    renderCheckableList("cronogramaWrap", CRONOGRAMA, "cronogramaDone");
+    renderCheckableList("dias30Wrap", DIAS30, "dias30Done");
+  });
   applyScrollMode();
   syncTabbarHeight();
   fetchLiveCotacao();
   if(!isScrollMode()) animateHeroEntrance();
+  scheduleDeferred();
 }
 init();
 if("serviceWorker" in navigator){
