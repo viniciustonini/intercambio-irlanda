@@ -87,56 +87,17 @@ function escapeHtml(str){
 var SCROLL_MODE_MQ = window.matchMedia("(max-width:900px)");
 function isScrollMode(){ return SCROLL_MODE_MQ.matches; }
 
-var NAV_GROUPS = {
-  inicio:["inicio"],
-  planejar:["roteiro","financas","acomodacao"],
-  preparar:["imigracao","trabalho","ingles"],
-  viver:["mercado","transporte","vidairlanda"],
-  explorar:["turismo","grupos","links"]
-};
-var GROUP_OF = {};
-Object.keys(NAV_GROUPS).forEach(function(g){ NAV_GROUPS[g].forEach(function(s){ GROUP_OF[s] = g; }); });
-var groupLast = {};
-
-function centerInBar(btn){
-  var bar = document.getElementById("subbar");
-  if(!bar || !btn || bar.scrollWidth <= bar.clientWidth) return;
-  bar.scrollTo({left: btn.offsetLeft - (bar.clientWidth - btn.offsetWidth)/2, behavior:"smooth"});
-}
-
 function highlightTab(id){
-  var g = GROUP_OF[id] || "inicio";
-  groupLast[g] = id;
-  var wrap = document.getElementById("tabbarWrap");
-  if(wrap) wrap.dataset.group = g;
-  document.querySelectorAll(".group-btn").forEach(function(b){
-    var on = b.dataset.group===g;
-    b.classList.toggle("active", on);
-    if(on) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
-  });
-  document.querySelectorAll(".subgroup").forEach(function(sg){ sg.hidden = sg.dataset.group!==g; });
   var activeBtn = null;
   document.querySelectorAll(".tab-btn[data-sec]").forEach(function(b){
     var on = b.dataset.sec===id;
     b.classList.toggle("active", on);
-    b.setAttribute("aria-selected", on ? "true" : "false");
+    if(b.getAttribute("role")==="tab") b.setAttribute("aria-selected", on ? "true" : "false");
     if(on) activeBtn = b;
   });
-  centerInBar(activeBtn);
-  syncTabbarHeight();
+  if(activeBtn) activeBtn.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
   return activeBtn;
 }
-
-document.querySelectorAll(".group-btn").forEach(function(b){
-  var ic = b.querySelector(".gi");
-  if(ic) ic.innerHTML = phi(ic.dataset.icon);
-  b.addEventListener("click", function(){
-    var g = b.dataset.group;
-    var sec = groupLast[g] || b.dataset.first;
-    history.replaceState(null, "", "#"+sec);
-    showSection(sec);
-  });
-});
 
 function showSection(id){
   if(isScrollMode()) flushDeferred(); else ensureRendered(id);
@@ -240,32 +201,17 @@ function enableScrollSpy(){
     entries.forEach(function(entry){
       if(entry.isIntersecting){
         var id = entry.target.dataset.sec;
-        highlightTab(id);
+        document.querySelectorAll(".tab-btn").forEach(function(b){ b.classList.toggle("active", b.dataset.sec===id); });
         history.replaceState(null, "", "#"+id);
+        var activeBtn = document.querySelector(".tab-btn.active");
+        if(activeBtn) activeBtn.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
       }
     });
   }, {rootMargin:"-45% 0px -45% 0px", threshold:0});
   document.querySelectorAll(".section").forEach(function(s){ scrollSpyObserver.observe(s); });
-  window.addEventListener("scroll", onScrollNearTop, {passive:true});
-}
-var nearTopTick = false;
-function onScrollNearTop(){
-  if(nearTopTick || scrollSpySuppressed) return;
-  nearTopTick = true;
-  requestAnimationFrame(function(){
-    nearTopTick = false;
-    var home = document.getElementById("sec-inicio");
-    if(!home || !isScrollMode()) return;
-    var wrap = document.getElementById("tabbarWrap");
-    if(home.getBoundingClientRect().top > window.innerHeight*0.55 && wrap && wrap.dataset.group!=="inicio"){
-      highlightTab("inicio");
-      history.replaceState(null, "", "#inicio");
-    }
-  });
 }
 function disableScrollSpy(){
   if(scrollSpyObserver){ scrollSpyObserver.disconnect(); scrollSpyObserver = null; }
-  window.removeEventListener("scroll", onScrollNearTop);
 }
 function applyScrollMode(){
   var on = isScrollMode();
@@ -283,12 +229,89 @@ function applyScrollMode(){
   } else {
     disableScrollSpy();
     showSection(location.hash.replace("#","") || "inicio");
+    adjustTabbarOverflow();
   }
 }
 if(SCROLL_MODE_MQ.addEventListener) SCROLL_MODE_MQ.addEventListener("change", applyScrollMode);
 else SCROLL_MODE_MQ.addListener(applyScrollMode);
 
-window.addEventListener("resize", function(){ syncTabbarHeight(); });
+/* ---------- tab bar: encolhe pra "Mais" quando nao cabe, sem seta de rolagem ---------- */
+var TABBAR_FLEX_IDS = ["tab-roteiro","tab-imigracao","tab-financas","tab-trabalho","tab-ingles","tab-acomodacao","tab-mercado","tab-transporte","tab-grupos"];
+function adjustTabbarOverflow(){
+  var tabbar = document.getElementById("tabbar");
+  var moreMenu = document.getElementById("moreMenu");
+  var moreBtn = document.getElementById("tabMoreBtn");
+  var linksBtn = document.getElementById("tab-links");
+  if(!tabbar || !moreMenu || isScrollMode()) return;
+  TABBAR_FLEX_IDS.forEach(function(id){
+    var btn = document.getElementById(id);
+    if(btn) tabbar.insertBefore(btn, moreBtn);
+  });
+  for(var i=TABBAR_FLEX_IDS.length-1; i>=0 && tabbar.scrollWidth > tabbar.clientWidth; i--){
+    var demoted = document.getElementById(TABBAR_FLEX_IDS[i]);
+    /* insere sempre no topo do menu (nao so antes do linksBtn): como a democao
+       roda do fim do array pra o comeco, isso reconstroi a ordem original do
+       array em vez de inverte-la quando mais de um item e demovido. */
+    if(demoted) moreMenu.insertBefore(demoted, moreMenu.querySelector(".tab-btn") || linksBtn);
+  }
+}
+/* varios gatilhos (resize, fonte carregada, checagem de seguranca apos o load)
+   podem pedir recalculo perto um do outro - centraliza tudo num unico timer
+   compartilhado + duplo requestAnimationFrame, pra nunca ter duas chamadas
+   correndo com medidas de layout diferentes (o que podia fazer a barra
+   "esconder" abas que cabiam de sobra, deixando espaco em branco). */
+var tabbarAdjustTimer = null;
+function scheduleTabbarAdjust(delay){
+  clearTimeout(tabbarAdjustTimer);
+  tabbarAdjustTimer = setTimeout(function(){
+    requestAnimationFrame(function(){ requestAnimationFrame(adjustTabbarOverflow); });
+  }, delay || 0);
+}
+window.addEventListener("resize", function(){ scheduleTabbarAdjust(150); });
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ scheduleTabbarAdjust(50); });
+scheduleTabbarAdjust(500);
+
+/* ---------- menu "Mais" ---------- */
+function openMoreMenu(){
+  var menu = document.getElementById("moreMenu");
+  var btn = document.getElementById("tabMoreBtn");
+  menu.hidden = false;
+  document.getElementById("moreMenuBackdrop").hidden = false;
+  btn.setAttribute("aria-expanded", "true");
+  if(window.matchMedia("(min-width:641px)").matches){
+    var r = btn.getBoundingClientRect();
+    var menuWidth = menu.offsetWidth || 220;
+    var left = Math.min(r.right - menuWidth, window.innerWidth - menuWidth - 12);
+    left = Math.max(left, 12);
+    menu.style.top = (r.bottom + 8) + "px";
+    menu.style.left = left + "px";
+    menu.style.right = "auto";
+  } else {
+    menu.style.top = ""; menu.style.left = ""; menu.style.right = "";
+  }
+}
+function closeMoreMenu(){
+  document.getElementById("moreMenu").hidden = true;
+  document.getElementById("moreMenuBackdrop").hidden = true;
+  document.getElementById("tabMoreBtn").setAttribute("aria-expanded", "false");
+}
+document.getElementById("tabMoreBtn").addEventListener("click", function(){
+  var isOpen = document.getElementById("tabMoreBtn").getAttribute("aria-expanded") === "true";
+  if(isOpen) closeMoreMenu(); else openMoreMenu();
+});
+document.getElementById("moreMenuBackdrop").addEventListener("click", closeMoreMenu);
+document.querySelectorAll("#moreMenu .tab-btn").forEach(function(btn){
+  btn.addEventListener("click", closeMoreMenu);
+});
+document.addEventListener("keydown", function(e){
+  if(e.key==="Escape" && !document.getElementById("moreMenu").hidden) closeMoreMenu();
+});
+window.addEventListener("scroll", function(){
+  if(!document.getElementById("moreMenu").hidden) closeMoreMenu();
+}, {passive:true});
+window.addEventListener("resize", function(){
+  if(!document.getElementById("moreMenu").hidden) closeMoreMenu();
+});
 document.getElementById("heroEditDate").addEventListener("click", function(){
   var editor = document.getElementById("heroDateEditor");
   editor.hidden = !editor.hidden;
@@ -3194,8 +3217,7 @@ function renderBudget(){
     WAGE_PRESETS.map(function(w){ return '<button class="subtab'+(b.wage===w.v?' active':'')+'" data-w="'+w.v+'">'+w.l+'</button>'; }).join("")+
     '</div>';
   var incomeFields = [{k:"wage",l:"Salário por hora (€)",step:0.01},{k:"hoursWeek",l:"Horas por semana",step:1},{k:"weeksMonth",l:"Semanas por mês",step:0.01}];
-  var srcTag = {wage:1, hoursWeek:1};
-  document.getElementById("budgetIncomeFields").innerHTML = presetHtml + incomeFields.map(function(f){ return '<div class="numfield"><label>'+f.l+(srcTag[f.k]?finSrcBadge(f.k):"")+'</label><input type="number" step="'+f.step+'" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("")+
+  document.getElementById("budgetIncomeFields").innerHTML = presetHtml + incomeFields.map(function(f){ return '<div class="numfield"><label>'+f.l+'</label><input type="number" step="'+f.step+'" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("")+
     '<div class="numfield">'+
     '<label>Impostos/descontos (estimado)</label>'+
     '<span style="display:flex;align-items:center;gap:10px;">'+
@@ -3892,7 +3914,7 @@ function init(){
   document.getElementById("lastUpdated").textContent = LAST_UPDATED;
   /* etapa 2: as demais abas, na ordem em que sempre foram montadas */
   defer("trabalho", function(){ renderComoEscolherEscola(); renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm(); });
-  defer("trabalho", function(){ renderAssessoria(); renderJobTypes(); renderJobFinder(); renderWorkFin(); renderAgencias(); });
+  defer("trabalho", function(){ renderAssessoria(); renderJobTypes(); renderJobFinder(); renderAgencias(); });
   defer("vidairlanda", function(){ renderVidaIrlandaSubtabs(); renderVidaIrlandaContent(); });
   defer("ingles", renderEnglish);
   defer("turismo", function(){ renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences(); });

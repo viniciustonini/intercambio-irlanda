@@ -92,38 +92,30 @@
     </div>
   </header>
 
-  <div class="tabbar-wrap" id="tabbarWrap" data-group="inicio">
+  <div class="tabbar-wrap">
     <div class="tabbar-outer">
-      <nav class="groupbar" id="groupbar" aria-label="Áreas do guia">
-        <button class="group-btn active" id="tab-inicio" type="button" data-group="inicio" data-first="inicio" aria-current="page"><span class="gi" data-icon="house" aria-hidden="true"></span><span class="gl">Início</span></button>
-        <button class="group-btn" type="button" data-group="planejar" data-first="roteiro"><span class="gi" data-icon="target" aria-hidden="true"></span><span class="gl">Planejar</span></button>
-        <button class="group-btn" type="button" data-group="preparar" data-first="imigracao"><span class="gi" data-icon="checks" aria-hidden="true"></span><span class="gl">Preparar</span></button>
-        <button class="group-btn" type="button" data-group="viver" data-first="mercado"><span class="gi" data-icon="key" aria-hidden="true"></span><span class="gl">Viver</span></button>
-        <button class="group-btn" type="button" data-group="explorar" data-first="turismo"><span class="gi" data-icon="plane" aria-hidden="true"></span><span class="gl">Explorar</span></button>
-      </nav>
-      <nav class="subbar" id="subbar" role="tablist" aria-label="Seções da área">
-        <div class="subgroup" data-group="planejar" hidden>
-          <button class="tab-btn" id="tab-roteiro" data-sec="roteiro" role="tab" aria-selected="false" aria-controls="sec-roteiro">Meu Plano</button>
-          <button class="tab-btn" id="tab-financas" data-sec="financas" role="tab" aria-selected="false" aria-controls="sec-financas">Finanças</button>
-          <button class="tab-btn" id="tab-acomodacao" data-sec="acomodacao" role="tab" aria-selected="false" aria-controls="sec-acomodacao">Acomodação</button>
-        </div>
-        <div class="subgroup" data-group="preparar" hidden>
-          <button class="tab-btn" id="tab-imigracao" data-sec="imigracao" role="tab" aria-selected="false" aria-controls="sec-imigracao">Imigração</button>
-          <button class="tab-btn" id="tab-trabalho" data-sec="trabalho" role="tab" aria-selected="false" aria-controls="sec-trabalho">Trabalho &amp; estudo</button>
-          <button class="tab-btn" id="tab-ingles" data-sec="ingles" role="tab" aria-selected="false" aria-controls="sec-ingles">Inglês</button>
-        </div>
-        <div class="subgroup" data-group="viver" hidden>
-          <button class="tab-btn" id="tab-mercado" data-sec="mercado" role="tab" aria-selected="false" aria-controls="sec-mercado">Mercado</button>
-          <button class="tab-btn" id="tab-transporte" data-sec="transporte" role="tab" aria-selected="false" aria-controls="sec-transporte">Transporte</button>
-          <button class="tab-btn" id="tab-vidairlanda" data-sec="vidairlanda" role="tab" aria-selected="false" aria-controls="sec-vidairlanda">Vida na Irlanda</button>
-        </div>
-        <div class="subgroup" data-group="explorar" hidden>
-          <button class="tab-btn tab-btn-alt" id="tab-turismo" data-sec="turismo" role="tab" aria-selected="false" aria-controls="sec-turismo">Turismo</button>
-          <button class="tab-btn" id="tab-grupos" data-sec="grupos" role="tab" aria-selected="false" aria-controls="sec-grupos">Grupos</button>
-          <button class="tab-btn" id="tab-links" data-sec="links" role="tab" aria-selected="false" aria-controls="sec-links">Links oficiais</button>
-        </div>
-      </nav>
+    <nav class="tabbar" id="tabbar" role="tablist" aria-label="Seções do guia">
+      <button class="tab-btn" id="tab-inicio" data-sec="inicio" role="tab" aria-selected="true" aria-controls="sec-inicio">Início</button>
+      <button class="tab-btn" id="tab-roteiro" data-sec="roteiro" role="tab" aria-selected="false" aria-controls="sec-roteiro">Meu Plano</button>
+      <button class="tab-btn" id="tab-imigracao" data-sec="imigracao" role="tab" aria-selected="false" aria-controls="sec-imigracao">Imigração</button>
+      <button class="tab-btn" id="tab-financas" data-sec="financas" role="tab" aria-selected="false" aria-controls="sec-financas">Finanças</button>
+      <button class="tab-btn" id="tab-trabalho" data-sec="trabalho" role="tab" aria-selected="false" aria-controls="sec-trabalho">Trabalho &amp; estudo</button>
+      <button class="tab-btn" id="tab-ingles" data-sec="ingles" role="tab" aria-selected="false" aria-controls="sec-ingles">Inglês</button>
+      <button class="tab-btn" id="tab-acomodacao" data-sec="acomodacao" role="tab" aria-selected="false" aria-controls="sec-acomodacao">Acomodação</button>
+      <button class="tab-btn" id="tab-mercado" data-sec="mercado" role="tab" aria-selected="false" aria-controls="sec-mercado">Mercado</button>
+      <button class="tab-btn" id="tab-transporte" data-sec="transporte" role="tab" aria-selected="false" aria-controls="sec-transporte">Transporte</button>
+      <button class="tab-btn" id="tab-grupos" data-sec="grupos" role="tab" aria-selected="false" aria-controls="sec-grupos">Grupos</button>
+      <button class="tab-btn more-btn" id="tabMoreBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="moreMenu">Mais<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="margin-left:4px;"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button class="tab-btn tab-btn-alt" id="tab-turismo" data-sec="turismo" role="tab" aria-selected="false" aria-controls="sec-turismo">✈ Turismo</button>
+    </nav>
     </div>
+  </div>
+
+  <div class="more-menu-backdrop" id="moreMenuBackdrop" hidden></div>
+  <div class="more-menu" id="moreMenu" role="menu" aria-label="Mais seções" hidden>
+    <div class="more-menu-handle" id="moreMenuHandle"></div>
+    <button class="tab-btn" id="tab-vidairlanda" data-sec="vidairlanda" role="menuitem" aria-controls="sec-vidairlanda">Vida na Irlanda</button>
+    <button class="tab-btn" id="tab-links" data-sec="links" role="menuitem" aria-controls="sec-links">Links oficiais</button>
   </div>
 
   <main class="main" id="main-content">
@@ -229,10 +221,6 @@
       <h3 style="margin:30px 0 4px;font-size:18px;">Qual trabalho posso pesquisar?</h3>
       <p class="source-note" style="margin-bottom:14px;">Responda rapidinho para ver uma orientação — não é uma garantia de vaga.</p>
       <div class="card" id="jobFinderWrap"></div>
-
-      <h3 style="margin:30px 0 4px;font-size:18px;">Quanto sobra do salário?</h3>
-      <p class="source-note" style="margin-bottom:14px;">Simule salário e horas e compare com os custos que você planejou em Finanças. Nada muda em Finanças até você clicar em "Usar".</p>
-      <div id="workFinWrap"></div>
 
       <h3 style="margin:30px 0 4px;font-size:18px;">Agências de recrutamento</h3>
       <p class="source-note" style="margin-bottom:14px;">Atuam nas três cidades com vagas temporárias e permanentes em várias áreas.</p>

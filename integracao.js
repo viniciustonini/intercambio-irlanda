@@ -1,11 +1,11 @@
-/* Integração entre módulos: leva valores de Mercado, Acomodação, Transporte e Trabalho para Finanças.
+/* Integração entre módulos: leva valores de Mercado, Acomodação e Transporte para Finanças.
    Nada é alterado sozinho: cada cartão mostra o valor, compara com o que Finanças usa hoje e só grava
    quando a pessoa clica. Depois de gravar, diz o que mudou e permite desfazer.
    Carregado depois de financas.js e antes de app.js; usa ls(), getBudget(), fmtEur(), etc. */
 
-var FIN_SRC = {market:"Mercado", stay:"Acomodação", transport:"Transporte", work:"Trabalho"};
+var FIN_SRC = {market:"Mercado", stay:"Acomodação", transport:"Transporte"};
 var FIN_ROW_LABEL = {3:"Acomodação inicial", 4:"Depósito de aluguel", 5:"Primeiro aluguel", 6:"Alimentação", 7:"Transporte"};
-var BUDGET_LABEL = {rent:"Aluguel", transport:"Transporte", groceries:"Mercado", wage:"Salário por hora", hoursWeek:"Horas por semana"};
+var BUDGET_LABEL = {rent:"Aluguel", transport:"Transporte", groceries:"Mercado"};
 
 function finSources(){ return ls("finSources") || {}; }
 function markFinSource(key, src){
@@ -29,7 +29,7 @@ function applyToFinance(src, changes){
     if(c.budget){
       var b = getBudget(); b[c.budget] = v; ls("budget", b);
       markFinSource(c.budget, src);
-      said.push(BUDGET_LABEL[c.budget]+" no orçamento mensal: "+(c.budget==="wage" ? fmtEur(v)+"/h" : c.budget==="hoursWeek" ? v+" h/semana" : fmtEur(v)+" por mês"));
+      said.push(BUDGET_LABEL[c.budget]+" no orçamento mensal: "+fmtEur(v)+" por mês");
     } else {
       var ov = getGastosOverrides(); ov[c.row+"_"+sc] = v; saveGastosOverrides(ov);
       markFinSource("row"+c.row+"_"+sc, src);
@@ -233,42 +233,4 @@ function renderTransportFin(){
   bindBridge(wrap, "transport", renderTransportFin, function(){ return applyToFinance("transport", [{budget:"transport", value:monthly}, {row:7, value:monthly}]); });
 }
 
-/* ---------- Trabalho: renda x custos ---------- */
-function workSim(){ var b = getBudget(), s = ls("workSim"); return {wage: s && s.wage>0 ? s.wage : b.wage, hours: s && s.hours>0 ? s.hours : b.hoursWeek}; }
-function renderWorkFin(){
-  var wrap = document.getElementById("workFinWrap");
-  if(!wrap) return;
-  var b = getBudget(), s = workSim();
-  var tax = calcIrishTax(s.wage, s.hours), gross = Math.round(s.wage*s.hours*b.weeksMonth), net = Math.round(gross-tax.totalMonth);
-  var costs = Math.round(sumExpenses(b)), margin = net-costs, same = Math.abs(s.wage-b.wage)<0.005 && Math.abs(s.hours-b.hoursWeek)<0.005;
-  var pre = '<div class="wk-sim">'+
-    '<div class="wk-row"><span class="fin-lbl">Salário por hora</span><div class="wk-chips" role="radiogroup" aria-label="Salário por hora">'+
-      WAGE_PRESETS.map(function(w){ return '<button type="button" role="radio" aria-checked="'+(s.wage===w.v)+'" class="subtab'+(s.wage===w.v?' active':'')+'" data-wk-w="'+w.v+'">'+fmtEur(w.v)+'</button>'; }).join("")+
-    '</div></div>'+
-    '<div class="wk-row"><span class="fin-lbl">Horas por semana</span><div class="wk-chips" role="radiogroup" aria-label="Horas por semana">'+
-      [20,30,40].map(function(h){ return '<button type="button" role="radio" aria-checked="'+(s.hours===h)+'" class="subtab'+(s.hours===h?' active':'')+'" data-wk-h="'+h+'">'+h+' h</button>'; }).join("")+
-    '</div></div></div>'+
-    '<div class="wk-view">'+
-      '<div><span class="fin-lbl">Salário líquido estimado</span><b class="tabular">'+fmtEur(net)+'</b><small class="wk-sub">de '+fmtEur(gross)+' bruto</small>'+brlSub(net)+'</div>'+
-      '<div><span class="fin-lbl">Custos mensais planejados</span><b class="tabular">'+fmtEur(costs)+'</b>'+brlSub(costs)+'</div>'+
-      '<div class="'+(margin<0?'is-neg':'is-pos')+'"><span class="fin-lbl">Margem mensal</span><b class="tabular">'+fmtEur(margin)+'</b>'+brlSub(margin)+'</div>'+
-    '</div>'+
-    (margin<0 ? '<p class="wk-warn">Com esses valores os custos passam do salário. Ajuste as horas, o salário ou os gastos em Finanças.</p>' : '')+
-    (getProfile()==="non-eu" && s.hours>20 ? '<p class="wk-hint">Quantas horas você pode trabalhar depende da sua permissão. <a href="#imigracao" data-wk-go="imigracao">Confira em Imigração</a> antes de contar com mais de 20 h por semana.</p>' : '');
-  wrap.innerHTML = '<div class="card">'+bridgeHtml("work", {
-    title:"Renda x custos", pre:pre, big:"",
-    now:'Simulação: <b>'+fmtEur(s.wage)+'/h</b> · <b>'+s.hours+' h por semana</b>. Em Finanças hoje: <b>'+fmtEur(b.wage)+'/h</b> · <b>'+b.hoursWeek+' h por semana</b>'+(finSources().wage ? ' (vindo de Trabalho)' : '')+'.',
-    btn:'Usar esse salário em Finanças', disabled:same, doneLabel:"Já está em Finanças",
-    touch:'Muda o <b>Salário por hora</b> e as <b>Horas por semana</b> do orçamento mensal. Os custos vêm de Finanças.'
-  })+'</div>';
-  wrap.querySelectorAll("[data-wk-w]").forEach(function(x){ x.addEventListener("click", function(){ ls("workSim", {wage:parseFloat(x.dataset.wkW), hours:s.hours}); bridgeMsg.work = ""; renderWorkFin(); }); });
-  wrap.querySelectorAll("[data-wk-h]").forEach(function(x){ x.addEventListener("click", function(){ ls("workSim", {wage:s.wage, hours:parseFloat(x.dataset.wkH)}); bridgeMsg.work = ""; renderWorkFin(); }); });
-  var g = wrap.querySelector("[data-wk-go]"); if(g) g.addEventListener("click", function(e){ e.preventDefault(); goToSection("imigracao"); });
-  bindBridge(wrap, "work", renderWorkFin, function(){
-    var r = applyToFinance("work", [{budget:"wage", value:s.wage}, {budget:"hoursWeek", value:s.hours}]);
-    ls("workSim", null);
-    return r;
-  });
-}
-
-BRIDGES.push(renderMarketFin, renderStayFin, renderTransportFin, renderWorkFin);
+BRIDGES.push(renderMarketFin, renderStayFin, renderTransportFin);
