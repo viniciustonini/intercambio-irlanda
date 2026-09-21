@@ -150,14 +150,34 @@ function renderEmptyProfileCTA(el){
   el.querySelector(".trip-edit").addEventListener("click", function(){ openOnboarding(); });
 }
 
+/* "Ainda não sei": a foto de fundo alterna entre Dublin, Cork e Galway (só a 1ª carrega de início) */
+var tripSlideTimer = null;
+function startPhotoRotation(el, slides){
+  if(slides.length<2 || reduceMotion) return;
+  var imgs = el.querySelectorAll(".trip-photo-slide"), credit = el.querySelector(".trip-credit"), idx = 0;
+  tripSlideTimer = setInterval(function(){
+    if(!document.body.contains(el)){ clearInterval(tripSlideTimer); return; }
+    if(document.hidden) return;
+    var next = (idx+1) % imgs.length, img = imgs[next];
+    if(!img.getAttribute("src")) img.src = img.dataset.src;
+    imgs[idx].classList.remove("is-active");
+    img.classList.add("is-active");
+    idx = next;
+    var ph = slides[idx];
+    if(credit && ph.photoCredit){ credit.href = ph.photoCredit.url; credit.textContent = "Foto: "+ph.photoCredit.name+" · "+ph.photoCredit.license; }
+  }, 6000);
+}
+
 function renderPersonalizedHero(){
   var el = document.getElementById("profileBanner");
   if(!el) return;
+  clearInterval(tripSlideTimer);
   var p = getProfile(), c = currentCity();
   if(!p && !c && !ls("tripDate")){ renderEmptyProfileCTA(el); return; }
 
   var prog = progressData(), fl = flagState(), days = tripDaysLeft(), tasks = pendingTasks();
   var photo = c ? cityPhoto(c.name) : null;
+  var slides = c ? [] : ["Dublin","Cork","Galway"].map(cityPhoto).filter(Boolean);
   var place = c ? c.name : "a Irlanda";
   var past = days!==null && days<0;
 
@@ -177,9 +197,9 @@ function renderPersonalizedHero(){
   } else if(past){
     count = '<div class="trip-count-k">Data ultrapassada</div><div class="trip-count-date">'+tripDateLong()+'</div><button type="button" class="trip-count-link" data-act="date">Atualizar data</button>';
   } else if(days===0){
-    count = '<div class="trip-count-k">Embarque</div><div class="trip-count-num">Hoje</div><div class="trip-count-date">'+tripDateLong()+'</div>';
+    count = '<div class="trip-count-k">Embarque</div><div class="trip-count-num">Hoje</div><div class="trip-count-date">'+tripDateLong()+'</div><button type="button" class="trip-count-link trip-count-edit" data-act="date">editar data</button>';
   } else {
-    count = '<div class="trip-count-k">Faltam</div><div class="trip-count-num tabular">'+days+'</div><div class="trip-count-unit">'+(days===1?'dia':'dias')+' até a viagem</div><div class="trip-count-date">'+tripDateLong()+'</div>';
+    count = '<div class="trip-count-k">Faltam</div><div class="trip-count-num tabular">'+days+'</div><div class="trip-count-unit">'+(days===1?'dia':'dias')+' até a viagem</div><div class="trip-count-date">'+tripDateLong()+'</div><button type="button" class="trip-count-link trip-count-edit" data-act="date">editar data</button>';
   }
 
   var facts = [];
@@ -196,9 +216,13 @@ function renderPersonalizedHero(){
     ? '<button class="btn btn-accent trip-continue" type="button" data-act="30dias">Ver primeiros 30 dias</button>'
     : '<button class="btn btn-accent trip-continue" type="button" data-act="continue">Continuar meu planejamento</button>';
 
-  el.className = "trip-card"+(photo ? " has-photo" : "");
+  var hasPhoto = !!photo || slides.length>0;
+  el.className = "trip-card"+(hasPhoto ? " has-photo" : "");
   el.innerHTML =
     (photo ? '<img class="trip-photo" src="'+photo.photo+'" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="960" height="540">' : '')+
+    slides.map(function(s, i){
+      return '<img class="trip-photo trip-photo-slide'+(i===0?' is-active':'')+'" '+(i===0 ? 'src="'+s.photo+'" loading="lazy"' : 'data-src="'+s.photo+'"')+' alt="" decoding="async" referrerpolicy="no-referrer" width="960" height="540">';
+    }).join("")+
     '<div class="trip-body">'+
       '<div class="eyebrow">'+(c ? escapeHtml(c.name)+' · Irlanda' : 'Sua viagem')+'</div>'+
       '<h3 class="trip-city">'+title+'</h3>'+
@@ -209,7 +233,8 @@ function renderPersonalizedHero(){
       '<div class="trip-actions">'+primary+'<button class="btn btn-ghost trip-edit" type="button">Editar perfil</button></div>'+
     '</div>'+
     '<div class="trip-count">'+count+'</div>'+
-    (photo && photo.photoCredit ? '<a class="trip-credit" href="'+photo.photoCredit.url+'" target="_blank" rel="noopener">Foto: '+escapeHtml(photo.photoCredit.name)+' · '+photo.photoCredit.license+'</a>' : '');
+    (function(){ var ph = photo || slides[0]; return ph && ph.photoCredit ? '<a class="trip-credit" href="'+ph.photoCredit.url+'" target="_blank" rel="noopener">Foto: '+escapeHtml(ph.photoCredit.name)+' · '+ph.photoCredit.license+'</a>' : ''; })();
+  startPhotoRotation(el, slides);
 
   el.querySelector(".trip-edit").addEventListener("click", function(){ openOnboarding(); });
   el.querySelectorAll('[data-act="date"]').forEach(function(b){ b.addEventListener("click", function(){ openOnboarding("date"); }); });
