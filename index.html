@@ -42,11 +42,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=optional" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@500;600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <noscript><style>body footer.site{visibility:visible !important;}</style></noscript>
-<link rel="preload" as="image" href="hero-dublin.webp" fetchpriority="high">
+<link rel="preload" as="image" href="hero-dublin-md.webp" media="(max-width:900px)" fetchpriority="high">
+<link rel="preload" as="image" href="hero-dublin.webp" media="(min-width:901px)" fetchpriority="high">
 
 
 </head>
@@ -73,15 +73,15 @@
         <h1 id="heroHeadline">Seu caminho até a Irlanda, sem perder o próximo passo.</h1>
         <p>Documentos, dinheiro, chegada e adaptação reunidos em um painel que acompanha seu progresso.</p>
       </div>
-      <div class="hero-card">
-        <div class="days tabular" id="heroDays">—</div>
-        <div class="days-lbl">dias para a viagem</div>
+      <div class="hero-card no-date" id="heroCard">
+        <div class="days tabular hero-ask" id="heroDays">Quando você viaja?</div>
+        <div class="days-lbl" id="heroDaysLbl">Defina a data e veja a contagem regressiva.</div>
         <div class="date-row">
-          <div class="date" id="heroDate">—</div>
+          <div class="date" id="heroDate"></div>
           <div class="route" id="heroRoute">Brasil → Irlanda</div>
         </div>
         <div class="hero-actions">
-          <button class="edit-link" id="heroEditDate" type="button">editar data</button>
+          <button class="edit-link" id="heroEditDate" type="button">definir minha data</button>
           <button class="edit-link edit-link-muted" id="heroBackupBtn" type="button">meus dados</button>
         </div>
         <div class="hero-date-editor" id="heroDateEditor" hidden>
@@ -674,13 +674,13 @@
   </figure>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="dashboard.js"></script>
-<script src="financas.js"></script>
-<script src="integracao.js"></script>
-<script src="plano.js"></script>
-<script src="modulos.js"></script>
-<script src="app.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script defer src="dashboard.js"></script>
+<script defer src="financas.js"></script>
+<script defer src="integracao.js"></script>
+<script defer src="plano.js"></script>
+<script defer src="modulos.js"></script>
+<script defer src="app.js"></script>
 </body>
 </html>

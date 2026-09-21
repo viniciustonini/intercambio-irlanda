@@ -95,6 +95,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   padding:26px 5vw 64px;color:#fff;
 }
 .hero-illustration{position:absolute;inset:0;pointer-events:none;background-size:cover;background-position:center 60%;background-image:url('hero-dublin.webp');}
+@media (max-width:900px){.hero-illustration{background-image:url('hero-dublin-md.webp');}}
 .hero-scrim{position:absolute;inset:0;background:linear-gradient(100deg,rgba(10,16,22,.86) 18%,rgba(10,16,22,.5) 48%,rgba(10,16,22,.12) 78%);}
 .hero-topbar{position:relative;max-width:1180px;margin:0 auto 26px;display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.16);}
 .hero-topbar .avatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13.5px;flex:none;font-family:var(--font-display);}
@@ -115,6 +116,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 .hero-card .days{font-family:var(--font-mono);font-size:44px;font-weight:600;color:var(--navy);line-height:1;}
 .hero-card .days-lbl{font-size:12.5px;color:var(--muted);margin-top:4px;}
+.hero-card .days.hero-ask{font-family:var(--font-display);font-size:21px;font-weight:600;line-height:1.15;letter-spacing:-.01em;min-height:44px;display:flex;align-items:flex-end;}
+.hero-card.no-date .date{display:none;}
 .hero-card .date-row{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
 .hero-card .date{font-weight:700;font-size:13.5px;}
 .hero-card .route{font-size:12px;color:var(--muted);margin-top:2px;}

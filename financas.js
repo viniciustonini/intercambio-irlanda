@@ -9,13 +9,18 @@ function phi(name, cls){
 }
 
 /* ---------- formatação padrão da área: € 2.100 · R$ 4.124 · 20/10/2026 ---------- */
+/* Intl.NumberFormat criado uma vez: toLocaleString cria um formatador novo a cada chamada e pesa na carga. */
+var NF_EUR0 = new Intl.NumberFormat("pt-BR",{minimumFractionDigits:0, maximumFractionDigits:0});
+var NF_EUR2 = new Intl.NumberFormat("pt-BR",{minimumFractionDigits:2, maximumFractionDigits:2});
+var NF_BRL = new Intl.NumberFormat("pt-BR");
+var NF_PLAIN = new Intl.NumberFormat("pt-BR",{maximumFractionDigits:2, useGrouping:false});
 function fmtEur(v){
   var n = Number(v)||0;
   if(n<0) return "-"+fmtEur(-n);
   var  cents = Math.abs(n-Math.round(n)) > 0.004;
-  return "€ "+n.toLocaleString("pt-BR",{minimumFractionDigits:cents?2:0, maximumFractionDigits:cents?2:0});
+  return "€ "+(cents ? NF_EUR2 : NF_EUR0).format(n);
 }
-function fmtBrl(v){ return "R$ "+Math.round(Number(v)||0).toLocaleString("pt-BR"); }
+function fmtBrl(v){ return "R$ "+NF_BRL.format(Math.round(Number(v)||0)); }
 function fmtDay(d){ return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear(); }
 /* Reais: sempre valor em euros x cotação do dia (getCotacao), a mesma do topo e de Acomodação. */
 function brlOf(v){ return (Number(v)||0)*getCotacao(); }
@@ -38,7 +43,7 @@ function applyBrlVisibility(){
   }
 }
 function parseNum(v){ var n = parseFloat(String(v).replace(",", ".")); return isNaN(n) ? 0 : Math.max(0, n); }
-function fmtPlain(v){ return (Number(v)||0).toLocaleString("pt-BR",{maximumFractionDigits:2, useGrouping:false}); }
+function fmtPlain(v){ return NF_PLAIN.format(Number(v)||0); }
 /* Cotação do euro: o mesmo valor do topo do site e de Acomodação, editável aqui também. */
 var ECB_URL = "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-brl.en.html";
 function onRateChanged(){

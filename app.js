@@ -27,7 +27,8 @@ function flushDeferred(){
   deferredTasks.forEach(runDeferred);
   markAppReady();
 }
-function scheduleDeferred(){
+/* Monta o que falta em pedaços, quando o navegador está ocioso. */
+function idleFlush(){
   function step(dl){
     deferredIdle = null;
     var start = performance.now();
@@ -42,8 +43,8 @@ function scheduleDeferred(){
     deferredIdle = window.requestIdleCallback ? window.requestIdleCallback(step, {timeout:800}) : setTimeout(step, 30);
   }
   deferredIdle = window.requestIdleCallback ? window.requestIdleCallback(step, {timeout:800}) : setTimeout(step, 30);
-  window.addEventListener("scroll", flushDeferred, {once:true, passive:true});
 }
+function scheduleDeferred(){ idleFlush(); }
 
 /* Escapa texto vindo do usuario antes de inserir em HTML/atributos — evita XSS
    armazenado quando esse texto (item de mercado, escola, acomodacao etc.) e
@@ -95,7 +96,13 @@ function highlightTab(id){
     if(b.getAttribute("role")==="tab") b.setAttribute("aria-selected", on ? "true" : "false");
     if(on) activeBtn = b;
   });
-  if(activeBtn) activeBtn.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
+  if(activeBtn){
+    /* medir a barra força um layout da página inteira: fica pro próximo quadro, fora da tarefa de carga */
+    requestAnimationFrame(function(){
+      var bar = document.getElementById("tabbar");
+      if(bar && bar.scrollWidth > bar.clientWidth) bar.scrollTo({left: activeBtn.offsetLeft - (bar.clientWidth - activeBtn.offsetWidth)/2, behavior: reduceMotion ? "auto" : "smooth"});
+    });
+  }
   return activeBtn;
 }
 
@@ -326,12 +333,20 @@ function setTripDate(v){ ls("tripDate", v); renderHero(); renderDashboard(); }
 function renderHero(){
   var dstr = ls("tripDate");
   var days = tripDaysLeft();
-  document.getElementById("heroDays").textContent = days!==null && days>=0 ? days : "—";
-  if(dstr && days!==null){
+  var daysEl = document.getElementById("heroDays"), daysLbl = document.getElementById("heroDaysLbl");
+  var hasDate = !!(dstr && days!==null);
+  document.getElementById("heroCard").classList.toggle("no-date", !hasDate);
+  daysEl.classList.toggle("hero-ask", !hasDate);
+  document.getElementById("heroEditDate").textContent = hasDate ? "editar data" : "definir minha data";
+  if(hasDate){
+    daysEl.textContent = Math.abs(days);
+    daysLbl.textContent = days>0 ? (days===1 ? "dia para a viagem" : "dias para a viagem") : days===0 ? "é hoje: boa viagem!" : (days===-1 ? "dia na Irlanda" : "dias na Irlanda");
     var d = new Date(dstr+"T00:00:00");
     document.getElementById("heroDate").textContent = d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear();
   } else {
-    document.getElementById("heroDate").textContent = "Defina a data";
+    daysEl.textContent = "Quando você viaja?";
+    daysLbl.textContent = "Defina a data e veja a contagem regressiva.";
+    document.getElementById("heroDate").textContent = "";
   }
   var city = getCity();
   var cityObj = city ? CITIES.find(function(c){return c.id===city;}) : null;
@@ -3937,7 +3952,9 @@ function init(){
   if(!isScrollMode()) animateHeroEntrance();
   scheduleDeferred();
 }
-init();
+/* No celular, deixa o navegador pintar o topo (e registrar o LCP) antes de montar o resto. */
+if(isScrollMode()){ renderHero(); requestAnimationFrame(function(){ setTimeout(init, 0); }); }
+else init();
 if("serviceWorker" in navigator){
   window.addEventListener("load", function(){
     navigator.serviceWorker.register("sw.js").catch(function(){ /* offline/PWA é um extra — sem service worker o site continua funcionando normal */ });
