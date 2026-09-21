@@ -287,22 +287,12 @@ function renderTripStats(){
   } else {
     tiles.push(tileHtml("✈️","Viagem","Ainda não definido","", {sec:"inicio", date:true, label:"Definir data da viagem"}));
   }
-  if(ls("budget")){
-    tiles.push(tileHtml("💶","Custo mensal","€"+sumExpenses(getBudget()).toLocaleString("pt-BR"),"Estimativa do seu orçamento",{sec:"financas",label:"Ajustar em Finanças"}));
-  } else {
-    tiles.push(tileHtml("💶","Custo mensal","Ainda não definido","",{sec:"financas",label:"Calcular em Finanças"}));
-  }
-  /* a lista de acomodações vem com exemplos pré-carregados: só mostramos valor
-     quando a pessoa escolheu uma opção ("Usar") em Acomodação */
-  var stay = null;
-  if(stayChosenNow()){
-    stay = getStayOptions().filter(function(s){ return s.id===ls("selectedStay"); })[0] || null;
-  }
+  var edited = !!ls("budget");
+  tiles.push(tileHtml("💶","Custo mensal","€"+sumExpenses(getBudget()).toLocaleString("pt-BR"), edited ? "Estimativa do seu orçamento" : "Estimativa padrão do site", {sec:"financas", label:"Ajustar em Finanças"}));
+  var stay = getStayOptions().filter(function(s){ return s.id===ls("selectedStay"); })[0] || null;
   if(stay){
     var eur = stay.noites*stay.preco/getCotacao();
-    tiles.push(tileHtml("🏠","Hospedagem","€"+eur.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}), stay.noites+" noites · "+escapeHtml(stay.nome), null));
-  } else if(flagState().stay){
-    tiles.push(tileHtml("🏠","Hospedagem","Acomodação definida ✓","Você marcou que já tem acomodação.",{sec:"acomodacao",label:"Registrar valores em Acomodação"}));
+    tiles.push(tileHtml("🏠","Hospedagem","€"+eur.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}), stay.noites+" noites · "+escapeHtml(stay.nome), {sec:"acomodacao", label:"Trocar em Acomodação"}));
   } else {
     tiles.push(tileHtml("🏠","Hospedagem","Ainda não definido","",{sec:"acomodacao",label:"Escolher em Acomodação"}));
   }
