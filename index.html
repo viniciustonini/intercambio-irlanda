@@ -126,25 +126,14 @@
       <div id="continueWrap" hidden style="margin-bottom:14px;"></div>
       <div id="backupReminderWrap" hidden style="margin-bottom:14px;"></div>
       <div class="trip-card" id="profileBanner"></div>
-      <div class="card overview-summary">
-        <div class="overview-progress">
-          <svg class="ring" width="64" height="64" viewBox="0 0 64 64">
-            <circle class="ring-track" cx="32" cy="32" r="27"/>
-            <circle class="ring-fill" id="ringFill" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"/>
-          </svg>
-          <div>
-            <div class="stat-val" id="progressPct">0%</div>
-            <div class="stat-sub" id="progressFrac">0 de 0 concluídos</div>
-          </div>
-        </div>
-        <div class="overview-figures">
-          <div class="summary-row"><span class="lbl">Custo mensal-base<br><span class="stat-sub" id="statBudgetSub">Defina em Finanças</span></span><span class="val" id="statBudget">€0</span></div>
-          <div class="summary-row"><span class="lbl">Hospedagem inicial<br><span class="stat-sub" id="statStaySub">Defina em Acomodação</span></span><span class="val" id="statStay">—</span></div>
-        </div>
-      </div>
-      <div class="card" id="nextStepWrap" style="margin-top:16px;"></div>
+      <div class="card next-card dash-block" id="nextStepWrap"></div>
+      <div class="card prep-card dash-block" id="progressWrap"></div>
+      <div class="dash-block" id="tripStatsWrap"></div>
+      <div class="card dash-block" id="journeyWrap"></div>
+      <div class="card dash-block" id="urgentWrap" hidden></div>
+      <div class="dash-block" id="guidesWrap"></div>
 
-      <h3 style="margin:28px 0 4px;font-size:18px;">Seu perfil e sua cidade</h3>
+      <h3 style="margin:28px 0 4px;font-size:18px;">Ajustar perfil e comparar cidades</h3>
       <p class="source-note" style="margin-bottom:14px;">Isso ajusta o que aparece em Checklist, Imigração e Trabalho.</p>
       <div class="card">
         <h3>Cidadania</h3>
@@ -185,10 +174,13 @@
         <div id="faqStartWrap"></div>
       </div>
 
-      <div class="card" style="margin-top:16px;">
-        <h3>Cronograma sugerido</h3>
-        <p class="source-note" style="margin-bottom:16px;">Um roteiro de referência de 8 meses antes do embarque. Veja a seção Cronograma para marcar cada etapa.</p>
-        <div id="miniTimeline"></div>
+      <div class="grid cols-2" style="margin-top:16px;">
+        <div class="card" id="first30Wrap"></div>
+        <div class="card">
+          <h3>Cronograma sugerido</h3>
+          <p class="source-note" style="margin-bottom:16px;">Um roteiro de referência de 8 meses antes do embarque. Veja a seção Cronograma para marcar cada etapa.</p>
+          <div id="miniTimeline"></div>
+        </div>
       </div>
     </section>
 
@@ -647,6 +639,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="dashboard.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

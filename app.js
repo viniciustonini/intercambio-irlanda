@@ -279,14 +279,17 @@ document.getElementById("heroEditDate").addEventListener("click", function(){
 function todayISO(){ return new Date().toISOString().slice(0,10); }
 var MONTHS = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
 function getTripDate(){ return ls("tripDate") || "2027-03-11"; }
-function setTripDate(v){ ls("tripDate", v); renderHero(); }
+function setTripDate(v){ ls("tripDate", v); renderHero(); renderDashboard(); }
 function renderHero(){
-  var dstr = getTripDate();
-  var d = new Date(dstr+"T00:00:00");
-  var now = new Date();
-  var diffDays = Math.ceil((d - now)/86400000);
-  document.getElementById("heroDays").textContent = diffDays > 0 ? diffDays : (diffDays===0 ? "0" : "—");
-  document.getElementById("heroDate").textContent = d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear();
+  var dstr = ls("tripDate");
+  var days = tripDaysLeft();
+  document.getElementById("heroDays").textContent = days!==null && days>=0 ? days : "—";
+  if(dstr && days!==null){
+    var d = new Date(dstr+"T00:00:00");
+    document.getElementById("heroDate").textContent = d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear();
+  } else {
+    document.getElementById("heroDate").textContent = "Defina a data";
+  }
   var city = getCity();
   var cityObj = city ? CITIES.find(function(c){return c.id===city;}) : null;
   document.getElementById("heroRoute").textContent = "Brasil → " + (cityObj ? cityObj.name : "Irlanda");
@@ -296,7 +299,7 @@ function renderHero(){
   document.getElementById("heroTopSub").textContent = "Planejamento revisado em " + LAST_UPDATED;
   document.getElementById("heroCotacaoVal").textContent = "R$ " + getCotacao().toFixed(2).replace(".", ",");
   var input = document.getElementById("heroDateInput");
-  if(input){ input.min = todayISO(); input.value = dstr; }
+  if(input){ input.min = todayISO(); input.value = dstr || ""; }
 }
 document.getElementById("heroCotacao").addEventListener("click", function(){ location.hash = "acomodacao"; showSection("acomodacao"); });
 document.getElementById("heroDateInput").addEventListener("change", function(e){ setTripDate(e.target.value); });
@@ -523,76 +526,6 @@ function renderProfileSeg(){
   document.getElementById("pickEU").classList.toggle("selected", p==="eu");
   document.getElementById("pickNONEU").classList.toggle("selected", p==="non-eu");
 }
-function goalLabel(v){
-  var all = GOALS_EU.concat(GOALS_NON_EU), hit = all.filter(function(g){ return g.v===v; })[0];
-  return hit ? hit.l : null;
-}
-function cityPhoto(name){
-  var hit = TOURIST_CITIES.filter(function(c){ return c.name===name; })[0];
-  return hit && hit.photo ? hit : null;
-}
-function tripStatusChip(done, label){
-  return '<span class="trip-chip '+(done?'is-done':'is-todo')+'"><span aria-hidden="true">'+(done?'✓':'○')+'</span> '+label+(done?'':' <span class="trip-chip-sub">a fazer</span>')+'</span>';
-}
-function renderProfileBanner(){
-  var el = document.getElementById("profileBanner");
-  if(!el) return;
-  var p = getProfile(), city = getCity();
-  var c = city ? CITIES.find(function(x){ return x.id===city; }) : null;
-  if(!p && !c){
-    el.className = "trip-card trip-card-empty";
-    el.innerHTML =
-      '<div class="trip-body">'+
-        '<div class="eyebrow">Sua viagem</div>'+
-        '<h3 class="trip-city">Monte um guia só seu</h3>'+
-        '<p class="trip-lead">Responda 5 perguntas rápidas (menos de 1 minuto) e o site ajusta Checklist, Imigração e Trabalho ao seu caso, com a cidade e a data da viagem em destaque.</p>'+
-        '<button class="btn btn-accent trip-edit" type="button" style="width:auto;padding:10px 18px;">Personalizar meu guia</button>'+
-      '</div>';
-    el.querySelector(".trip-edit").addEventListener("click", openOnboarding);
-    return;
-  }
-  var photo = c ? cityPhoto(c.name) : null;
-  var chips = [];
-  chips.push('<span class="trip-chip"><span class="trip-chip-k">Perfil</span> '+(p==="eu"?"Cidadão UE":p==="non-eu"?"Não-UE":"não definido")+'</span>');
-  var goal = goalLabel(getGoal());
-  if(goal) chips.push('<span class="trip-chip"><span class="trip-chip-k">Objetivo</span> '+escapeHtml(goal)+'</span>');
-  var td = ls("tripDate");
-  if(td){
-    var d = new Date(td+"T00:00:00");
-    if(!isNaN(d.getTime())){
-      var days = Math.ceil((d - new Date())/86400000);
-      chips.push('<span class="trip-chip"><span class="trip-chip-k">Viagem</span> '+d.getDate()+" "+MONTHS[d.getMonth()].toLowerCase()+" "+d.getFullYear()+(days>0?' · faltam <b>'+days+'</b> dias':'')+'</span>');
-    }
-  }
-  var status = tripStatusChip(!!ls("hasFlight"),"Passagem")+tripStatusChip(!!ls("hasAccommodation"),"Acomodação")+tripStatusChip(!!ls("hasSchool"),"Escola");
-  el.className = "trip-card"+(photo?" has-photo":"");
-  el.innerHTML =
-    (photo ? '<img class="trip-photo" src="'+photo.photo+'" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">' : '')+
-    '<div class="trip-body">'+
-      '<div class="eyebrow">Sua viagem</div>'+
-      '<h3 class="trip-city">'+(c ? c.name+', Irlanda' : 'Irlanda')+'</h3>'+
-      '<p class="trip-lead">'+(c ? c.tag+'.' : 'Escolha a cidade de destino para ver pontos fortes, fracos e custos.')+'</p>'+
-      '<div class="trip-chips">'+chips.join("")+'</div>'+
-      '<div class="trip-chips trip-chips-status" aria-label="Situação da viagem">'+status+'</div>'+
-      '<p class="trip-note">Checklist, Imigração e Trabalho já mostram o caminho do seu perfil.</p>'+
-      '<button class="btn btn-ghost trip-edit" type="button">Editar perfil</button>'+
-    '</div>'+
-    (photo && photo.photoCredit ? '<a class="trip-credit" href="'+photo.photoCredit.url+'" target="_blank" rel="noopener">Foto: '+escapeHtml(photo.photoCredit.name)+' · '+photo.photoCredit.license+'</a>' : '');
-  el.querySelector(".trip-edit").addEventListener("click", openOnboarding);
-}
-function celebrateProfileSaved(){
-  var el = document.getElementById("profileBanner"), sec = document.getElementById("sec-inicio");
-  if(!el || !sec || !sec.classList.contains("active")) return;
-  var msg = document.createElement("div");
-  msg.className = "trip-saved";
-  msg.setAttribute("role", "status");
-  msg.textContent = "✓ Perfil salvo. Seu guia foi ajustado.";
-  el.appendChild(msg);
-  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
-  setTimeout(function(){ el.scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block:"start"}); }, 60);
-  setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); el.classList.remove("flash"); }, 4500);
-}
-
 /* ---------- onboarding ---------- */
 function getGoal(){ return ls("goal"); }
 /* Cidadao europeu tem liberdade de movimento — pode escolher qualquer
@@ -614,7 +547,7 @@ function updateGoalOptions(profile){
   sel.innerHTML = '<option value="">Selecione...</option>'+list.map(function(g){ return '<option value="'+g.v+'">'+g.l+'</option>'; }).join("");
   sel.value = list.some(function(g){ return g.v===current; }) ? current : "";
 }
-function openOnboarding(){
+function openOnboarding(focus){
   var profile = getProfile();
   document.querySelectorAll("#onbProfileSeg .seg-btn").forEach(function(b){ b.classList.toggle("selected", b.dataset.profile===profile); });
   var city = getCity();
@@ -626,9 +559,19 @@ function openOnboarding(){
   document.getElementById("onbFlight").checked = !!ls("hasFlight");
   document.getElementById("onbAccommodation").checked = !!ls("hasAccommodation");
   document.getElementById("onbSchool").checked = !!ls("hasSchool");
-  document.getElementById("onboardingModal").hidden = false;
+  var modal = document.getElementById("onboardingModal");
+  clearTimeout(closeOnboardingTimer);
+  modal.classList.remove("closing");
+  modal.hidden = false;
+  if(focus==="date") document.getElementById("onbTripDate").focus();
 }
-function closeOnboarding(){ document.getElementById("onboardingModal").hidden = true; }
+var closeOnboardingTimer;
+function closeOnboarding(){
+  var modal = document.getElementById("onboardingModal");
+  if(reduceMotion){ modal.hidden = true; return; }
+  modal.classList.add("closing");
+  closeOnboardingTimer = setTimeout(function(){ modal.hidden = true; modal.classList.remove("closing"); }, 220);
+}
 (function(){
   var chosenProfile = null, chosenCity = undefined;
   document.querySelectorAll("#onbProfileSeg .seg-btn").forEach(function(b){
@@ -645,6 +588,7 @@ function closeOnboarding(){ document.getElementById("onboardingModal").hidden = 
     });
   });
   function saveOnboarding(){
+    var prevFlags = {flight: !!ls("hasFlight"), stay: !!ls("hasAccommodation"), school: !!ls("hasSchool")};
     if(chosenProfile!=null) ls("profile", chosenProfile);
     if(chosenCity!==undefined) ls("city", chosenCity);
     var goal = document.getElementById("onbGoal").value;
@@ -655,6 +599,7 @@ function closeOnboarding(){ document.getElementById("onboardingModal").hidden = 
     ls("hasAccommodation", document.getElementById("onbAccommodation").checked);
     ls("hasSchool", document.getElementById("onbSchool").checked);
     ls("onboardingDone", true);
+    syncFlagsToPlan(prevFlags, {flight: !!document.getElementById("onbFlight").checked, stay: !!document.getElementById("onbAccommodation").checked, school: !!document.getElementById("onbSchool").checked}, getCity());
     closeOnboarding();
     renderAll();
     celebrateProfileSaved();
@@ -717,7 +662,7 @@ function renderChecklist(){
   var p = getProfile();
   var state = ls("checklist") || {};
   var html = "";
-  CHECKLIST.forEach(function(g){
+  CHECKLIST.filter(function(g){ return g.scope===p; }).concat(CHECKLIST.filter(function(g){ return g.scope!==p; })).forEach(function(g){
     if(g.scope==="eu" && p==="non-eu") return;
     if(g.scope==="non-eu" && p==="eu") return;
     html += '<div class="checkgroup"><span class="eyebrow">'+g.cat+'</span>';
@@ -834,56 +779,6 @@ function countsFor(list, storeKey){
 }
 
 /* ---------- proximo passo / continuar de onde parou ---------- */
-function firstPendingChecklist(){
-  var p = getProfile();
-  var state = ls("checklist") || {};
-  for(var gi=0; gi<CHECKLIST.length; gi++){
-    var g = CHECKLIST[gi];
-    if(g.scope==="eu" && p==="non-eu") continue;
-    if(g.scope==="non-eu" && p==="eu") continue;
-    for(var ii=0; ii<g.items.length; ii++){
-      if(!state[g.items[ii].id]) return {title:g.items[ii].label, sec:"roteiro"};
-    }
-  }
-  return null;
-}
-function firstPendingFrom(list, storeKey){
-  var dm = ls(storeKey) || {};
-  for(var i=0;i<list.length;i++){
-    if(!dm[list[i].id]) return {title:list[i].title, sec:(list[i].link?list[i].link.sec:"roteiro")};
-  }
-  return null;
-}
-function findNextTask(){
-  var alreadyTraveled = false;
-  var tripDate = ls("tripDate");
-  if(tripDate){
-    var d = new Date(tripDate+"T00:00:00");
-    if(!isNaN(d.getTime()) && d.getTime() < Date.now()) alreadyTraveled = true;
-  }
-  var beforeTrip = firstPendingFrom(CRONOGRAMA,"cronogramaDone") || firstPendingChecklist();
-  var afterArrival = firstPendingFrom(DIAS30,"dias30Done");
-  if(alreadyTraveled) return afterArrival || beforeTrip;
-  return beforeTrip || afterArrival;
-}
-function renderNextStepCard(){
-  var el = document.getElementById("nextStepWrap");
-  if(!el) return;
-  if(!getProfile()){
-    el.innerHTML = '<div class="eyebrow" style="color:var(--muted);">Próximo passo</div>'+
-      '<div style="font-weight:700;margin-top:4px;">Configure sua viagem para criarmos seu planejamento</div>'+
-      '<button type="button" class="ci-link" style="border:none;background:none;padding:0;font:inherit;cursor:pointer;" onclick="openOnboarding()">Responder agora →</button>';
-    return;
-  }
-  var next = findNextTask();
-  if(!next){
-    el.innerHTML = '<div class="eyebrow" style="color:var(--muted);">Próximo passo</div><div style="font-weight:700;margin-top:4px;">Tudo em dia! 🎉</div><p class="ci-note" style="margin-top:2px;">Nenhuma tarefa pendente no momento.</p>';
-    return;
-  }
-  el.innerHTML = '<div class="eyebrow" style="color:var(--muted);">Próximo passo</div>'+
-    '<div style="font-weight:700;margin-top:4px;">'+escapeHtml(next.title)+'</div>'+
-    '<a href="#'+next.sec+'" class="ci-link" onclick="location.hash=\''+next.sec+'\';showSection(\''+next.sec+'\');return false;">Resolver agora →</a>';
-}
 function renderContinueCard(){
   var el = document.getElementById("continueWrap");
   if(!el) return;
@@ -898,34 +793,11 @@ function renderContinueCard(){
 
 /* ---------- overview ---------- */
 function renderOverview(){
-  renderNextStepCard();
   renderContinueCard();
   renderBackupReminder();
-  var cl = checklistCounts(), cr = countsFor(CRONOGRAMA,"cronogramaDone"), d3 = countsFor(DIAS30,"dias30Done");
-  var total = cl.total+cr.total+d3.total, done = cl.done+cr.done+d3.done;
-  var pct = total ? Math.round(done/total*100) : 0;
-  document.getElementById("progressPct").textContent = pct+"%";
-  document.getElementById("progressFrac").textContent = done+" de "+total+" concluídos";
-  var circumference = 169.6;
-  document.getElementById("ringFill").style.strokeDashoffset = (circumference - (pct/100)*circumference);
+  var prog = progressData();
   var miniBar = document.getElementById("miniProgressBar"), miniPct = document.getElementById("miniProgressPct");
-  if(miniBar){ miniBar.style.transform = "scaleX("+(pct/100)+")"; miniPct.textContent = pct+"%"; }
-
-  var b = getBudget();
-  var totalExpenses = sumExpenses(b);
-  document.getElementById("statBudget").textContent = "€"+totalExpenses.toFixed(0);
-  document.getElementById("statBudgetSub").textContent = "Quarto €"+b.rent+" · transporte €"+b.transport+" · mercado €"+b.groceries;
-
-  var stayOptions = getStayOptions();
-  var selectedStay = stayOptions.find(function(s){ return s.id===ls("selectedStay"); });
-  if(selectedStay){
-    var eur = (selectedStay.noites*selectedStay.preco/getCotacao()).toFixed(2);
-    document.getElementById("statStay").textContent = "€"+eur;
-    document.getElementById("statStaySub").textContent = selectedStay.nome+" · "+selectedStay.noites+" noites";
-  } else {
-    document.getElementById("statStay").textContent = "—";
-    document.getElementById("statStaySub").textContent = "Escolha uma opção em Acomodação";
-  }
+  if(miniBar){ miniBar.style.transform = "scaleX("+(prog.pct/100)+")"; miniPct.textContent = prog.pct+"%"; }
 
   document.getElementById("miniTimeline").innerHTML = CRONOGRAMA.slice(0,5).map(function(t){
     var done = !!(ls("cronogramaDone")||{})[t.id];
@@ -934,7 +806,7 @@ function renderOverview(){
       '<span style="'+(done?'color:var(--muted);text-decoration:line-through;':'')+'">'+t.title+'</span></div>';
   }).join("");
 
-  renderProfileBanner();
+  renderDashboard();
   renderHero();
 }
 
@@ -2594,7 +2466,7 @@ function renderStayTable(){
   document.getElementById("stayTable").innerHTML =
     '<thead><tr><th>Usar</th><th>Acomodação</th><th class="num">Noites</th><th class="num">R$/noite</th><th class="num">Total</th><th class="num">Equiv. €</th><th></th></tr></thead><tbody>'+rows+'</tbody>';
   document.querySelectorAll('#stayTable [data-select]').forEach(function(r){
-    r.addEventListener("change", function(){ ls("selectedStay", r.dataset.select); renderStayComparator(); renderOverview(); });
+    r.addEventListener("change", function(){ ls("stayChosen", true); ls("selectedStay", r.dataset.select); renderStayComparator(); renderOverview(); });
   });
   document.querySelectorAll('#stayTable input[data-f]').forEach(function(inp){
     inp.addEventListener("input", function(){
