@@ -1556,7 +1556,8 @@ function climateChartHtml(){
 function renderVidaIrlanda(){
   var wrap = document.getElementById("vidaIrlandaWrap");
   if(!wrap) return;
-  var html = VIDA_PRATICA_CATEGORIES.map(function(cat, idx){
+  renderVidaGroups();
+  var html = VIDA_PRATICA_CATEGORIES.filter(function(cat){ return vidaCatVisible(cat.id); }).map(function(cat, idx){
     if(cat.id==="bairros"){
       var bairrosTagOk = !vidaSharedFilterState.tag || vidaSharedFilterState.tag==="Casa";
       var bairrosSearchOk = !vidaSharedFilterState.q || (cat.label+" "+DUBLIN_DISTRICTS.map(function(d){ return d.code+" "+d.side+" "+d.d; }).join(" ")).toLowerCase().indexOf(vidaSharedFilterState.q.trim().toLowerCase())>-1;
@@ -1735,7 +1736,7 @@ function renderVidaIrlandaContent(){
   filterBarWrap.innerHTML = vidaFilterBarHtml();
   wireVidaFilterBar();
   wrap.innerHTML =
-    '<div class="vida-panel" id="vidaPanel-pratica"><div id="vidaIrlandaWrap"></div></div>'+
+    '<div class="vida-panel" id="vidaPanel-pratica"><div class="subtabs" id="vidaGroupTabs" style="margin-bottom:14px;"></div><div id="vidaIrlandaWrap"></div></div>'+
     '<div class="vida-panel" id="vidaPanel-glossario"><div id="glossarioWrap"></div></div>'+
     '<div class="vida-panel" id="vidaPanel-mitos"><div id="mitosWrap"></div></div>';
   renderVidaAllPanels();
