@@ -818,6 +818,7 @@ function renderCheckableList(containerId, list, storeKey, afterFn){
   });
 }
 function countsFor(list, storeKey){
+  if(storeKey==="cronogramaDone" && getProfile()==="eu") list = list.filter(function(t){ return t.id!=="c4"; });
   var dm = ls(storeKey) || {}; var done=0;
   list.forEach(function(t){ if(dm[t.id]) done++; });
   return {total:list.length, done:done};
@@ -3888,8 +3889,7 @@ function renderMistakes(){
 /* ---------- init ---------- */
 function renderAll(){
   renderFaqStart(); renderProfileSeg(); renderCitySeg(); renderChecklist(); renderVistos(); renderTrabalho(); renderCursoRegras();
-  renderCheckableList("cronogramaWrap", CRONOGRAMA, "cronogramaDone");
-  renderCheckableList("dias30Wrap", DIAS30, "dias30Done");
+  renderPlanRoadmap();
   renderOverview();
 }
 function syncTabbarHeight(){
@@ -3930,8 +3930,7 @@ function init(){
   defer("trabalho", function(){ renderTrabalho(); renderCursoRegras(); });
   defer("roteiro", function(){
     renderChecklist();
-    renderCheckableList("cronogramaWrap", CRONOGRAMA, "cronogramaDone");
-    renderCheckableList("dias30Wrap", DIAS30, "dias30Done");
+    renderPlanRoadmap();
   });
   applyScrollMode();
   syncTabbarHeight();
