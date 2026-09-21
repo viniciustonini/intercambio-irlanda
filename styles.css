@@ -669,7 +669,13 @@ footer.site{max-width:1180px;margin:0 auto;padding:20px 5vw 60px;color:var(--mut
 
 /* ===== Finanças: plano financeiro (financas.js) ===== */
 .phi{width:1em;height:1em;flex:none;}
-.fin-head{max-width:680px;margin:0 0 34px;}
+.fin-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:0 0 34px;}
+.fin-head-text{max-width:680px;min-width:0;}
+.fin-eye{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text);font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s ease,border-color .15s ease;}
+.fin-eye:hover{border-color:var(--accent);background:var(--surface-2);}
+.fin-eye .phi{width:22px;height:22px;color:var(--accent-strong);}
+.fin-eye[aria-pressed="true"]{color:var(--muted);}
+.fin-eye[aria-pressed="true"] .phi{color:var(--muted);}
 .fin-head h2{font-size:clamp(30px,4.6vw,44px);line-height:1.05;letter-spacing:-.015em;margin:8px 0 12px;}
 .fin-head p{font-size:15.5px;color:var(--muted);margin:0;max-width:52ch;}
 .fin-lbl{font-size:13.5px;font-weight:600;color:var(--muted);}
@@ -883,4 +889,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{position:absolute;inset:0;
   .fin-amt-wrap{min-width:86px;}
   .fin-amt-in{min-width:3ch;}
   .fin-x{width:28px;height:28px;opacity:.7;}
+}
+
+/* olho: com valores em reais ocultos, ficam só os euros */
+.hide-brl .brl,.hide-brl .brl-i,.hide-brl .fin-in-brl,.hide-brl .fin-big-brl,.hide-brl .fin-eq-brl,.hide-brl .rota-b,.hide-brl .fin-goal-brl,.hide-brl .fin-pace-brl,.hide-brl .fin-rate{display:none !important;}
+@media (max-width:600px){
+  .fin-eye{padding:0 12px;}
 }
