@@ -230,6 +230,10 @@
       <p class="source-note" style="margin-bottom:14px;">Responda rapidinho para ver uma orientação — não é uma garantia de vaga.</p>
       <div class="card" id="jobFinderWrap"></div>
 
+      <h3 style="margin:30px 0 4px;font-size:18px;">Quanto sobra do salário?</h3>
+      <p class="source-note" style="margin-bottom:14px;">Simule salário e horas e compare com os custos que você planejou em Finanças. Nada muda em Finanças até você clicar em "Usar".</p>
+      <div id="workFinWrap"></div>
+
       <h3 style="margin:30px 0 4px;font-size:18px;">Agências de recrutamento</h3>
       <p class="source-note" style="margin-bottom:14px;">Atuam nas três cidades com vagas temporárias e permanentes em várias áreas.</p>
       <div class="grid cols-3" id="agenciasWrap"></div>
@@ -387,6 +391,7 @@
         <div id="stayComparatorWrap"></div>
         <div class="tablewrap" style="margin-top:10px;"><table id="stayTable"></table></div>
       </div>
+      <div id="stayFinWrap" class="bridge-stack"></div>
       <div id="moradiaWrap"></div>
 
       <h3 style="margin:28px 0 4px;font-size:18px;">Tipos de acomodação — o que os anúncios significam</h3>
@@ -414,6 +419,7 @@
       <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
         <span class="eyebrow" style="margin:0;">Total da cesta</span><span class="stat-val" id="marketTotal">€0</span>
       </div>
+      <div id="marketFinWrap" style="margin-top:16px;"></div>
       <p class="source-note">Preços de referência extraídos da sua planilha. Revise novamente perto da viagem, pois podem mudar.</p>
     </section>
 
@@ -434,6 +440,9 @@
       <h3 id="transporte-leap" style="margin:28px 0 4px;font-size:18px;scroll-margin-top:88px;">Qual Leap Card é ideal para mim?</h3>
       <p class="source-note" style="margin-bottom:14px;">Adult, Young Adult, Student ou Visitor — compare antes de comprar.</p>
       <div class="grid cols-2" id="leapCardsWrap"></div>
+      <h3 style="margin:24px 0 4px;font-size:16px;">Quanto vou gastar por mês com transporte?</h3>
+      <p class="source-note" style="margin-bottom:12px;">Responda como você pretende se deslocar e leve a estimativa para o seu orçamento.</p>
+      <div id="transportFinWrap"></div>
 
       <h3 id="transporte-rotas" style="margin:28px 0 12px;font-size:18px;scroll-margin-top:88px;">Rotas por cidade</h3>
       <div class="subtabs" id="transportCityTabs"></div>
@@ -676,6 +685,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="dashboard.js"></script>
 <script src="financas.js"></script>
+<script src="integracao.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

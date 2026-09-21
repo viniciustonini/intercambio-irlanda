@@ -374,7 +374,7 @@ function needRowHtml(l, m){
     '<span class="fin-row-ico">'+phi(icon)+'</span>'+
     (l.custom
       ? '<input type="text" class="fin-name-in" maxlength="60" value="'+nome+'" data-name="'+l.id+'" aria-label="Nome do item">'
-      : '<span class="fin-row-name">'+nome+'</span>')+
+      : '<span class="fin-row-name">'+nome+finSrcBadge("row"+l.id+"_"+m.sc)+'</span>')+
     '<span class="fin-amt-wrap"><label class="fin-amt"><span aria-hidden="true">€</span><input type="text" inputmode="decimal" class="fin-amt-in" data-amt="'+l.id+'" style="width:'+Math.max(3, fmtPlain(v).length+1)+'ch" value="'+fmtPlain(v)+'" aria-label="Valor de '+nome+' no cenário '+m.g.cols[m.sc]+', em euros"></label><small class="brl fin-row-brl">'+fmtBrlApprox(v)+'</small></span>'+
     '<button type="button" class="fin-pay" data-pay="'+l.id+'" aria-pressed="'+paid+'" aria-label="'+(paid?'Desfazer pago: ':'Marcar como pago: ')+nome+'">'+phi("check")+'<span class="fin-pay-t">'+(paid?'Pago':'Já paguei')+'</span></button>'+
     '<button type="button" class="fin-x" data-del="'+l.id+'" aria-label="Remover '+nome+'" title="Remover">'+phi("x")+'</button>'+
@@ -421,6 +421,7 @@ function renderGastosIniciais(){
     '</div>';
   finTweenNumbers(wrap);
   bindNeed(wrap);
+  refreshBridges();
 }
 /* atualiza totais, reais, barra e comparação sem recriar as linhas (o campo em edição mantém o foco) */
 function patchNeed(){
@@ -437,6 +438,7 @@ function patchNeed(){
     if(el) el.textContent = fmtBrlApprox(parseFloat(l.v[m.sc])||0);
   });
   finTweenNumbers(wrap);
+  refreshBridges();
 }
 function saveAmount(id, sc, val){
   if(id.charAt(0)==="x"){
@@ -447,6 +449,8 @@ function saveAmount(id, sc, val){
     var ov = getGastosOverrides();
     ov[id+"_"+sc] = val;
     saveGastosOverrides(ov);
+    markFinSource("row"+id+"_"+sc, null);
+    var bd = document.querySelector('#gastosIniciaisWrap .fin-row[data-id="'+id+'"] .src-badge'); if(bd) bd.remove();
   }
 }
 function bindNeed(wrap){
@@ -485,6 +489,7 @@ function bindNeed(wrap){
     if(e.target.closest("#gastosResetBtn")){
       if(!window.confirm("Restaurar os valores padrão? Isso desfaz seus valores editados, reexibe os itens removidos e apaga os itens que você adicionou. O que você marcou como já pago é mantido.")) return;
       saveGastosOverrides({}); saveGastosRemovidos({}); saveGastosExtras([]);
+      var fs2 = finSources(); Object.keys(fs2).forEach(function(k){ if(k.indexOf("row")===0) delete fs2[k]; }); ls("finSources", fs2);
       renderGastosIniciais();
     }
   });
@@ -528,6 +533,7 @@ function renderFinancas(){
 /* chamado quando o orçamento mensal muda */
 function refreshFinancas(){
   if(document.getElementById("finGoalNum")) refreshFinPlan(true);
+  refreshBridges();
 }
 
 /* ---------- passo a passo da aba ---------- */

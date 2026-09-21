@@ -2468,6 +2468,7 @@ function renderStayFields(){
   renderStayTable();
   renderStayComparator();
   renderStayAddForm();
+  renderStayFin();
 }
 var TIP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3 11.2c.6.4 1 1.1 1 1.8h4c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3Z"/></svg>';
 function tipRow(title, note){
@@ -2492,7 +2493,7 @@ function renderStayTable(){
   document.getElementById("stayTable").innerHTML =
     '<thead><tr><th>Usar</th><th>Acomodação</th><th class="num">Noites</th><th class="num">R$/noite</th><th class="num">Total</th><th class="num">Equiv. €</th><th></th></tr></thead><tbody>'+rows+'</tbody>';
   document.querySelectorAll('#stayTable [data-select]').forEach(function(r){
-    r.addEventListener("change", function(){ ls("stayChosen", true); ls("selectedStay", r.dataset.select); renderStayComparator(); renderOverview(); });
+    r.addEventListener("change", function(){ ls("stayChosen", true); ls("selectedStay", r.dataset.select); renderStayComparator(); renderOverview(); bridgeInput(["stayInitial"], renderStayFin); });
   });
   document.querySelectorAll('#stayTable input[data-f]').forEach(function(inp){
     inp.addEventListener("input", function(){
@@ -2504,6 +2505,7 @@ function renderStayTable(){
       saveStayOptions(opts);
       if(f==="noites" || f==="preco" || f==="nome"){
         renderStayComparator();
+        bridgeInput(["stayInitial"], renderStayFin);
       }
       if(f==="noites" || f==="preco"){
         var total = row.noites*row.preco;
@@ -2521,6 +2523,7 @@ function renderStayTable(){
       renderStayTable();
       renderStayComparator();
       renderOverview();
+      bridgeInput(["stayInitial"], renderStayFin);
     });
   });
 }
@@ -2535,6 +2538,7 @@ function updateStayComputed(){
   });
   renderStayComparator();
   renderOverview();
+  bridgeInput(["stayInitial"], renderStayFin);
 }
 function renderStayComparator(){
   var wrap = document.getElementById("stayComparatorWrap");
@@ -3060,6 +3064,7 @@ function updateMarketTotal(){
   var total = getMarketCart().reduce(function(s,it){ return s+it.qty*it.price; }, 0);
   var el = document.getElementById("marketTotal");
   if(el) el.textContent = "€"+total.toFixed(2);
+  bridgeInput(["market"], renderMarketFin);
 }
 var marketAddState = {open:false};
 function renderMarketAddForm(){
@@ -3105,7 +3110,7 @@ var WAGE_PRESETS = [{v:14.15,l:"Salário mínimo (€14,15)"},{v:15,l:"€15"},{
 var EXPENSE_KEYS = ["rent","phone","transport","groceries","englishCourse","insurance","gym","leisure","other"];
 function getBudget(){ return Object.assign({}, BUDGET_DEFAULTS, ls("budget")||{}); }
 function sumExpenses(b){ return EXPENSE_KEYS.reduce(function(sum,k){ return sum+(b[k]||0); }, 0); }
-function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderTaxLine(); renderOverview(); refreshFinancas(); }
+function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); markFinSource(key, null); updateBudgetSummary(); renderTaxLine(); renderOverview(); refreshFinancas(); }
 /* Regras fiscais irlandesas usadas na estimativa de PAYE + USC + PRSI.
    Estrutura pensada pra ser facil de atualizar ano a ano sem mexer na
    formula de calculo — so trocar os valores/fontes/datas aqui. */
@@ -3189,7 +3194,8 @@ function renderBudget(){
     WAGE_PRESETS.map(function(w){ return '<button class="subtab'+(b.wage===w.v?' active':'')+'" data-w="'+w.v+'">'+w.l+'</button>'; }).join("")+
     '</div>';
   var incomeFields = [{k:"wage",l:"Salário por hora (€)",step:0.01},{k:"hoursWeek",l:"Horas por semana",step:1},{k:"weeksMonth",l:"Semanas por mês",step:0.01}];
-  document.getElementById("budgetIncomeFields").innerHTML = presetHtml + incomeFields.map(function(f){ return '<div class="numfield"><label>'+f.l+'</label><input type="number" step="'+f.step+'" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("")+
+  var srcTag = {wage:1, hoursWeek:1};
+  document.getElementById("budgetIncomeFields").innerHTML = presetHtml + incomeFields.map(function(f){ return '<div class="numfield"><label>'+f.l+(srcTag[f.k]?finSrcBadge(f.k):"")+'</label><input type="number" step="'+f.step+'" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("")+
     '<div class="numfield">'+
     '<label>Impostos/descontos (estimado)</label>'+
     '<span style="display:flex;align-items:center;gap:10px;">'+
@@ -3199,8 +3205,8 @@ function renderBudget(){
     '</div>'+
     '<div id="taxDetailWrap" style="display:none;padding-top:10px;"></div>';
   var expenseFields = [{k:"rent",l:"Aluguel / quarto"},{k:"phone",l:"Celular / contas extras"},{k:"transport",l:"Transporte"},{k:"groceries",l:"Mercado"},{k:"englishCourse",l:"Escola de inglês"},{k:"insurance",l:"Seguro-saúde"},{k:"gym",l:"Academia"},{k:"leisure",l:"Lazer / saídas"},{k:"other",l:"Outros gastos"}];
-  document.getElementById("budgetExpenseFields").innerHTML = expenseFields.map(function(f){ return '<div class="numfield"><label>'+f.l+'</label><input type="number" step="1" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("");
-  document.querySelectorAll("#budgetIncomeFields input, #budgetExpenseFields input").forEach(function(inp){ inp.addEventListener("input", function(){ setBudgetField(inp.dataset.k, parseFloat(inp.value)||0); }); });
+  document.getElementById("budgetExpenseFields").innerHTML = expenseFields.map(function(f){ return '<div class="numfield"><label>'+f.l+finSrcBadge(f.k)+'</label><input type="number" step="1" data-k="'+f.k+'" value="'+b[f.k]+'"></div>'; }).join("");
+  document.querySelectorAll("#budgetIncomeFields input, #budgetExpenseFields input").forEach(function(inp){ inp.addEventListener("input", function(){ setBudgetField(inp.dataset.k, parseFloat(inp.value)||0); var bd = inp.closest(".numfield").querySelector(".src-badge"); if(bd) bd.remove(); }); });
   document.querySelectorAll("#hoursPreset .subtab").forEach(function(btn){
     btn.addEventListener("click", function(){ setBudgetField("hoursWeek", parseFloat(btn.dataset.h)); renderBudget(); });
   });
@@ -3886,15 +3892,15 @@ function init(){
   document.getElementById("lastUpdated").textContent = LAST_UPDATED;
   /* etapa 2: as demais abas, na ordem em que sempre foram montadas */
   defer("trabalho", function(){ renderComoEscolherEscola(); renderSchoolTabs(); renderSchoolsTable(); renderSchoolAddForm(); });
-  defer("trabalho", function(){ renderAssessoria(); renderJobTypes(); renderJobFinder(); renderAgencias(); });
+  defer("trabalho", function(){ renderAssessoria(); renderJobTypes(); renderJobFinder(); renderWorkFin(); renderAgencias(); });
   defer("vidairlanda", function(){ renderVidaIrlandaSubtabs(); renderVidaIrlandaContent(); });
   defer("ingles", renderEnglish);
   defer("turismo", function(){ renderTouristEntry(); renderTouristCities(); renderTouristBudget(); renderTouristTips(); renderTouristExperiences(); });
   defer("turismo", function(){ renderNiInfo(); renderTourismCalendar(); renderTourismPasses(); renderTourismChecklist(); });
   defer("turismo", function(){ renderAttrCatTabs(); renderAttrGrid(); renderAttrProgress(); renderItineraryTabs(); renderItinerary(); renderMyItinerary(); renderMistakes(); });
   defer("acomodacao", function(){ renderTiposAcomodacao(); renderMoradia(); renderHousingPhrases(); renderStayFields(); });
-  defer("transporte", function(){ renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity(); renderTransportCityTabs(); renderTransportRoutes(); });
-  defer("mercado", renderMarket);
+  defer("transporte", function(){ renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity(); renderTransportCityTabs(); renderTransportRoutes(); renderTransportFin(); });
+  defer("mercado", function(){ renderMarket(); });
   defer("financas", function(){ renderBudget(); renderConverter(); renderMoneyTips(); renderBancosFinancas(); });
   defer("links", renderLinks);
   defer("grupos", renderGroups);
