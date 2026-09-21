@@ -4,3 +4,4 @@ wrangler.jsonc
 .assetsignore
 intercambio-irlanda.html
 README.md
+static-server.js
