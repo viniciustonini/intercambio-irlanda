@@ -202,34 +202,42 @@ function renderStayFin(){
 }
 
 /* ---------- Transporte ---------- */
-/* Tarifas de Dublin (Zona 1) já citadas na aba: 90 min €2,00 adulto; teto de €3,00/dia e €12,00/semana; Leap Student com 50% de desconto. */
-var LEAP_FARE = 2.00, LEAP_DAY_CAP = 3.00, LEAP_WEEK_CAP = 12.00;
-function transportPlan(){ return Object.assign({days:5, trips:2, student:false}, ls("transportPlan")||{}); }
-function transportMonthly(p){
-  var perDay = Math.min(p.trips*LEAP_FARE, LEAP_DAY_CAP);
-  var perWeek = Math.min(p.days*perDay, LEAP_WEEK_CAP);
-  return perWeek*4.33*(p.student ? 0.5 : 1);
+/* Tarifas de Dublin (Zona 1) de 2026 e tetos por cartão: veja LEAP_RATES em modulos.js. */
+var LEAP_LABEL = {adult:"Adult Leap Card", young:"Young Adult Leap Card", student:"Student Leap Card"};
+function transportPlan(){ return Object.assign({days:5, trips:2}, ls("transportPlan")||{}); }
+function transportMonthly(p, rate){
+  var perDay = Math.min(p.trips*rate.fare, rate.day);
+  var perWeek = Math.min(p.days*perDay, rate.week);
+  return perWeek*4.33;
 }
 function renderTransportFin(){
   var wrap = document.getElementById("transportFinWrap");
   if(!wrap) return;
-  var p = transportPlan(), monthly = eurRound(transportMonthly(p)), cur = getBudget().transport, o = overrideNow(7);
-  function opts(from, to, sel, suffix){ var h = ""; for(var i=from; i<=to; i++) h += '<option value="'+i+'"'+(i===sel?' selected':'')+'>'+i+suffix+'</option>'; return h; }
+  var rec = leapRecommend(leapAnswers()), rate = rec ? LEAP_RATES[rec] : null;
+  if(!rec){
+    wrap.innerHTML = '<div class="card"><div class="empty">Responda às perguntas do Leap Card acima para estimar quanto você vai gastar por mês.</div></div>';
+    return;
+  }
+  if(!rate){
+    wrap.innerHTML = '<div class="card"><div class="empty">'+(rec==="visitor" ? 'O Visitor Card é para poucos dias e tem preço fixo (€8, €18 ou €24), então não há estimativa mensal. Se a sua estadia passar de uma semana, refaça as perguntas.' : 'Para menores de 19 anos a tarifa é reduzida (€0,65 no 90 minutos), mas o teto de gasto não consta aqui. Confira no aplicativo Leap Card.')+'</div></div>';
+    return;
+  }
+  var p = transportPlan(), monthly = eurRound(transportMonthly(p, rate)), cur = getBudget().transport, o = overrideNow(7);
+  function opts(from, to, sel, one, many){ var h = ""; for(var i=from; i<=to; i++) h += '<option value="'+i+'"'+(i===sel?' selected':'')+'>'+i+' '+(i===1?one:many)+'</option>'; return h; }
   var pre = '<div class="tr-plan">'+
-    '<label>Uso o transporte público<select id="trDays">'+opts(1,7,p.days," dia"+"s por semana").replace('>1 dias','>1 dia')+'</select></label>'+
-    '<label>Faço<select id="trTrips">'+opts(1,6,p.trips," viagens por dia").replace('>1 viagens','>1 viagem')+'</select></label>'+
-    '<label class="tr-check"><input type="checkbox" id="trStudent"'+(p.student?' checked':'')+'> Tenho Leap Student (50% de desconto)</label></div>';
+    '<label>Uso o transporte público<select id="trDays">'+opts(1,7,p.days,"dia por semana","dias por semana")+'</select></label>'+
+    '<label>Faço<select id="trTrips">'+opts(1,6,p.trips,"viagem por dia","viagens por dia")+'</select></label></div>';
   wrap.innerHTML = '<div class="card">'+bridgeHtml("transport", {
-    pre:pre, big:fmtEur(monthly), bigCap:'por mês'+brlSub(monthly),
+    pre:pre, big:fmtEur(monthly), bigCap:'por mês com o '+LEAP_LABEL[rec]+brlSub(monthly),
     now:nowLine(cur, " por mês", "transport"),
     btn:'Usar '+fmtEur(monthly)+' em Finanças', disabled:Math.abs(cur-monthly)<0.5 && Math.abs(o.v-monthly)<0.5,
-    touch:'Estimativa com as tarifas de Dublin (Zona 1) e os tetos de €3,00 por dia e €12,00 por semana. Muda o <b>Transporte</b> do orçamento mensal e do primeiro mês.'
+    touch:'Cálculo com as tarifas de 2026 em Dublin (Zona 1): €'+rate.fare.toFixed(2).replace(".",",")+' por viagem e teto de €'+rate.day.toFixed(2).replace(".",",")+' por dia e €'+rate.week.toFixed(2).replace(".",",")+' por semana. Em janeiro de 2027 as tarifas sobem em média 15%. Muda o <b>Transporte</b> do orçamento mensal e do primeiro mês.'
   })+'</div>';
   function save(){
-    ls("transportPlan", {days:parseInt(document.getElementById("trDays").value,10), trips:parseInt(document.getElementById("trTrips").value,10), student:document.getElementById("trStudent").checked});
+    ls("transportPlan", {days:parseInt(document.getElementById("trDays").value,10), trips:parseInt(document.getElementById("trTrips").value,10)});
     bridgeMsg.transport = ""; renderTransportFin();
   }
-  ["trDays","trTrips","trStudent"].forEach(function(id){ document.getElementById(id).addEventListener("change", save); });
+  ["trDays","trTrips"].forEach(function(id){ document.getElementById(id).addEventListener("change", save); });
   bindBridge(wrap, "transport", renderTransportFin, function(){ return applyToFinance("transport", [{budget:"transport", value:monthly}, {row:7, value:monthly}]); });
 }
 

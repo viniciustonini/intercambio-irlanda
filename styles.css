@@ -1113,3 +1113,15 @@ body:not(.app-ready) footer.site{visibility:hidden;}
 .rc-actions{margin-top:14px;}
 .rc-actions .btn{width:auto;gap:6px;}
 .rc-actions .phi{width:15px;height:15px;}
+
+/* Transporte: qual Leap Card comprar */
+.la{display:grid;gap:18px;}
+.la-q{border:0;margin:0;padding:0;min-width:0;}
+.la-q legend{font-size:13.6px;font-weight:600;margin-bottom:8px;padding:0;}
+.la-opts{display:flex;gap:8px;flex-wrap:wrap;}
+.la-empty{margin:0;font-size:13.4px;color:var(--muted);}
+.la-result{padding-top:18px;border-top:1px solid var(--border);}
+.la-result h4{font-size:21px;margin:6px 0 6px;}
+.la-result p{margin:0 0 10px;font-size:13.6px;}
+.la-result .tablewrap{margin:0 0 12px;max-width:380px;}
+.la-result .la-note{font-size:12.4px;color:var(--muted);}

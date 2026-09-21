@@ -2745,7 +2745,8 @@ var TRANSPORT_ROUTES = {
       {name:"Tarifa Leap 90 minutos (Zona 1)", detail:"€2,00 adulto · €1,00 Young Adult/Student · €0,65 criança — na janela de 90 min você troca de ônibus/Luas/DART sem pagar de novo. É a tarifa que vale pra quase todo mundo morando e estudando dentro de Dublin."},
       {name:"Ônibus suburbano / Nitelink / Xpresso (Zona 1)", detail:"€2,40 adulto · €1,20 Young Adult/Student."},
       {name:"Viajando para fora da Zona 1", detail:"Só importa se você sair da área central de Dublin para outra zona (ex: Naas, Maynooth, Wicklow). Trem: Zona 1↔2 €3,90 · ↔3 €6,00 · ↔4 €7,50 (metade do valor para criança/jovem). Ônibus: Zona 1↔2 €3,70 · ↔3 €5,30 · ↔4 €6,30 (metade do valor para criança/jovem). A grande maioria dos intercambistas mora e estuda dentro da Zona 1, sem precisar dessas tarifas."},
-      {name:"Teto diário e semanal", detail:"Pagando com Leap em Dublin Bus, Luas e DART/Commuter, o gasto trava em €3,00/dia e €12,00/semana — depois disso as viagens do período saem de graça."},
+      {name:"Teto diário e semanal", detail:"Pagando com Leap em Dublin Bus, Luas e DART/Commuter (Zona 1), o gasto trava em <b>€6,00/dia e €24,00/semana</b> com o cartão de adulto, e em <b>€3,00/dia e €12,00/semana</b> com o Young Adult e o Student. Depois disso, as viagens do período saem de graça."},
+      {name:"Mudança em janeiro de 2027", detail:"As tarifas de Dublin sobem em média 15% a partir de janeiro de 2027: o 90 minutos de adulto vai de €2,00 para €2,30, e o desconto de 50% do Young Adult e do Student continua. Quem chega em 2027 deve usar valores maiores no orçamento. <a href=\"https://www.rte.ie/news/ireland/2026/0903/1590193-transport-fares/\" target=\"_blank\" rel=\"noopener\">Fonte: RTÉ, 03/09/2026 ↗</a>"},
       {name:"Leap Student", detail:"50% de desconto — precisa da carta da escola confirmando matrícula em curso de ao menos 25 semanas para liberar o cartão."}
     ],
     lines:[
@@ -3921,7 +3922,7 @@ function init(){
   defer("turismo", function(){ renderNiInfo(); renderTourismCalendar(); renderTourismPasses(); renderTourismChecklist(); });
   defer("turismo", function(){ renderAttrCatTabs(); renderAttrGrid(); renderAttrProgress(); renderItineraryTabs(); renderItinerary(); renderMyItinerary(); renderMistakes(); });
   defer("acomodacao", function(){ renderTiposAcomodacao(); renderMoradia(); renderHousingPhrases(); renderStayFields(); });
-  defer("transporte", function(){ renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity(); renderTransportCityTabs(); renderTransportRoutes(); renderTransportFin(); });
+  defer("transporte", function(){ renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity(); renderTransportCityTabs(); renderTransportRoutes(); renderLeapAdvisor(); renderTransportFin(); });
   defer("mercado", function(){ renderMarket(); });
   defer("financas", function(){ renderBudget(); renderConverter(); renderMoneyTips(); renderBancosFinancas(); });
   defer("links", renderLinks);

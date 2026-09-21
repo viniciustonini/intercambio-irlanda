@@ -189,3 +189,58 @@ function renderStayRooms(){
   }
 }
 BRIDGES.push(renderStayRooms);
+
+/* ---------- Transporte: qual Leap Card comprar (um fluxo só) ---------- */
+var LEAP_RATES = {adult:{fare:2.00, day:6.00, week:24.00}, young:{fare:1.00, day:3.00, week:12.00}, student:{fare:1.00, day:3.00, week:12.00}};
+var LEAP_2027_NOTE = 'Em janeiro de 2027 as tarifas sobem em média 15%: o 90 minutos de adulto vai de €2,00 para €2,30, e o desconto de 50% do Young Adult e do Student continua. <a href="https://www.rte.ie/news/ireland/2026/0903/1590193-transport-fares/" target="_blank" rel="noopener">Fonte: RTÉ, 03/09/2026 ↗</a>';
+function leapAnswers(){ return Object.assign({age:"", enrolled:"", stay:""}, ls("leapAdvisor")||{}); }
+function leapRecommend(a){
+  if(!a.age || !a.stay) return null;
+  if(a.stay==="short") return "visitor";
+  if(a.age==="u18") return "child";
+  if(a.age==="ya") return "young";
+  if(!a.enrolled) return null;
+  return a.enrolled==="yes" ? "student" : "adult";
+}
+function leapCardById(id){ return LEAP_CARDS.filter(function(c){ return c.id===id; })[0] || null; }
+function leapResultHtml(id, a){
+  var youngRows = leapCardById("young").rows;
+  var cards = {
+    visitor:{label:"Leap Visitor Card", why:"Você fica poucos dias. É um cartão de viagens ilimitadas por período fixo, sem recarga, ideal para turismo ou os primeiros dias. Não vale nos ônibus expressos do aeroporto.", rows:leapCardById("visitor").rows},
+    child:{label:"Leap Card de criança (5 a 18 anos)", why:"Até os 18 anos existe tarifa reduzida, a mais barata de todas.", rows:[{l:"TFI 90 Minute",v:"€0,65"}]},
+    young:{label:"Young Adult Leap Card", why:leapCardById("young").who, rows:youngRows},
+    student:{label:"Student Leap Card", why:"Você tem 26 anos ou mais e está matriculado em curso de pelo menos 25 semanas, então pode pedir o Student, com 50% de desconto. Precisa da carta da escola.", rows:youngRows},
+    adult:{label:"Adult Leap Card", why:leapCardById("adult").who+" Se você tiver carta de matrícula em curso de pelo menos 25 semanas, o Student sai pela metade do preço: confira a resposta acima.", rows:leapCardById("adult").rows}
+  };
+  var c = cards[id];
+  return '<div class="la-result"><span class="eyebrow">Recomendação informativa</span><h4>'+c.label+'</h4><p>'+c.why+'</p>'+
+    '<div class="tablewrap tablewrap-narrow"><table><tbody>'+c.rows.map(function(r){ return '<tr><td>'+r.l+'</td><td class="num tabular">'+r.v+'</td></tr>'; }).join("")+'</tbody></table></div>'+
+    '<p class="la-note">Valores de 2026 para Dublin (Zona 1). '+LEAP_2027_NOTE+'</p>'+
+    '<p class="la-note">Antes de comprar, confirme as regras e o valor vigente no aplicativo Leap Card. Young Adult e Student exigem cadastro e comprovação.</p></div>';
+}
+function renderLeapAdvisor(){
+  var wrap = document.getElementById("leapAdvisorWrap");
+  if(!wrap) return;
+  var a = leapAnswers(), rec = leapRecommend(a);
+  function q(key, title, opts){
+    return '<fieldset class="la-q"><legend>'+title+'</legend><div class="la-opts" role="radiogroup">'+opts.map(function(o){
+      var on = a[key]===o.v;
+      return '<button type="button" role="radio" aria-checked="'+on+'" class="subtab'+(on?' active':'')+'" data-la="'+key+'" data-v="'+o.v+'">'+o.l+'</button>';
+    }).join("")+'</div></fieldset>';
+  }
+  wrap.innerHTML = '<div class="card la">'+
+    q("age", "Qual é a sua idade?", [{v:"u18",l:"Até 18 anos"},{v:"ya",l:"19 a 25 anos"},{v:"adult",l:"26 anos ou mais"}])+
+    (a.age==="adult" ? q("enrolled", "Você está matriculado em curso de pelo menos 25 semanas?", [{v:"yes",l:"Sim, tenho carta da escola"},{v:"no",l:"Não"}]) : "")+
+    q("stay", "Quanto tempo você vai ficar?", [{v:"short",l:"Até 1 semana"},{v:"long",l:"Mais que isso (moro ou estudo lá)"}])+
+    (rec ? leapResultHtml(rec, a) : '<p class="la-empty">Responda às perguntas para ver qual cartão vale para o seu caso.</p>')+
+  '</div>';
+  wrap.querySelectorAll("[data-la]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var s = leapAnswers(); s[b.dataset.la] = b.dataset.v;
+      if(b.dataset.la==="age" && s.age!=="adult") s.enrolled = "";
+      ls("leapAdvisor", s);
+      renderLeapAdvisor();
+      if(typeof renderTransportFin==="function") renderTransportFin();
+    });
+  });
+}
