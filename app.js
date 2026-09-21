@@ -1970,22 +1970,16 @@ function englishLevelCompleted(level){
   var state = englishProgressState();
   return topics.every(function(t){ return !!state[t.id]; });
 }
-function englishLevelUnlocked(level){
-  var idx = ENGLISH_LEVEL_ORDER.indexOf(level);
-  if(idx <= 0) return true;
-  for(var i=0;i<idx;i++){ if(!englishLevelCompleted(ENGLISH_LEVEL_ORDER[i])) return false; }
-  return true;
-}
+/* Todos os níveis ficam abertos: A1 → A2 → B1 → B2 é só o caminho recomendado. */
+function englishLevelUnlocked(level){ return true; }
 function renderEnglishLevelSubtabs(containerId, items, currentLevel, onSelect){
+  var rec = englishRecommendedLevel();
   document.getElementById(containerId).innerHTML = items.map(function(it){
-    var locked = !englishLevelUnlocked(it.level);
-    return '<button class="subtab'+(currentLevel===it.level?' active':'')+(locked?' locked':'')+'" data-level="'+it.level+'"'+(locked?' disabled title="Complete a gramática do nível anterior para desbloquear"':'')+'>'+(locked?'🔒 ':'')+it.label+'</button>';
+    var done = englishLevelCompleted(it.level), next = it.level===rec;
+    return '<button class="subtab'+(currentLevel===it.level?' active':'')+(done?' is-done':'')+'" data-level="'+it.level+'"'+(next?' title="Próximo passo do caminho recomendado"':'')+'>'+(done?'✓ ':'')+it.label+(next?' <span class="subtab-tag">próximo</span>':'')+'</button>';
   }).join("");
   document.querySelectorAll("#"+containerId+" .subtab").forEach(function(b){
-    b.addEventListener("click", function(){
-      if(b.hasAttribute("disabled")) return;
-      onSelect(b.dataset.level);
-    });
+    b.addEventListener("click", function(){ onSelect(b.dataset.level); });
   });
 }
 var ENGLISH_MODULES = [
@@ -2369,9 +2363,11 @@ function renderEnglishTopics(){
       var st = englishProgressState();
       st[el.dataset.id] = !st[el.dataset.id];
       ls("inglesProgress", st);
+      if(st[el.dataset.id]) englishTouch();
       el.classList.toggle("checked", st[el.dataset.id]);
       renderEnglishProgress();
       renderEnglishLevelTabs(); renderEnglishReadingTabs(); renderEnglishListeningTabs(); renderEnglishWritingTabs();
+      renderEnglishContinue();
     });
   });
 }
@@ -2391,8 +2387,10 @@ function renderEnglishModules(){
       var st = englishProgressState();
       st[el.dataset.id] = !st[el.dataset.id];
       ls("inglesProgress", st);
+      if(st[el.dataset.id]) englishTouch();
       el.classList.toggle("checked", st[el.dataset.id]);
       renderEnglishProgress();
+      renderEnglishContinue();
     });
   });
 }
@@ -2407,6 +2405,7 @@ function renderEnglishProgress(){
   if(bar) bar.style.width = pct+"%";
 }
 function renderEnglish(){
+  renderEnglishContinue();
   renderEnglishLevelTabs();
   renderEnglishTopics();
   renderEnglishModules();

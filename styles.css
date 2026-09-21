@@ -1064,3 +1064,17 @@ body:not(.app-ready) footer.site{visibility:hidden;}
   .rm-next-act .btn{flex:1 1 auto;}
 }
 @media print{ .rm-stage > summary .rm-here{display:none;} .rm-line::before{display:none;} }
+
+/* Inglês: continuar estudando e níveis sem trava */
+.en-cont{margin-bottom:16px;}
+.en-cont-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:8px;}
+.en-cont-t{font-family:var(--font-display);font-size:20px;font-weight:600;margin:0;}
+.en-cont-s{margin:2px 0 0;font-size:13px;color:var(--muted);}
+.en-cont-meta{margin:12px 0 0;font-size:12.6px;color:var(--muted);}
+.en-cont .btn{width:auto;}
+.subtab.is-done{color:var(--accent-strong);}
+.subtab-tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent-strong);font-size:10.5px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;}
+.subtab.active .subtab-tag{background:rgba(255,255,255,.2);color:inherit;}
+.checkitem.is-flash{animation:enFlash 1.6s ease;}
+@keyframes enFlash{0%,60%{box-shadow:0 0 0 3px var(--accent-soft);background:var(--accent-soft);}100%{box-shadow:none;}}
+@media (prefers-reduced-motion:reduce){.checkitem.is-flash{animation:none;background:var(--accent-soft);}}
