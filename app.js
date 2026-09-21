@@ -3063,11 +3063,11 @@ function renderMarketAddForm(){
 
 /* ---------- dinheiro para a viagem ---------- */
 var MONEY_TIPS = [
-  {title:"Quanto levar em espécie", note:"Leve o equivalente a ~€200–300 em notas pequenas (€5, €10, €20) para os primeiros dias — evite notas de €100/€200, muitos lugares pequenos não aceitam. O resto pode ficar no cartão e ser sacado em caixas eletrônicos, que costumam ter câmbio melhor que casas de câmbio de aeroporto."},
-  {title:"Declaração alfandegária", note:"Se entrar ou sair da UE por um aeroporto irlandês carregando €10.000 ou mais em espécie, é obrigatório declarar à alfândega. Abaixo desse valor não há restrição nem necessidade de declarar."},
+  {title:"Quanto levar em espécie", note:"Leve o equivalente a cerca de € 200 a € 300 em notas pequenas (€ 5, € 10, € 20) para os primeiros dias. Evite notas de € 100 ou € 200, porque muitos lugares pequenos não aceitam. O resto pode ficar no cartão e ser sacado em caixas eletrônicos, que costumam ter câmbio melhor que casas de câmbio de aeroporto."},
+  {title:"Declaração alfandegária", note:"Se entrar ou sair da UE por um aeroporto irlandês carregando € 10.000 ou mais em espécie, é obrigatório declarar à alfândega. Abaixo desse valor não há restrição nem necessidade de declarar."},
   {title:"Avise seu banco brasileiro", note:"Notifique seu banco e a bandeira do cartão sobre a viagem antes de embarcar, para evitar bloqueio por 'compra suspeita' assim que usar o cartão na Irlanda."},
-  {title:"Conta digital antes de chegar", note:"Abrir uma conta Revolut ou N26 ainda no Brasil (não exige PPSN) facilita muito — o salário já pode cair nela assim que você conseguir emprego, sem precisar esperar abrir conta em banco tradicional."},
-  {title:"Comprovação financeira do visto ≠ dinheiro do dia a dia", note:"O valor exigido para comprovar recursos no visto/IRP (ver aba Imigração) é sobre saldo disponível em conta, não sobre quanto você vai gastar por mês — são coisas diferentes, não confunda um com o outro no seu planejamento."}
+  {title:"Conta digital antes de chegar", note:"Abrir uma conta Revolut ou N26 ainda no Brasil (não exige PPSN) facilita muito. O salário já pode cair nela assim que você conseguir emprego, sem esperar a abertura de uma conta em banco tradicional."},
+  {title:"Comprovação financeira do visto ≠ dinheiro do dia a dia", note:"O valor exigido para comprovar recursos no visto/IRP (ver aba Imigração) é sobre saldo disponível em conta, não sobre quanto você vai gastar por mês. São coisas diferentes, então não misture as duas no planejamento."}
 ];
 function renderMoneyTips(){
   document.getElementById("moneyTipsWrap").innerHTML = MONEY_TIPS.map(function(t){ return tipRow(t.title, t.note); }).join("");
@@ -3079,7 +3079,7 @@ var WAGE_PRESETS = [{v:14.15,l:"Salário mínimo (€14,15)"},{v:15,l:"€15"},{
 var EXPENSE_KEYS = ["rent","phone","transport","groceries","englishCourse","insurance","gym","leisure","other"];
 function getBudget(){ return Object.assign({}, BUDGET_DEFAULTS, ls("budget")||{}); }
 function sumExpenses(b){ return EXPENSE_KEYS.reduce(function(sum,k){ return sum+(b[k]||0); }, 0); }
-function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderTaxLine(); renderOverview(); refreshReservePlanner(); }
+function setBudgetField(key, val){ var b = getBudget(); b[key] = val; ls("budget", b); updateBudgetSummary(); renderTaxLine(); renderOverview(); refreshFinancas(); }
 /* Regras fiscais irlandesas usadas na estimativa de PAYE + USC + PRSI.
    Estrutura pensada pra ser facil de atualizar ano a ano sem mexer na
    formula de calculo — so trocar os valores/fontes/datas aqui. */
@@ -3132,19 +3132,19 @@ function calcIrishTax(wage, hoursWeek){
 function renderTaxLine(){
   var b = getBudget();
   var t = calcIrishTax(b.wage, b.hoursWeek);
-  document.getElementById("taxEstValue").textContent = "€"+t.totalMonth.toFixed(2);
+  document.getElementById("taxEstValue").textContent = fmtEur(t.totalMonth);
   document.getElementById("taxDetailWrap").innerHTML =
-    '<div class="summary-row"><span class="lbl">PAYE (imposto de renda)</span><span class="val">€'+t.payeMonth.toFixed(2)+'</span></div>'+
-    '<div class="summary-row"><span class="lbl">USC</span><span class="val">€'+t.uscMonth.toFixed(2)+'</span></div>'+
-    '<div class="summary-row"><span class="lbl">PRSI</span><span class="val">€'+t.prsiMonth.toFixed(2)+'</span></div>'+
-    '<div class="summary-row big"><span class="lbl">Total de descontos</span><span class="val">€'+t.totalMonth.toFixed(2)+'</span></div>'+
+    '<div class="summary-row"><span class="lbl">PAYE (imposto de renda)</span><span class="val">'+fmtEur(t.payeMonth)+'</span></div>'+
+    '<div class="summary-row"><span class="lbl">USC</span><span class="val">'+fmtEur(t.uscMonth)+'</span></div>'+
+    '<div class="summary-row"><span class="lbl">PRSI</span><span class="val">'+fmtEur(t.prsiMonth)+'</span></div>'+
+    '<div class="summary-row big"><span class="lbl">Total de descontos</span><span class="val">'+fmtEur(t.totalMonth)+'</span></div>'+
     '<button class="btn-ghost btn" id="taxInfoToggle" type="button" style="width:auto;padding:5px 10px;font-size:12.5px;margin-top:8px;gap:6px;"><svg viewBox="0 0 16 16" fill="none" width="13" height="13"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2v4.1M8 5.1v.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Como calcula?</button>'+
     '<div id="taxInfoWrap" hidden style="margin-top:8px;font-size:12.6px;color:var(--muted);">'+
-    '<p style="margin:0 0 8px;"><strong>PAYE:</strong> 20% até €44.000/ano, 40% acima — menos €4.000/ano de créditos fiscais padrão (com 20h/semana no mínimo, o crédito costuma zerar o PAYE).</p>'+
-    '<p style="margin:0 0 8px;"><strong>USC:</strong> isento até €13.000/ano; acima disso, 0,5% até €12.012, 2% até €28.700, 3% até €70.044, 8% acima.</p>'+
-    '<p style="margin:0;"><strong>PRSI (Classe A):</strong> isento até €352/semana; acima disso, 4,20% (até 30/09/2026) ou 4,35% (a partir de 01/10/2026).</p>'+
+    '<p style="margin:0 0 8px;"><strong>PAYE:</strong> 20% até € 44.000/ano, 40% acima, menos € 4.000/ano de créditos fiscais padrão (com 20h/semana no mínimo, o crédito costuma zerar o PAYE).</p>'+
+    '<p style="margin:0 0 8px;"><strong>USC:</strong> isento até € 13.000/ano; acima disso, 0,5% até € 12.012, 2% até € 28.700, 3% até € 70.044, 8% acima.</p>'+
+    '<p style="margin:0;"><strong>PRSI (Classe A):</strong> isento até € 352/semana; acima disso, 4,20% (até 30/09/2026) ou 4,35% (a partir de 01/10/2026).</p>'+
     '</div>'+
-    '<p class="source-note" style="margin-top:10px;">Referência fiscal: <strong>'+TAX_CONFIG_2026.year+'</strong> (pessoa solteira, sem filhos/outra renda) — estimativa para planejamento, não substitui o Revenue. <a href="'+TAX_CONFIG_2026.paye.sourceUrl+'" target="_blank" rel="noopener">Tabelas</a> · <a href="'+TAX_CONFIG_2026.usc.sourceUrl+'" target="_blank" rel="noopener">USC</a> · <a href="'+TAX_CONFIG_2026.prsi.sourceUrl+'" target="_blank" rel="noopener">PRSI</a> · <a href="https://www.ros.ie/myaccount-web/sign_in.html" target="_blank" rel="noopener">Revenue myAccount ↗</a></p>'+
+    '<p class="source-note" style="margin-top:10px;">Referência fiscal: <strong>'+TAX_CONFIG_2026.year+'</strong> (pessoa solteira, sem filhos nem outra renda). É uma estimativa para planejamento e não substitui o Revenue. <a href="'+TAX_CONFIG_2026.paye.sourceUrl+'" target="_blank" rel="noopener">Tabelas</a> · <a href="'+TAX_CONFIG_2026.usc.sourceUrl+'" target="_blank" rel="noopener">USC</a> · <a href="'+TAX_CONFIG_2026.prsi.sourceUrl+'" target="_blank" rel="noopener">PRSI</a> · <a href="https://www.ros.ie/myaccount-web/sign_in.html" target="_blank" rel="noopener">Revenue myAccount ↗</a></p>'+
     sourceVerifiedNote(oldestVerifiedAt([TAX_CONFIG_2026.paye,TAX_CONFIG_2026.usc,TAX_CONFIG_2026.prsi]));
   document.getElementById("taxInfoToggle").addEventListener("click", function(){
     var wrap = document.getElementById("taxInfoWrap");
@@ -3158,7 +3158,7 @@ function renderBudget(){
     '<button class="subtab'+(b.hoursWeek===30?' active':'')+'" data-h="30">30h/semana</button>'+
     '<button class="subtab'+(b.hoursWeek===40?' active':'')+'" data-h="40">40h/semana (exemplo tempo integral)</button>'+
     '</div>'+
-    '<p class="source-note" style="margin:-6px 0 12px;">Na Irlanda, tempo integral não é fixo em 44h como no Brasil — contratos de 39–40h são comuns. Ajuste "Horas por semana" abaixo para o seu caso. <b>A quantidade de horas que você pode trabalhar depende da sua situação migratória</b> — nem todo intercambista tem o mesmo limite; confira em Imigração.</p>'+
+    '<p class="source-note" style="margin:-6px 0 12px;">Na Irlanda, tempo integral não é fixo em 44h como no Brasil. Contratos de 39 a 40h são comuns. Ajuste "Horas por semana" abaixo para o seu caso. <b>A quantidade de horas que você pode trabalhar depende da sua situação migratória</b>. Nem todo intercambista tem o mesmo limite, então confira em Imigração.</p>'+
     '<div class="subtabs" id="wagePreset" style="margin-bottom:12px;">'+
     WAGE_PRESETS.map(function(w){ return '<button class="subtab'+(b.wage===w.v?' active':'')+'" data-w="'+w.v+'">'+w.l+'</button>'; }).join("")+
     '</div>';
@@ -3199,9 +3199,9 @@ function updateBudgetSummary(){
   var freeBalance = netMonth-totalExpenses, pctCommitted = netMonth>0 ? (totalExpenses/netMonth*100):0, yearlyReserve = freeBalance*12;
   function row(lbl,val,cls){ return '<div class="summary-row '+(cls||"")+'"><span class="lbl">'+lbl+'</span><span class="val">'+val+'</span></div>'; }
   document.getElementById("budgetSummary").innerHTML =
-    row("Salário bruto semanal","€"+t.grossWeek.toFixed(2))+row("Salário bruto mensal","€"+grossMonth.toFixed(2))+row("Salário líquido estimado","€"+netMonth.toFixed(2))+
-    row("Total de gastos mensais","€"+totalExpenses.toFixed(2))+row("Saldo livre no mês","€"+freeBalance.toFixed(2), freeBalance<0?"warn big":"big")+
-    row("% da renda comprometida", pctCommitted.toFixed(1)+"%", pctCommitted>85?"warn":"")+row("Reserva possível em 12 meses","€"+yearlyReserve.toFixed(2));
+    row("Salário bruto semanal",fmtEur(t.grossWeek))+row("Salário bruto mensal",fmtEur(grossMonth))+row("Salário líquido estimado",fmtEur(netMonth))+
+    row("Total de gastos mensais",fmtEur(totalExpenses))+row("Saldo livre no mês",fmtEur(freeBalance), freeBalance<0?"warn big":"big")+
+    row("% da renda comprometida", pctCommitted.toFixed(1).replace(".",",")+"%", pctCommitted>85?"warn":"")+row("Reserva possível em 12 meses",fmtEur(yearlyReserve));
 }
 /* ---------- quanto dinheiro preciso (custos iniciais) ---------- */
 var GASTOS_INICIAIS_CENARIOS = {
@@ -3249,149 +3249,6 @@ function gastosTotais(){
   return {aPagar:a, pago:p, qtdPagos:qtd};
 }
 function fmtEuro(v){ return "€"+v.toLocaleString("pt-BR"); }
-function renderGastosIniciais(){
-  var wrap = document.getElementById("gastosIniciaisWrap");
-  if(!wrap) return;
-  var g = GASTOS_INICIAIS_CENARIOS, pagos = getGastosPagos(), linhas = gastosLinhas();
-  var rows = linhas.map(function(l){
-    var paid = !!pagos[l.id];
-    var tds = l.v.map(function(v, ci){
-      return gastosEditOpen
-        ? '<td class="num" data-label="'+g.cols[ci]+'"><input type="number" step="1" style="width:68px;text-align:right;" value="'+v+'" data-id="'+l.id+'" data-ci="'+ci+'"></td>'
-        : '<td class="num tabular" data-label="'+g.cols[ci]+'">'+fmtEuro(parseFloat(v)||0)+'</td>';
-    }).join("");
-    var nome = escapeHtml(l.item);
-    return '<tr'+(paid?' style="opacity:.5;"':'')+'><td data-label="Item"'+(paid?' style="text-decoration:line-through;"':'')+'>'+nome+'</td>'+tds+
-      '<td class="num" data-label="Já pago?"><input type="checkbox" class="gasto-pago" data-id="'+l.id+'" aria-label="Já paguei: '+nome+'"'+(paid?' checked':'')+' style="width:18px;height:18px;"></td>'+
-      (gastosEditOpen ? '<td class="num" data-label="Remover"><button type="button" class="gasto-remover btn-ghost btn" data-id="'+l.id+'" aria-label="Remover '+nome+'" style="width:auto;padding:4px 10px;font-size:15px;line-height:1;">✕</button></td>' : '')+'</tr>';
-  }).join("");
-  if(!linhas.length) rows = '<tr><td colspan="'+(gastosEditOpen?6:5)+'" style="color:var(--muted);text-align:center;padding:18px;">Nenhum item na lista. Use "Personalizar valores e itens" para adicionar os seus.</td></tr>';
-  var t = gastosTotais();
-  var extraTd = gastosEditOpen ? '<td></td>' : '';
-  var totalRow = '<tr style="font-weight:700;"><td data-label="Item">Total a pagar</td>'+t.aPagar.map(function(v,ci){ return '<td class="num tabular" data-label="'+g.cols[ci]+'" id="gastosTotal-'+ci+'">'+fmtEuro(v)+'</td>'; }).join("")+'<td></td>'+extraTd+'</tr>';
-  var paidRow = '<tr id="gastosPagoRow" style="color:var(--muted);'+(t.qtdPagos?'':'display:none;')+'"><td data-label="Item">Já pago (fora do total)</td>'+t.pago.map(function(v,ci){ return '<td class="num tabular" data-label="'+g.cols[ci]+'" id="gastosPago-'+ci+'">'+fmtEuro(v)+'</td>'; }).join("")+'<td></td>'+extraTd+'</tr>';
-  var nRem = Object.keys(getGastosRemovidos()).length;
-  var inputStyle = 'padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;';
-  var editControls = gastosEditOpen
-    ? '<div class="card" style="margin-top:12px;"><h3 style="font-size:15px;">Adicionar item</h3>'+
-        '<p class="source-note" style="margin-bottom:10px;">Crie um item seu (ex.: "Visto", "Curso extra") com o valor em cada cenário.</p>'+
-        '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">'+
-          '<input type="text" id="gNovoNome" maxlength="60" placeholder="Nome do item" aria-label="Nome do novo item" style="flex:1 1 200px;min-width:160px;'+inputStyle+'">'+
-          g.cols.map(function(c, ci){ return '<input type="number" step="1" id="gNovoV'+ci+'" placeholder="'+c+' €" aria-label="Valor '+c+'" style="width:110px;text-align:right;'+inputStyle+'">'; }).join("")+
-          '<button type="button" class="btn btn-accent" id="gastosAddBtn" style="width:auto;padding:9px 16px;">+ Adicionar</button>'+
-        '</div></div>'+
-      '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;">'+
-        '<button type="button" class="btn-ghost btn" id="gastosDoneBtn" style="width:auto;padding:8px 14px;">Concluir edição</button>'+
-        (nRem ? '<button type="button" class="btn-ghost btn" id="gastosRestoreRemBtn" style="width:auto;padding:8px 14px;">Reexibir '+nRem+(nRem>1?' itens removidos':' item removido')+'</button>' : '')+
-        '<button type="button" class="btn-ghost btn" id="gastosResetBtn" style="width:auto;padding:8px 14px;">Restaurar padrão</button>'+
-      '</div>'
-    : '<button type="button" class="btn-ghost btn" id="gastosEditBtn" style="width:auto;padding:8px 14px;margin-top:10px;">✎ Personalizar valores e itens</button>';
-  wrap.innerHTML =
-    '<div class="tablewrap"><table><thead><tr><th>Item</th>'+g.cols.map(function(c){ return '<th class="num">'+c+'</th>'; }).join("")+'<th class="num">Já pago?</th>'+(gastosEditOpen?'<th class="num">Remover</th>':'')+'</tr></thead>'+
-    '<tbody>'+rows+totalRow+paidRow+'</tbody></table></div>'+editControls;
-  wrap.querySelectorAll(".gasto-pago").forEach(function(cb){
-    cb.addEventListener("change", function(){
-      var p = getGastosPagos();
-      if(cb.checked) p[cb.dataset.id] = true; else delete p[cb.dataset.id];
-      saveGastosPagos(p);
-      renderGastosIniciais();
-    });
-  });
-  if(gastosEditOpen){
-    wrap.querySelectorAll("input[data-id][data-ci]").forEach(function(inp){
-      inp.addEventListener("input", function(){
-        var val = parseFloat(inp.value)||0, id = inp.dataset.id, ci = parseInt(inp.dataset.ci,10);
-        if(id.charAt(0)==="x"){
-          var ex = getGastosExtras();
-          ex.forEach(function(x){ if(x.id===id) x.v[ci] = val; });
-          saveGastosExtras(ex);
-        } else {
-          var ov = getGastosOverrides();
-          ov[id+"_"+ci] = val;
-          saveGastosOverrides(ov);
-        }
-        var tt = gastosTotais();
-        [0,1,2].forEach(function(c){
-          document.getElementById("gastosTotal-"+c).textContent = fmtEuro(tt.aPagar[c]);
-          document.getElementById("gastosPago-"+c).textContent = fmtEuro(tt.pago[c]);
-        });
-      });
-    });
-    wrap.querySelectorAll(".gasto-remover").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        var id = btn.dataset.id;
-        if(id.charAt(0)==="x"){
-          saveGastosExtras(getGastosExtras().filter(function(x){ return x.id!==id; }));
-        } else {
-          var rem = getGastosRemovidos(); rem[id] = true; saveGastosRemovidos(rem);
-        }
-        var p = getGastosPagos(); delete p[id]; saveGastosPagos(p);
-        renderGastosIniciais();
-      });
-    });
-    document.getElementById("gastosAddBtn").addEventListener("click", function(){
-      var nomeEl = document.getElementById("gNovoNome");
-      var nome = nomeEl.value.trim();
-      if(!nome){ nomeEl.focus(); nomeEl.style.borderColor = "var(--warn)"; return; }
-      var ex = getGastosExtras();
-      ex.push({id:"x"+Date.now().toString(36)+Math.floor(Math.random()*1000).toString(36), item:nome, v:[0,1,2].map(function(ci){ return parseFloat(document.getElementById("gNovoV"+ci).value)||0; })});
-      saveGastosExtras(ex);
-      renderGastosIniciais();
-      document.getElementById("gNovoNome").focus();
-    });
-    document.getElementById("gNovoNome").addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); document.getElementById("gastosAddBtn").click(); } });
-    var rr = document.getElementById("gastosRestoreRemBtn");
-    if(rr) rr.addEventListener("click", function(){ saveGastosRemovidos({}); renderGastosIniciais(); });
-    document.getElementById("gastosDoneBtn").addEventListener("click", function(){ gastosEditOpen=false; renderGastosIniciais(); });
-    document.getElementById("gastosResetBtn").addEventListener("click", function(){
-      if(!window.confirm("Restaurar a lista padrão? Isso desfaz seus valores editados, reexibe os itens removidos e apaga os itens que você adicionou. O que você marcou como já pago é mantido.")) return;
-      saveGastosOverrides({}); saveGastosRemovidos({}); saveGastosExtras([]);
-      renderGastosIniciais();
-    });
-  } else {
-    document.getElementById("gastosEditBtn").addEventListener("click", function(){ gastosEditOpen=true; renderGastosIniciais(); });
-  }
-}
-/* ---------- primeiro mês / reserva ---------- */
-/* Só o resultado é atualizado ao digitar: reconstruir o cartão inteiro tirava o foco do campo a cada dígito. */
-function reservePlannerValues(){
-  var b = getBudget();
-  var totalExpenses = sumExpenses(b);
-  var reserve = ls("travelReserve");
-  if(reserve==null) reserve = "";
-  var months = (reserve && totalExpenses>0) ? (parseFloat(reserve)/totalExpenses) : null;
-  return {firstMonth: totalExpenses + b.rent, totalExpenses:totalExpenses, reserve:reserve, months:months};
-}
-function reserveResultHtml(v){
-  return v.months!=null
-    ? '<div class="summary-row big" style="margin-top:8px;"><span class="lbl">Reserva estimada</span><span class="val">'+v.months.toFixed(1).replace(".",",")+' meses</span></div><p class="source-note">Reserva ÷ custo mensal estimado (€'+v.totalExpenses.toFixed(2)+'/mês).</p>'
-    : '<p class="source-note" style="margin-top:8px;">Informe sua reserva para ver quantos meses ela cobre, com base no seu orçamento mensal.</p>';
-}
-function refreshReservePlanner(){
-  var fm = document.getElementById("firstMonthVal"), res = document.getElementById("reserveResult");
-  if(!fm || !res) return;
-  var v = reservePlannerValues();
-  fm.textContent = "€"+v.firstMonth.toFixed(2);
-  res.innerHTML = reserveResultHtml(v);
-}
-function renderReservePlanner(){
-  var wrap = document.getElementById("reservePlannerWrap");
-  if(!wrap) return;
-  var v = reservePlannerValues();
-  wrap.innerHTML =
-    '<div class="grid cols-2">'+
-      '<div class="card"><h3>Quanto custa o primeiro mês?</h3>'+
-        '<p class="source-note" style="margin-bottom:10px;">Baseado no seu orçamento mensal (acima) + um depósito equivalente a 1 aluguel.</p>'+
-        '<div class="summary-row big"><span class="lbl">Estimativa do primeiro mês</span><span class="val" id="firstMonthVal">€'+v.firstMonth.toFixed(2)+'</span></div>'+
-      '</div>'+
-      '<div class="card"><h3>Quanto tempo minha reserva dura?</h3>'+
-        '<div class="numfield"><label>Reserva disponível (€)</label><input type="number" step="1" id="travelReserveInput" value="'+v.reserve+'" placeholder="Ex: 5000"></div>'+
-        '<div id="reserveResult">'+reserveResultHtml(v)+'</div>'+
-      '</div>'+
-    '</div>';
-  var input = document.getElementById("travelReserveInput");
-  if(input) input.addEventListener("input", function(){ ls("travelReserve", input.value); refreshReservePlanner(); if(typeof renderSavingsPlanner==="function") renderSavingsPlanner(); });
-}
 function renderConverter(){
   var eurEl = document.getElementById("convEur"), brlEl = document.getElementById("convBrl");
   if(!eurEl) return;
@@ -3569,7 +3426,7 @@ function renderBancosFinancas(){
   }).join("");
   wrap.innerHTML =
     '<div class="card"><h3>Bancos e dinheiro</h3>'+
-    '<p class="source-note" style="margin:-4px 0 8px;">Exigências e taxas mudam — confira no site de cada um. <a href="/bancos">Guia completo →</a></p>'+
+    '<p class="source-note" style="margin:-4px 0 8px;">Exigências e taxas mudam. Confira no site de cada um. <a href="/bancos">Guia completo →</a></p>'+
     '<ul class="linklist">'+rows+'</ul></div>';
 }
 
@@ -4012,7 +3869,7 @@ function init(){
   renderHousingPhrases();
   renderTransportApps(); renderLeapCards(); renderTransportGallery(); renderTransportOvernight(); renderTransportMetrolink(); renderTransportIntercity();
   renderTransportCityTabs(); renderTransportRoutes();
-  renderMarket(); renderBudget(); renderReservePlanner(); renderGastosIniciais(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderBancosFinancas(); renderGroups();
+  renderMarket(); renderBudget(); renderFinancas(); renderConverter(); renderMoneyTips(); renderStayFields(); renderLinks(); renderBancosFinancas(); renderGroups();
   renderAll();
   setInterval(renderHero, 60000);
   document.getElementById("lastUpdated").textContent = LAST_UPDATED;
@@ -4027,3 +3884,11 @@ if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").catch(function(){ /* offline/PWA é um extra — sem service worker o site continua funcionando normal */ });
   });
 }
+
+/* Campos de data: clicar em qualquer parte do campo abre o calendário (não só no ícone). */
+document.addEventListener("click", function(e){
+  var t = e.target;
+  if(t && t.matches && t.matches('input[type="date"]') && typeof t.showPicker==="function"){
+    try{ t.showPicker(); }catch(err){}
+  }
+});
