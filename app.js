@@ -361,7 +361,7 @@ function renderBackupReminder(){
   var needsBackup = hasData && (last==null || (days!=null && days > BACKUP_REMINDER_DAYS));
   if(!needsBackup){ wrap.hidden = true; wrap.innerHTML = ""; return; }
   wrap.hidden = false;
-  wrap.innerHTML = '<div class="callout" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">'+
+  wrap.innerHTML = '<div class="callout backup-callout">'+
     '<span>'+(last?"Seu último backup foi há "+days+" dias.":"Você ainda não baixou um backup dos seus dados.")+' Baixe um agora para não perder seu progresso.</span>'+
     '<button type="button" class="btn btn-accent" id="backupReminderBtn" style="width:auto;padding:8px 16px;font-size:12.8px;">Fazer backup</button>'+
     '</div>';

@@ -242,31 +242,30 @@ function renderNextStepCard(){
   var el = document.getElementById("nextStepWrap");
   if(!el) return;
   el.className = "card next-card";
+  /* Texto à esquerda e botões numa coluna própria à direita: os botões ficam sempre no mesmo lugar,
+     não importa o tamanho do título ou da descrição da tarefa. */
+  function shell(icon, title, detail, actions, after){
+    return '<div class="next-step"><div class="next-icon" aria-hidden="true">'+icon+'</div><div class="next-main">'+
+      '<div class="eyebrow">Seu próximo passo</div><h3 class="next-title">'+title+'</h3>'+
+      (detail ? '<p class="next-detail">'+detail+'</p>' : '')+
+      (after ? '<p class="next-after">Depois: <b>'+after+'</b></p>' : '')+
+      '</div>'+(actions ? '<div class="next-actions">'+actions+'</div>' : '')+'</div>';
+  }
   if(!getProfile()){
-    el.innerHTML = '<div class="next-step"><div class="next-icon" aria-hidden="true">🧭</div><div class="next-main">'+
-      '<div class="eyebrow">Seu próximo passo</div><h3 class="next-title">Configure sua viagem</h3>'+
-      '<p class="next-detail">Com seu perfil definido, calculamos o próximo passo e reordenamos o checklist.</p>'+
-      '<div class="next-actions"><button class="btn btn-accent" type="button" data-act="setup">Responder agora →</button></div></div></div>';
+    el.innerHTML = shell("🧭","Configure sua viagem","Com seu perfil definido, calculamos o próximo passo e reordenamos o checklist.",
+      '<button class="btn btn-accent" type="button" data-act="setup">Responder agora →</button>', "");
     el.querySelector('[data-act="setup"]').addEventListener("click", function(){ openOnboarding(); });
     return;
   }
   var tasks = pendingTasks();
   if(!tasks.length){
-    el.innerHTML = '<div class="next-step"><div class="next-icon" aria-hidden="true">🎉</div><div class="next-main">'+
-      '<div class="eyebrow">Seu próximo passo</div><h3 class="next-title">Tudo em dia</h3>'+
-      '<p class="next-detail">Nenhuma tarefa pendente no momento.</p></div></div>';
+    el.innerHTML = shell("🎉","Tudo em dia","Nenhuma tarefa pendente no momento.","", "");
     return;
   }
   var t = tasks[0], after = tasks[1];
-  el.innerHTML =
-    '<div class="next-step"><div class="next-icon" aria-hidden="true">'+taskIcon(t)+'</div><div class="next-main">'+
-      '<div class="eyebrow">Seu próximo passo</div>'+
-      '<h3 class="next-title">'+t.title+'</h3>'+
-      (t.detail ? '<p class="next-detail">'+t.detail+'</p>' : '')+
-      '<div class="next-actions"><button class="btn btn-accent" type="button" data-act="go">Começar agora →</button>'+
-      '<button class="btn btn-ghost" type="button" data-act="done">Marcar como feito</button></div>'+
-      (after ? '<p class="next-after">Depois: <b>'+after.title+'</b></p>' : '')+
-    '</div></div>';
+  el.innerHTML = shell(taskIcon(t), t.title, t.detail,
+    '<button class="btn btn-accent" type="button" data-act="go">Começar agora →</button>'+
+    '<button class="btn btn-ghost" type="button" data-act="done">Marcar como feito</button>', after ? after.title : "");
   el.querySelector('[data-act="go"]').addEventListener("click", function(){ dashGo(t.sec); });
   el.querySelector('[data-act="done"]').addEventListener("click", function(){ markTaskDone(t); });
 }
