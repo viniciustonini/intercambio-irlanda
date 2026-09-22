@@ -1021,11 +1021,16 @@ body:not(.app-ready) footer.site{visibility:hidden;}
 .rm-next-act{display:flex;gap:10px;flex-wrap:wrap;}
 .rm-next-act .btn{width:auto;}
 .rm-line{position:relative;padding-left:36px;}
-.rm-line::before{content:"";position:absolute;left:11px;top:14px;bottom:14px;width:2px;background:var(--border);}
+/* trilha: uma estrada sinuosa em vez de uma linha reta, com uma faixa clara no meio simulando um tubo com volume */
+.rm-road{position:absolute;left:4px;top:6px;bottom:6px;width:24px;pointer-events:none;filter:drop-shadow(0 1px 2px rgba(16,28,43,.14));}
+.rm-road-base{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='80' viewBox='0 0 24 80'%3E%3Cpath d='M12,0 C19,0 19,40 12,40 C5,40 5,80 12,80' fill='none' stroke='%23D7DCE2' stroke-width='10' stroke-linecap='round'/%3E%3Cpath d='M12,0 C19,0 19,40 12,40 C5,40 5,80 12,80' fill='none' stroke='%23FFFFFF' stroke-opacity='0.6' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-y;background-position:top;background-size:24px 80px;}
+.rm-road-fill{position:absolute;left:0;top:0;width:24px;height:0%;overflow:hidden;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='80' viewBox='0 0 24 80'%3E%3Cpath d='M12,0 C19,0 19,40 12,40 C5,40 5,80 12,80' fill='none' stroke='%230F7A51' stroke-width='10' stroke-linecap='round'/%3E%3Cpath d='M12,0 C19,0 19,40 12,40 C5,40 5,80 12,80' fill='none' stroke='%234CD69A' stroke-opacity='0.65' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-y;background-position:top;background-size:24px 80px;transition:height .5s cubic-bezier(.22,1,.36,1);}
 .rm-node,.rm-stage{position:relative;margin-bottom:8px;}
-.rm-dot{position:absolute;left:-36px;top:9px;width:24px;height:24px;border-radius:50%;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;box-sizing:border-box;z-index:1;}
-.is-done > .rm-dot,.is-done > summary .rm-dot{background:var(--accent-strong);border-color:var(--accent-strong);}
-.is-current > .rm-dot,.is-current > summary .rm-dot{border-color:var(--navy);background:var(--navy);box-shadow:0 0 0 4px rgba(15,28,43,.10);}
+.rm-dot{position:absolute;left:-32px;top:9px;z-index:1;width:24px;height:24px;border-radius:50%;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;box-sizing:border-box;z-index:1;}
+.is-done > .rm-dot,.is-done > summary .rm-dot{background:var(--accent-strong);border-color:var(--accent-strong);box-shadow:0 2px 4px rgba(15,122,81,.35);}
+.is-current > .rm-dot,.is-current > summary .rm-dot{border-color:var(--navy);background:var(--navy);box-shadow:0 0 0 4px rgba(15,28,43,.10),0 2px 5px rgba(15,28,43,.3);}
+.rm-stage.is-todo{opacity:.86;}
+.rm-stage.is-todo:hover,.rm-stage.is-todo[open]{opacity:1;}
 .rm-trip .rm-dot{border-radius:8px;}
 .rm-hd{padding:8px 0 4px;}
 .rm-hd h3{font-size:17px;}
@@ -1046,6 +1051,7 @@ body:not(.app-ready) footer.site{visibility:hidden;}
 .rm-stage > summary:hover .rm-sum-t b{color:var(--accent-strong);}
 .rm-stage > summary:focus-visible{outline:2px solid var(--accent-strong);outline-offset:2px;border-radius:8px;}
 .rm-here{background:var(--navy);color:#fff;flex:none;}
+.rm-divider-note{font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted);}
 .rm-items{padding:2px 0 14px;}
 .rm-items .checkitem-wrap{margin-bottom:2px;}
 .rm-items .checkitem{border-color:transparent;background:transparent;box-shadow:none;border-radius:10px;}
@@ -1066,7 +1072,7 @@ body:not(.app-ready) footer.site{visibility:hidden;}
   .rm-here{display:none;}
   .rm-next-act .btn{flex:1 1 auto;}
 }
-@media print{ .rm-stage > summary .rm-here{display:none;} .rm-line::before{display:none;} }
+@media print{ .rm-stage > summary .rm-here{display:none;} .rm-road{display:none;} }
 
 /* Inglês: continuar estudando e níveis sem trava */
 .en-cont{margin-bottom:16px;}
