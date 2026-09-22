@@ -298,7 +298,7 @@ function renderTripStats(){
     var sub = days>0 ? days+(days===1?" dia":" dias") : days===0 ? "É hoje" : "Data já passou";
     tiles.push(tileHtml("✈️","Viagem", formatDateBR(td), sub, days<0 ? {sec:"inicio", date:true, label:"Atualizar data"} : null));
   } else {
-    tiles.push(tileHtml("✈️","Viagem","Ainda não definido","", {sec:"inicio", date:true, label:"Definir data da viagem"}));
+    tiles.push(tileHtml("✈️","Viagem","Escolha a data","e veja a contagem regressiva", {sec:"inicio", date:true, label:"Definir data da viagem"}));
   }
   var edited = !!ls("budget");
   tiles.push(tileHtml("💶","Custo mensal",fmtEur(sumExpenses(getBudget())), '<span class="brl-i">'+fmtBrlApprox(sumExpenses(getBudget()))+' · </span>'+(edited ? "seu orçamento" : "estimativa padrão"), {sec:"financas", label:"Ajustar em Finanças"}));
@@ -307,7 +307,7 @@ function renderTripStats(){
     var eur = stay.noites*stay.preco/getCotacao();
     tiles.push(tileHtml("🏠","Hospedagem",fmtEur(eur), '<span class="brl-i">'+fmtBrlApprox(eur)+' · </span>'+stay.noites+" noites · "+escapeHtml(stay.nome), {sec:"acomodacao", label:"Trocar em Acomodação"}));
   } else {
-    tiles.push(tileHtml("🏠","Hospedagem","Ainda não definido","",{sec:"acomodacao",label:"Escolher em Acomodação"}));
+    tiles.push(tileHtml("🏠","Hospedagem","Escolha uma opção","para levar o valor a Finanças",{sec:"acomodacao",label:"Escolher em Acomodação"}));
   }
   var d = progressData();
   tiles.push(tileHtml("✅","Preparação", d.done+" / "+d.total, d.pct+"% concluído", null));

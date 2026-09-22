@@ -413,7 +413,12 @@ var BACKUP_REMINDER_DAYS = 21;
 function renderBackupReminder(){
   var wrap = document.getElementById("backupReminderWrap");
   if(!wrap) return;
-  var hasData = Object.keys(localStorage).some(function(k){ return k.indexOf(LS)===0 && k!==LS+"schemaVersion" && k!==LS+"lastBackupAt"; });
+  var USER_KEYS = ["profile","city","goal","tripDate","checklist","cronogramaDone","dias30Done","planNotes","budget","travelReserve","savingsGoal","savingsPace","stayRooms","inglesProgress","gastosIniciaisOverrides","gastosIniciaisPagos","gastosIniciaisExtras","turistChecklist"];
+  var hasData = USER_KEYS.some(function(k){
+    var v = ls(k);
+    if(v===null || v===undefined) return false;
+    return !(typeof v==="object" && Object.keys(v).length===0);
+  });
   var last = ls("lastBackupAt");
   var days = last ? daysSince(last) : null;
   var needsBackup = hasData && (last==null || (days!=null && days > BACKUP_REMINDER_DAYS));
@@ -993,7 +998,7 @@ function renderSchoolsTable(){
   var list = getSchools(schoolCity);
   var wrap = document.getElementById("schoolsTable");
   if(!list.length){
-    wrap.innerHTML = '<div class="empty">Nenhuma escola cadastrada — adicione abaixo.</div>';
+    wrap.innerHTML = '<div class="empty">Nenhuma escola cadastrada. Adicione uma abaixo.</div>';
     return;
   }
   wrap.innerHTML = '<div class="grid cols-2">'+list.map(function(s){
@@ -1428,7 +1433,7 @@ function renderGlossario(){
   var items = GLOSSARIO_TERMS.filter(function(g){ return matchesVidaFilter(g, vidaSharedFilterState); })
     .slice().sort(function(a,b){ return a.t.localeCompare(b.t, "pt-BR"); });
   if(!items.length){
-    wrap.innerHTML = '<div class="empty">Nenhum termo encontrado — tente outra palavra ou filtro.</div>';
+    wrap.innerHTML = '<div class="empty">Nenhum termo encontrado. Tente outra palavra ou filtro.</div>';
     return;
   }
   var rowsHtml = items.map(function(g){
@@ -1598,7 +1603,7 @@ function renderVidaIrlanda(){
     return '<details class="acc-item vida-cat" open><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
       '<div class="vida-cat-body"><div class="grid cols-3">'+cardsHtml+'</div></div></details>';
   }).join("");
-  wrap.innerHTML = html.trim() ? html : '<div class="empty">Nenhum resultado — tente outra palavra ou filtro.</div>';
+  wrap.innerHTML = html.trim() ? html : '<div class="empty">Nenhum resultado. Tente outra palavra ou filtro.</div>';
   wireSaibaMais(wrap);
 }
 
@@ -1697,7 +1702,7 @@ function renderMitos(){
     return '<details class="acc-item vida-cat" open><summary><span class="vida-cat-title">'+cat.label+'<span class="vida-cat-count">'+items.length+'</span></span></summary>'+
       '<div class="vida-cat-body">'+rows+'</div></details>';
   }).join("");
-  wrap.innerHTML = mitosOverviewHtml() + (html.trim() ? html : '<div class="empty">Nenhuma pergunta encontrada — tente outra palavra ou filtro.</div>');
+  wrap.innerHTML = mitosOverviewHtml() + (html.trim() ? html : '<div class="empty">Nenhuma pergunta encontrada. Tente outra palavra ou filtro.</div>');
   wireSaibaMais(wrap);
 }
 function injectFaqSchema(){
@@ -2447,7 +2452,7 @@ var STAY_SEED = [
   {nome:"Quarto em Dublin · Airbnb", noites:10, preco:343.51, obs:"1 quarto solteiro — casa de irlandeses"},
   {nome:"Quarto em Dublin · Airbnb econômico", noites:10, preco:312.83, obs:"1 quarto solteiro — casa de irlandeses"},
   {nome:"Garden Lane Backpackers", noites:10, preco:510.31, obs:"Dormitório 4 camas + café da manhã"},
-  {nome:"Mattew e Roberta · Airbnb", noites:10, preco:328.70, obs:"Casa aconchegante — quarto duplo em Dublin", selected:true}
+  {nome:"Quarto duplo em Dublin · Airbnb", noites:10, preco:328.70, obs:"Casa de irlandeses, quarto duplo"}
 ];
 function getStayOptions(){
   var saved = ls("stayOptions");
@@ -2486,7 +2491,7 @@ function fetchLiveCotacao(){
 }
 function renderStayFields(){
   var updated = ls("cotacaoUpdatedAt");
-  var noteText = updated ? "Atualizada automaticamente em "+updated.split("-").reverse().join("/")+", a partir do Banco Central Europeu. Você pode ajustar manualmente se precisar." : "Buscando cotação automática... você também pode ajustar manualmente.";
+  var noteText = updated ? "Atualizada automaticamente em "+updated.split("-").reverse().join("/")+", a partir do Banco Central Europeu. Ajuste à mão se precisar." : "Buscando cotação automática... você também pode ajustar manualmente.";
   document.getElementById("stayCotacaoWrap").innerHTML =
     '<div class="numfield"><label>Cotação R$/€ (usada em todas as opções)</label>'+
     '<div style="display:flex;align-items:center;gap:10px;">'+
@@ -3711,7 +3716,7 @@ function renderAttrGrid(){
       '<button class="btn-ghost btn" data-id="'+a.id+'" data-f="visited" style="width:auto;padding:6px 10px;font-size:12.5px;'+(s.visited?'background:var(--accent-soft);border-color:var(--accent);':'')+'">Já visitei</button>'+
       '<button class="btn-ghost btn" data-id="'+a.id+'" data-f="fav" style="width:auto;padding:6px 10px;font-size:12.5px;'+(s.fav?'background:var(--warn-soft);border-color:var(--warn);':'')+'">'+STAR_ICON+' Favorito</button>'+
       '</div></div>';
-  }).join("") : '<div class="empty">Nenhuma atração gratuita nesta categoria — tente outra categoria ou desmarque "Só grátis".</div>';
+  }).join("") : '<div class="empty">Nenhuma atração gratuita nesta categoria. Tente outra categoria ou desmarque "Só grátis".</div>';
   document.querySelectorAll("#attrGridWrap [data-f]").forEach(function(btn){
     btn.addEventListener("click", function(){
       var s = attrState(btn.dataset.id);
@@ -3747,7 +3752,7 @@ function renderMyItinerary(){
   if(!wrap) return;
   var wanted = ATTRACTIONS.filter(function(a){ return attrState(a.id).want; });
   if(!wanted.length){
-    wrap.innerHTML = '<div class="empty">Nenhuma atração marcada como "Quero ir" ainda — volte à grade acima e escolha algumas.</div>';
+    wrap.innerHTML = '<div class="empty">Nenhuma atração marcada como "Quero ir" ainda. Volte à grade acima e escolha algumas.</div>';
     return;
   }
   var rows = wanted.map(function(a){
