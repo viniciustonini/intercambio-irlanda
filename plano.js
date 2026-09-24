@@ -138,7 +138,7 @@ function planStageHtml(m, s){
   var note = (s.kind==="pre" && m.euSkipped) ? '<p class="rm-skip">Etapa de visto omitida: cidadãos da UE/EEE/Suíça não precisam de visto nem de IRP.</p>' : '';
   return '<details class="rm-stage '+state+(s.kind==="trip"?' rm-trip':'')+'" data-stage="'+s.key+'"'+(open?' open':'')+'>'+
     '<summary><span class="rm-dot" aria-hidden="true">'+(s.complete?'✓':'')+'</span><span class="rm-sum-t"><b>'+s.title+'</b><small>'+s.done+' de '+s.total+' etapas'+range+'</small></span>'+
-    (isCur ? '<span class="pill step rm-here">Etapa atual</span>' : '')+'</summary>'+
+    (isCur ? '<span class="pill step rm-here">Você está aqui</span>' : '')+'</summary>'+
     '<div class="rm-items" id="rm-items-'+s.key+'" data-store="'+s.store+'">'+note+timelineHtml(items, map)+'</div></details>';
 }
 
@@ -149,12 +149,10 @@ function renderPlanRoadmap(){
   var focusId = document.activeElement && document.activeElement.closest && document.activeElement.closest(".checkitem") ? document.activeElement.closest(".checkitem").dataset.id : null;
   var last = m.stages[m.stages.length-1];
   var endDate = planTrip() ? ' · '+fmtDay(planAddDays(planTrip(), 30)) : '';
-  var preTravel = m.days===null || m.days>=0;
-  var pct = m.total ? Math.max(0, Math.min(100, Math.round(m.done/m.total*100))) : 0;
   root.innerHTML = planSummaryHtml(m)+
-    '<div class="rm-line"><div class="rm-road"><div class="rm-road-base"></div><div class="rm-road-fill" style="height:'+pct+'%"></div></div>'+
+    '<div class="rm-line">'+
       '<section class="rm-node '+(today.done?'is-done':'is-current')+'"><span class="rm-dot" aria-hidden="true">'+(today.done?'✓':'')+'</span>'+today.html+'</section>'+
-      m.stages.map(function(s, i){ return (i===2 ? '<div class="rm-divider"><span>Na Irlanda'+(preTravel?' <span class="rm-divider-note">· para quando você chegar</span>':'')+'</span></div>' : '')+planStageHtml(m, s); }).join("")+
+      m.stages.map(function(s, i){ return (i===2 ? '<div class="rm-divider"><span>Na Irlanda</span></div>' : '')+planStageHtml(m, s); }).join("")+
       '<div class="rm-node rm-end'+(m.cur?'':' is-done')+'"><span class="rm-dot" aria-hidden="true">'+(m.cur?'':'✓')+'</span><div class="rm-hd"><h3>Fim do primeiro mês'+endDate+'</h3><p class="rm-sub">Depois disso você entra na rotina: acompanhe seu orçamento e atualize seu plano.</p></div></div>'+
     '</div>';
   m.stages.forEach(function(s){ wirePlanNotes("rm-items-"+s.key); });
