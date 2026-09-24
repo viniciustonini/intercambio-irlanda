@@ -283,38 +283,3 @@ function renderJobResult(el, shown, ingles, expLabel, dispo){
   document.getElementById("jfCopyAll").addEventListener("click", function(){ copyText(terms.join("\n"), function(){ say('Copiadas '+terms.length+' palavras, uma por linha.'); }); });
 }
 
-/* ---------- Vida prática: agrupada por situações reais ---------- */
-var VIDA_GROUPS = [
-  {id:"all", label:"Tudo", cats:null},
-  {id:"chegada", label:"Primeiros dias", cats:["celular","pagamentos","compras","enderecos"]},
-  {id:"casa", label:"Casa", cats:["casa","reciclagem","energia","bairros"]},
-  {id:"saude", label:"Saúde e segurança", cats:["saude","seguranca"]},
-  {id:"cultura", label:"Cultura e dia a dia", cats:["cultura","clima","pubs"]}
-];
-function vidaGroupView(){
-  var g = ls("vidaGroup");
-  return VIDA_GROUPS.filter(function(x){ return x.id===g; })[0] || VIDA_GROUPS[1];
-}
-/* Com busca ou filtro ativo, a pesquisa vale para todas as situações. */
-function vidaCatVisible(catId){
-  var st = vidaSharedFilterState;
-  if(st.q || st.tag) return true;
-  var g = vidaGroupView();
-  return !g.cats || g.cats.indexOf(catId)>-1;
-}
-function renderVidaGroups(){
-  var wrap = document.getElementById("vidaGroupTabs");
-  if(!wrap) return;
-  var g = vidaGroupView(), searching = !!(vidaSharedFilterState.q || vidaSharedFilterState.tag);
-  wrap.innerHTML = VIDA_GROUPS.map(function(x){
-    var n = VIDA_PRATICA.filter(function(v){ return !x.cats || x.cats.indexOf(v.cat)>-1; }).length + (!x.cats || x.cats.indexOf("bairros")>-1 ? 1 : 0);
-    var on = !searching && x.id===g.id;
-    return '<button type="button" class="subtab'+(on?' active':'')+'" data-vg="'+x.id+'">'+x.label+' <span class="subtab-tag">'+n+'</span></button>';
-  }).join("");
-  wrap.querySelectorAll("[data-vg]").forEach(function(b){
-    b.addEventListener("click", function(){
-      ls("vidaGroup", b.dataset.vg);
-      renderVidaIrlanda();
-    });
-  });
-}

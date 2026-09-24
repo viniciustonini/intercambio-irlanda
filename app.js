@@ -1446,19 +1446,12 @@ function renderGlossario(){
 
 /* ---------- vida prática ---------- */
 var VIDA_PRATICA_CATEGORIES = [
-  {id:"cultura", label:"Cultura e comportamento"},
-  {id:"casa", label:"Casa e rotina"},
-  {id:"reciclagem", label:"Reciclagem e Deposit Return Scheme"},
+  {id:"cultura", label:"Cultura, comunicação e lazer"},
+  {id:"casa", label:"Casa, contas e reciclagem"},
+  {id:"compras", label:"Compras, pagamentos e celular"},
   {id:"clima", label:"Clima, de verdade"},
-  {id:"enderecos", label:"Endereços, Eircode e County"},
   {id:"bairros", label:"Bairros de Dublin"},
-  {id:"compras", label:"Compras do dia a dia"},
-  {id:"pagamentos", label:"Pagamentos"},
-  {id:"celular", label:"Celular e internet"},
-  {id:"energia", label:"Tomadas e energia"},
-  {id:"pubs", label:"Pubs e restaurantes"},
-  {id:"seguranca", label:"Segurança prática"},
-  {id:"saude", label:"Emergências e saúde"}
+  {id:"seguranca", label:"Segurança e saúde"}
 ];
 var VIDA_PRATICA = [
   {cat:"cultura", tags:["Cultura"], t:"\"How are you?\" não é bem uma pergunta", d:"É uma saudação — a resposta esperada é curta (\"Grand, thanks, you?\"), não um relato do seu dia."+verGlossarioHtml("Grand")},
@@ -1474,40 +1467,40 @@ var VIDA_PRATICA = [
   {cat:"casa", tags:["Casa"], t:"Bins e reciclagem", d:"Resumo rápido aqui — detalhe completo no bloco de reciclagem logo abaixo."},
   {cat:"casa", tags:["Casa"], t:"Lavanderia em casa x laundrette", d:"A maioria das casas tem máquina; quem mora em quarto sem máquina usa uma laundrette."+verGlossarioHtml("Laundrette")},
   {cat:"casa", tags:["Casa"], t:"Drying rack", d:"O estendedor de secar roupa dentro de casa — secadora elétrica não é tão comum quanto no Brasil."},
-  {cat:"reciclagem", tags:["Casa"], t:"As 3 lixeiras", d:"General waste (geral), recycling (reciclagem seca) e organic/food waste (orgânico). Cores e dia de coleta variam por município."},
-  {cat:"reciclagem", tags:["Casa"], t:"Glass recycling", d:"Vidro normalmente não vai na lixeira de reciclagem comum — tem ecoponto próprio (bottle bank)."},
-  {cat:"reciclagem", tags:["Casa","Dinheiro"], t:"Deposit Return Scheme (Re-turn)", d:"Garrafas plásticas e latas elegíveis já vêm com um valor de depósito embutido no preço. Devolvendo numa máquina de retorno, você recupera esse valor.", source:"https://www.re-turn.ie", verifiedAt:VIDA_VERIFIED_AT},
-  {cat:"reciclagem", tags:["Casa"], t:"Onde fica a máquina", d:"Geralmente na entrada de supermercados grandes — procure o símbolo Re-turn."},
+  {cat:"casa", tags:["Casa"], t:"As 3 lixeiras", d:"General waste (geral), recycling (reciclagem seca) e organic/food waste (orgânico). Cores e dia de coleta variam por município."},
+  {cat:"casa", tags:["Casa"], t:"Glass recycling", d:"Vidro normalmente não vai na lixeira de reciclagem comum — tem ecoponto próprio (bottle bank)."},
+  {cat:"casa", tags:["Casa","Dinheiro"], t:"Deposit Return Scheme (Re-turn)", d:"Garrafas plásticas e latas elegíveis já vêm com um valor de depósito embutido no preço. Devolvendo numa máquina de retorno, você recupera esse valor.", source:"https://www.re-turn.ie", verifiedAt:VIDA_VERIFIED_AT},
+  {cat:"casa", tags:["Casa"], t:"Onde fica a máquina", d:"Geralmente na entrada de supermercados grandes — procure o símbolo Re-turn."},
   {cat:"clima", tags:["Cultura"], t:"Por que muda tão rápido", d:"A proximidade do Atlântico Norte deixa o clima ameno, mas instável e ventoso o ano todo."},
   {cat:"clima", tags:["Cultura"], t:"\"Pode chover e fazer sol no mesmo dia?\"", d:"Pode, e é bem comum."},
   {cat:"clima", tags:["Cultura"], t:"\"Guarda-chuva funciona?\"", d:"Com vento forte, capa ou jaqueta impermeável costuma ser mais prática — não é regra para toda situação."},
   {cat:"clima", tags:["Cultura"], t:"Luz do dia", d:"Quase 18h de luz em junho; escurece já no meio da tarde em dezembro.", source:"https://www.met.ie", verifiedAt:VIDA_VERIFIED_AT},
-  {cat:"enderecos", tags:["Documentos","Casa"], t:"Eircode e County", d:"Todo endereço tem um Eircode único (o \"CEP\" de cada casa) e fica dentro de um County — divisão administrativa, mais ou menos como um \"estado\" pequeno."+verGlossarioHtml("Eircode")+verGlossarioHtml("County"), source:"https://www.eircode.ie", verifiedAt:VIDA_VERIFIED_AT},
-  {cat:"enderecos", tags:["Documentos","Casa"], t:"Distritos postais de Dublin", d:"Dublin 1, 2, 4 e assim por diante — explicado em detalhe no bloco de bairros logo abaixo."},
-  {cat:"enderecos", tags:["Documentos"], t:"Diferenças de formato", d:"Endereço irlandês às vezes usa nome da casa/prédio em vez de número, e a ordem das linhas muda em relação ao padrão brasileiro."},
+  {cat:"casa", tags:["Documentos","Casa"], t:"Eircode e County", d:"Todo endereço tem um Eircode único (o \"CEP\" de cada casa) e fica dentro de um County — divisão administrativa, mais ou menos como um \"estado\" pequeno."+verGlossarioHtml("Eircode")+verGlossarioHtml("County"), source:"https://www.eircode.ie", verifiedAt:VIDA_VERIFIED_AT},
+  {cat:"casa", tags:["Documentos","Casa"], t:"Distritos postais de Dublin", d:"Dublin 1, 2, 4 e assim por diante — explicado em detalhe no bloco de bairros logo abaixo."},
+  {cat:"casa", tags:["Documentos"], t:"Diferenças de formato", d:"Endereço irlandês às vezes usa nome da casa/prédio em vez de número, e a ordem das linhas muda em relação ao padrão brasileiro."},
   {cat:"compras", tags:["Dinheiro"], t:"Lojas do dia a dia", d:"Penneys (roupa barata — é a Primark europeia), Boots (farmácia e perfumaria) e Dealz (utilidades domésticas baratas, tipo Poundland) são presença certa em qualquer cidade."},
   {cat:"compras", tags:["Dinheiro"], t:"Supermercados", d:"Tesco, Lidl, Aldi e outras redes já têm página própria com preços de referência.", sec:"mercado"},
-  {cat:"pagamentos", tags:["Dinheiro"], t:"Contactless", d:"Pagamento por aproximação é muito comum — muitas vezes preferido a dinheiro, mesmo em valores pequenos."},
-  {cat:"pagamentos", tags:["Dinheiro"], t:"Debit card, Apple Pay, Google Pay", d:"Aceitos amplamente em praticamente qualquer estabelecimento."},
-  {cat:"pagamentos", tags:["Dinheiro"], t:"Cash", d:"Ainda útil em situações pontuais, mas cada vez menos essencial no dia a dia."},
-  {cat:"pagamentos", tags:["Dinheiro","Documentos"], t:"IBAN", d:"Formato de conta bancária europeu, necessário para receber salário e pagar aluguel por transferência."},
-  {cat:"pagamentos", tags:["Dinheiro"], t:"Revolut", d:"Conta digital popular entre estrangeiros por ser fácil de abrir sem PPSN — uma opção prática, não uma obrigação."},
-  {cat:"celular", tags:["Casa"], t:"SIM físico x eSIM", d:"As duas opções existem lado a lado — dá para escolher pelo aparelho e pela operadora."},
-  {cat:"celular", tags:["Casa","Dinheiro"], t:"Prepaid x bill pay", d:"Pré-pago recarrega saldo (\"top up\") quando quiser; plano mensal (bill pay) costuma pedir conta bancária irlandesa."+verGlossarioHtml("Top up")},
-  {cat:"celular", tags:["Casa"], t:"Por onde começar", d:"Pré-pago costuma ser mais simples logo na chegada, antes de ter conta bancária e comprovante de endereço."},
-  {cat:"energia", tags:["Casa"], t:"Tomada tipo G", d:"230V/50Hz — formato diferente do padrão brasileiro."},
-  {cat:"energia", tags:["Casa"], t:"Adaptador x conversor de voltagem", d:"Todo aparelho brasileiro precisa do adaptador físico; alguns também precisam de conversor de voltagem se não forem bivolt. Sempre cheque a etiqueta do aparelho antes de ligar."},
-  {cat:"pubs", tags:["Cultura"], t:"Counter service x table service", d:"Em pub, geralmente você pede e paga no balcão — não tem garçom vindo à mesa como em restaurante. Quer levar a bebida para casa? Isso é papel da off-licence, não do próprio pub."+verGlossarioHtml("Off-licence")},
-  {cat:"pubs", tags:["Cultura"], t:"Last orders", d:"O aviso de \"últimos pedidos\" antes do bar fechar."},
-  {cat:"pubs", tags:["Cultura"], t:"Frases prontas", d:"\"Can I get...\", \"Could I have...\", \"Can we split the bill?\", \"Could we get the bill, please?\""},
-  {cat:"pubs", tags:["Cultura","Dinheiro"], t:"Gorjeta", d:"Comum em restaurante (10–15%), mas não obrigatória; no balcão de pub não é costume."},
+  {cat:"compras", tags:["Dinheiro"], t:"Contactless", d:"Pagamento por aproximação é muito comum — muitas vezes preferido a dinheiro, mesmo em valores pequenos."},
+  {cat:"compras", tags:["Dinheiro"], t:"Debit card, Apple Pay, Google Pay", d:"Aceitos amplamente em praticamente qualquer estabelecimento."},
+  {cat:"compras", tags:["Dinheiro"], t:"Cash", d:"Ainda útil em situações pontuais, mas cada vez menos essencial no dia a dia."},
+  {cat:"compras", tags:["Dinheiro","Documentos"], t:"IBAN", d:"Formato de conta bancária europeu, necessário para receber salário e pagar aluguel por transferência."},
+  {cat:"compras", tags:["Dinheiro"], t:"Revolut", d:"Conta digital popular entre estrangeiros por ser fácil de abrir sem PPSN — uma opção prática, não uma obrigação."},
+  {cat:"compras", tags:["Casa"], t:"SIM físico x eSIM", d:"As duas opções existem lado a lado — dá para escolher pelo aparelho e pela operadora."},
+  {cat:"compras", tags:["Casa","Dinheiro"], t:"Prepaid x bill pay", d:"Pré-pago recarrega saldo (\"top up\") quando quiser; plano mensal (bill pay) costuma pedir conta bancária irlandesa."+verGlossarioHtml("Top up")},
+  {cat:"compras", tags:["Casa"], t:"Por onde começar", d:"Pré-pago costuma ser mais simples logo na chegada, antes de ter conta bancária e comprovante de endereço."},
+  {cat:"casa", tags:["Casa"], t:"Tomada tipo G", d:"230V/50Hz — formato diferente do padrão brasileiro."},
+  {cat:"casa", tags:["Casa"], t:"Adaptador x conversor de voltagem", d:"Todo aparelho brasileiro precisa do adaptador físico; alguns também precisam de conversor de voltagem se não forem bivolt. Sempre cheque a etiqueta do aparelho antes de ligar."},
+  {cat:"cultura", tags:["Cultura"], t:"Counter service x table service", d:"Em pub, geralmente você pede e paga no balcão — não tem garçom vindo à mesa como em restaurante. Quer levar a bebida para casa? Isso é papel da off-licence, não do próprio pub."+verGlossarioHtml("Off-licence")},
+  {cat:"cultura", tags:["Cultura"], t:"Last orders", d:"O aviso de \"últimos pedidos\" antes do bar fechar."},
+  {cat:"cultura", tags:["Cultura"], t:"Frases prontas", d:"\"Can I get...\", \"Could I have...\", \"Can we split the bill?\", \"Could we get the bill, please?\""},
+  {cat:"cultura", tags:["Cultura","Dinheiro"], t:"Gorjeta", d:"Comum em restaurante (10–15%), mas não obrigatória; no balcão de pub não é costume."},
   {cat:"seguranca", tags:["Casa"], t:"Cuidados básicos", d:"Celular, carteira e transporte à noite: atenção comum a qualquer cidade grande, sem alarmismo."},
   {cat:"seguranca", tags:["Casa"], t:"Golpe de moradia", d:"Nunca pague depósito sem visitar o imóvel antes.", sec:"acomodacao"},
   {cat:"seguranca", tags:["Trabalho"], t:"Golpe de vaga de emprego", d:"Desconfie de qualquer vaga que peça pagamento adiantado.", sec:"trabalho"},
-  {cat:"saude", tags:["Saúde"], t:"112 / 999", d:"Emergência — gratuito mesmo sem chip ativo.", source:"https://www.hse.ie", verifiedAt:VIDA_VERIFIED_AT},
-  {cat:"saude", tags:["Saúde"], t:"Garda / Garda Station", d:"A polícia irlandesa e suas delegacias."},
-  {cat:"saude", tags:["Saúde"], t:"Fluxo simples", d:"Problema leve → farmácia/GP · precisa de avaliação → GP/urgent care · emergência → 112/999/hospital."},
-  {cat:"saude", tags:["Saúde"], t:"Aviso", d:"Isso é orientação de \"para quem ligar\" em cada situação — não é conselho médico."}
+  {cat:"seguranca", tags:["Saúde"], t:"112 / 999", d:"Emergência — gratuito mesmo sem chip ativo.", source:"https://www.hse.ie", verifiedAt:VIDA_VERIFIED_AT},
+  {cat:"seguranca", tags:["Saúde"], t:"Garda / Garda Station", d:"A polícia irlandesa e suas delegacias."},
+  {cat:"seguranca", tags:["Saúde"], t:"Fluxo simples", d:"Problema leve → farmácia/GP · precisa de avaliação → GP/urgent care · emergência → 112/999/hospital."},
+  {cat:"seguranca", tags:["Saúde"], t:"Aviso", d:"Isso é orientação de \"para quem ligar\" em cada situação — não é conselho médico."}
 ];
 var DUBLIN_DISTRICTS = [
   {code:"Dublin 1", side:"Norte do Liffey", d:"Muito central, comércio e transporte fortes, região movimentada. Perfil muda bastante de rua para rua."},
@@ -1578,8 +1571,7 @@ function climateChartHtml(){
 function renderVidaIrlanda(){
   var wrap = document.getElementById("vidaIrlandaWrap");
   if(!wrap) return;
-  renderVidaGroups();
-  var html = VIDA_PRATICA_CATEGORIES.filter(function(cat){ return vidaCatVisible(cat.id); }).map(function(cat, idx){
+  var html = VIDA_PRATICA_CATEGORIES.map(function(cat, idx){
     if(cat.id==="bairros"){
       var bairrosTagOk = !vidaSharedFilterState.tag || vidaSharedFilterState.tag==="Casa";
       var bairrosSearchOk = !vidaSharedFilterState.q || (cat.label+" "+DUBLIN_DISTRICTS.map(function(d){ return d.code+" "+d.side+" "+d.d; }).join(" ")).toLowerCase().indexOf(vidaSharedFilterState.q.trim().toLowerCase())>-1;
@@ -1758,7 +1750,7 @@ function renderVidaIrlandaContent(){
   filterBarWrap.innerHTML = vidaFilterBarHtml();
   wireVidaFilterBar();
   wrap.innerHTML =
-    '<div class="vida-panel" id="vidaPanel-pratica"><div class="subtabs" id="vidaGroupTabs" style="margin-bottom:14px;"></div><div id="vidaIrlandaWrap"></div></div>'+
+    '<div class="vida-panel" id="vidaPanel-pratica"><div id="vidaIrlandaWrap"></div></div>'+
     '<div class="vida-panel" id="vidaPanel-glossario"><div id="glossarioWrap"></div></div>'+
     '<div class="vida-panel" id="vidaPanel-mitos"><div id="mitosWrap"></div></div>';
   renderVidaAllPanels();
@@ -1988,16 +1980,22 @@ function englishLevelCompleted(level){
   var state = englishProgressState();
   return topics.every(function(t){ return !!state[t.id]; });
 }
-/* Todos os níveis ficam abertos: A1 → A2 → B1 → B2 é só o caminho recomendado. */
-function englishLevelUnlocked(level){ return true; }
+function englishLevelUnlocked(level){
+  var idx = ENGLISH_LEVEL_ORDER.indexOf(level);
+  if(idx <= 0) return true;
+  for(var i=0;i<idx;i++){ if(!englishLevelCompleted(ENGLISH_LEVEL_ORDER[i])) return false; }
+  return true;
+}
 function renderEnglishLevelSubtabs(containerId, items, currentLevel, onSelect){
-  var rec = englishRecommendedLevel();
   document.getElementById(containerId).innerHTML = items.map(function(it){
-    var done = englishLevelCompleted(it.level), next = it.level===rec;
-    return '<button class="subtab'+(currentLevel===it.level?' active':'')+(done?' is-done':'')+'" data-level="'+it.level+'"'+(next?' title="Próximo passo do caminho recomendado"':'')+'>'+(done?'✓ ':'')+it.label+(next?' <span class="subtab-tag">próximo</span>':'')+'</button>';
+    var locked = !englishLevelUnlocked(it.level);
+    return '<button class="subtab'+(currentLevel===it.level?' active':'')+(locked?' locked':'')+'" data-level="'+it.level+'"'+(locked?' disabled title="Complete a gramática do nível anterior para desbloquear"':'')+'>'+(locked?'🔒 ':'')+it.label+'</button>';
   }).join("");
   document.querySelectorAll("#"+containerId+" .subtab").forEach(function(b){
-    b.addEventListener("click", function(){ onSelect(b.dataset.level); });
+    b.addEventListener("click", function(){
+      if(b.hasAttribute("disabled")) return;
+      onSelect(b.dataset.level);
+    });
   });
 }
 var ENGLISH_MODULES = [
@@ -3107,7 +3105,6 @@ function updateMarketTotal(){
   var total = getMarketCart().reduce(function(s,it){ return s+it.qty*it.price; }, 0);
   var el = document.getElementById("marketTotal");
   if(el) el.textContent = "€"+total.toFixed(2);
-  bridgeInput(["market"], renderMarketFin);
 }
 var marketAddState = {open:false};
 function renderMarketAddForm(){

@@ -121,38 +121,6 @@ function rowNowLine(rowId, label){
   return 'Em Finanças hoje, em '+label+' (cenário '+GASTOS_INICIAIS_CENARIOS.cols[sc]+'): <b>'+fmtEur(o.v)+'</b>'+tag;
 }
 
-/* ---------- Mercado ---------- */
-var MARKET_PERIODS = [{k:"week", l:"1 semana", f:4.33}, {k:"fortnight", l:"2 semanas", f:2.165}, {k:"month", l:"1 mês", f:1}];
-function marketPeriod(){ var p = ls("marketPeriod"); return MARKET_PERIODS.filter(function(x){ return x.k===p; })[0] || MARKET_PERIODS[2]; }
-function marketTotals(){
-  var cart = getMarketCart(), total = 0, cats = {};
-  cart.forEach(function(it){ var s = (it.qty||0)*(it.price||0); total += s; cats[it.cat||"Outros"] = (cats[it.cat||"Outros"]||0)+s; });
-  var list = Object.keys(cats).map(function(k){ return {cat:k, v:cats[k]}; }).filter(function(c){ return c.v>0; }).sort(function(a,b){ return b.v-a.v; });
-  return {total:total, cats:list};
-}
-function renderMarketFin(){
-  var wrap = document.getElementById("marketFinWrap");
-  if(!wrap) return;
-  var t = marketTotals(), p = marketPeriod();
-  if(t.total<=0){
-    wrap.innerHTML = '<div class="card"><div class="empty">Coloque preço e quantidade nos itens da cesta para estimar quanto você gasta por mês e levar esse valor para Finanças.</div></div>';
-    return;
-  }
-  var monthly = eurRound(t.total*p.f), cur = getBudget().groceries;
-  var max = t.cats[0].v;
-  var pre = '<div class="mk-period" role="radiogroup" aria-label="Período que a cesta cobre"><span class="fin-lbl">Essa cesta cobre</span>'+
-    MARKET_PERIODS.map(function(x){ return '<button type="button" role="radio" aria-checked="'+(x.k===p.k)+'" class="subtab'+(x.k===p.k?' active':'')+'" data-mkp="'+x.k+'">'+x.l+'</button>'; }).join("")+'</div>'+
-    '<ul class="mk-cats">'+t.cats.slice(0,6).map(function(c){ return '<li><span>'+escapeHtml(c.cat)+'</span><i style="--w:'+Math.max(4, Math.round(c.v/max*100))+'%"></i><b>'+fmtEur(c.v)+'</b></li>'; }).join("")+'</ul>';
-  wrap.innerHTML = '<div class="card">'+bridgeHtml("market", {
-    pre:pre, big:fmtEur(monthly), bigCap:'por mês'+brlSub(monthly),
-    now:nowLine(cur, " por mês", "groceries"),
-    btn:'Usar '+fmtEur(monthly)+' em Finanças', disabled: Math.abs(cur-monthly)<0.5 && Math.abs(overrideNow(6).v-monthly)<0.5,
-    touch:'Muda o <b>Mercado</b> do orçamento mensal e a <b>Alimentação</b> do primeiro mês.'
-  })+'</div>';
-  wrap.querySelectorAll("[data-mkp]").forEach(function(b){ b.addEventListener("click", function(){ ls("marketPeriod", b.dataset.mkp); bridgeMsg.market = ""; renderMarketFin(); }); });
-  bindBridge(wrap, "market", renderMarketFin, function(){ return applyToFinance("market", [{budget:"groceries", value:monthly}, {row:6, value:monthly}]); });
-}
-
 /* ---------- Acomodação ---------- */
 function stayInitialEur(){
   var id = ls("selectedStay");
@@ -241,4 +209,4 @@ function renderTransportFin(){
   bindBridge(wrap, "transport", renderTransportFin, function(){ return applyToFinance("transport", [{budget:"transport", value:monthly}, {row:7, value:monthly}]); });
 }
 
-BRIDGES.push(renderMarketFin, renderStayFin, renderTransportFin);
+BRIDGES.push(renderStayFin, renderTransportFin);
