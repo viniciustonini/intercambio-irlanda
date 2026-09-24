@@ -1,7 +1,7 @@
 /* Service worker simples: cacheia só os arquivos estáticos do próprio site
    (para abrir offline depois da primeira visita). Requisições de terceiros
    (fontes, mapas, cotação do euro, favicons) sempre vão direto pra rede. */
-var CACHE_NAME = "ie-guide-v13";
+var CACHE_NAME = "ie-guide-v14";
 var CORE_ASSETS = ["./", "index.html", "styles.css", "dashboard.js", "financas.js", "integracao.js", "plano.js", "modulos.js", "app.js", "manifest.json"];
 
 self.addEventListener("install", function(event){
